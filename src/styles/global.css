@@ -80,9 +80,6 @@ code, pre, kbd, .mono {
 .wiggle {
   animation: vb-wiggle 550ms ease-in-out;
 }
-@media (prefers-reduced-motion: reduce) {
-  .wiggle { animation: none; }
-}
 
 .prose {
   line-height: 1.7;
