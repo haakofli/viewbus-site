@@ -10,7 +10,8 @@ const queues = [
   "sb-notifications-dev",
 ];
 ---
-<div class="max-w-6xl mx-auto px-4 sm:px-6 pt-16 md:pt-24 pb-20 md:pb-28">
+<div class="min-h-[calc(100dvh-3.5rem)] flex items-center">
+  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
   <!-- Mobile: simple centered content, no chrome -->
   <div class="md:hidden py-12">
     <slot />
@@ -168,5 +169,6 @@ const queues = [
         </div>
       </main>
     </div>
+  </div>
   </div>
 </div>
