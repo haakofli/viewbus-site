@@ -1,13 +1,59 @@
 ---
 import LogoMark from "./LogoMark.astro";
 
-const queues = [
-  "sb-orders-dev",
-  "sb-payments-dev",
-  "sb-inventory-dev",
-  "sb-customers-dev",
-  "sb-shipping-dev",
-  "sb-notifications-dev",
+interface ChildQueue {
+  name: string;
+  active: number;
+  dead: number;
+}
+
+interface Namespace {
+  name: string;
+  children: ChildQueue[];
+}
+
+const namespaces: Namespace[] = [
+  {
+    name: "sb-orders-dev",
+    children: [
+      { name: "api~orders~placement", active: 0, dead: 0 },
+      { name: "integration~from~erp~order-events", active: 0, dead: 12 },
+      { name: "private~orders~processor", active: 2, dead: 0 },
+    ],
+  },
+  {
+    name: "sb-payments-dev",
+    children: [
+      { name: "api~payments~received", active: 0, dead: 0 },
+      { name: "integration~settlement~events", active: 5, dead: 0 },
+    ],
+  },
+  {
+    name: "sb-inventory-dev",
+    children: [
+      { name: "api~inventory~updates", active: 0, dead: 0 },
+      { name: "private~inventory~sync", active: 0, dead: 3 },
+    ],
+  },
+  {
+    name: "sb-customers-dev",
+    children: [
+      { name: "api~customer~events", active: 0, dead: 0 },
+    ],
+  },
+  {
+    name: "sb-shipping-dev",
+    children: [
+      { name: "integration~carrier~webhooks", active: 0, dead: 0 },
+    ],
+  },
+  {
+    name: "sb-notifications-dev",
+    children: [
+      { name: "api~notifications~send", active: 0, dead: 0 },
+      { name: "private~notifications~retry", active: 1, dead: 2 },
+    ],
+  },
 ];
 ---
 <div class="min-h-[calc(100dvh-3.5rem)] flex items-center">
@@ -20,7 +66,7 @@ const queues = [
   <!-- Desktop / tablet: full app window -->
   <div class="hidden md:block rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] overflow-hidden bg-[var(--color-bg)]">
     <!-- TitleBar: 38px -->
-    <div class="flex items-stretch h-[38px] border-b border-[var(--color-border)] bg-[var(--color-chrome)] select-none" aria-hidden="true">
+    <div class="flex items-stretch h-[38px] border-b border-[var(--color-border)] bg-[var(--color-chrome)] select-none">
       <!-- Logo + wordmark -->
       <div class="flex items-center gap-2 pl-[14px] pr-2">
         <LogoMark variant="color" width={16} height={13} />
@@ -34,7 +80,7 @@ const queues = [
 
       <!-- Breadcrumb: single segment for welcome state -->
       <div class="flex items-center gap-0.5 px-2 text-[12px]">
-        <span class="rounded-[3px] px-1.5 py-[3px] text-[var(--color-fg)] whitespace-nowrap">acme-dev</span>
+        <span class="rounded-[3px] px-1.5 py-[3px] text-[var(--color-fg)] whitespace-nowrap transition-colors hover:bg-[var(--color-hover)]">acme-dev</span>
       </div>
 
       <!-- Drag spacer -->
@@ -42,73 +88,64 @@ const queues = [
 
       <!-- Caption buttons: 46px per Fluent spec -->
       <div class="flex items-stretch text-[var(--color-muted)]">
-        <div class="w-[46px] grid place-items-center">
+        <button type="button" aria-label="Minimize" class="w-[46px] grid place-items-center transition-colors hover:bg-[var(--color-hover)] hover:text-[var(--color-fg)]">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" shape-rendering="geometricPrecision">
             <line x1="1" y1="5" x2="9" y2="5" />
           </svg>
-        </div>
-        <div class="w-[46px] grid place-items-center">
+        </button>
+        <button type="button" aria-label="Maximize" class="w-[46px] grid place-items-center transition-colors hover:bg-[var(--color-hover)] hover:text-[var(--color-fg)]">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" shape-rendering="geometricPrecision">
             <rect x="1.5" y="1.5" width="7" height="7" />
           </svg>
-        </div>
-        <div class="w-[46px] grid place-items-center">
+        </button>
+        <button type="button" aria-label="Close" class="w-[46px] grid place-items-center transition-colors hover:bg-[#e81123] hover:text-white">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1" shape-rendering="geometricPrecision">
             <line x1="1" y1="1" x2="9" y2="9" />
             <line x1="9" y1="1" x2="1" y2="9" />
           </svg>
-        </div>
+        </button>
       </div>
     </div>
 
     <!-- Body: sidebar + main -->
     <div class="flex min-h-[520px]">
       <!-- Sidebar -->
-      <aside class="hidden lg:flex flex-col w-[240px] border-r border-[var(--color-border)] text-sm select-none bg-[var(--color-chrome)]" aria-hidden="true">
-        <!-- Subscription selector: px-2 py-2 gap-1 (from SubscriptionSelector.tsx) -->
+      <aside class="hidden lg:flex flex-col w-[240px] border-r border-[var(--color-border)] text-sm select-none bg-[var(--color-chrome)]">
+        <!-- Subscription selector: px-2 py-2 gap-1 -->
         <div class="flex items-center gap-1 px-2 py-2">
-          <!-- Select trigger: h-7 px-2.5 text-xs, rounded-md, border, bg (shadcn Select) -->
-          <div class="h-7 min-w-0 flex-1 flex items-center justify-between gap-2 px-2.5 rounded-[8px] border border-[var(--color-border)] text-xs">
+          <button type="button" class="h-7 min-w-0 flex-1 flex items-center justify-between gap-2 px-2.5 rounded-[8px] border border-[var(--color-border)] text-xs cursor-pointer transition-colors hover:bg-[var(--color-hover)]">
             <span class="truncate text-[var(--color-fg)]">acme-dev</span>
-            <!-- Chevron down, shadcn Select uses lucide ChevronDown size-4 -->
             <svg class="shrink-0 opacity-50" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="m6 9 6 6 6-6" />
             </svg>
-          </div>
-          <!-- Refresh button: h-8 w-8 ghost -->
-          <div class="size-8 shrink-0 grid place-items-center rounded-[8px] text-[var(--color-fg)]">
-            <!-- lucide RefreshCw at size-3.5 -->
+          </button>
+          <button type="button" aria-label="Refresh" class="size-8 shrink-0 grid place-items-center rounded-[8px] text-[var(--color-fg)] cursor-pointer transition-colors hover:bg-[var(--color-hover)]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
               <path d="M21 3v5h-5" />
               <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
               <path d="M8 16H3v5" />
             </svg>
-          </div>
-          <!-- Collapse button: h-8 w-8 ghost -->
-          <div class="size-8 shrink-0 grid place-items-center rounded-[8px] text-[var(--color-fg)]">
-            <!-- lucide PanelLeftClose at size-3.5 -->
+          </button>
+          <button type="button" aria-label="Collapse sidebar" class="size-8 shrink-0 grid place-items-center rounded-[8px] text-[var(--color-fg)] cursor-pointer transition-colors hover:bg-[var(--color-hover)]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect width="18" height="18" x="3" y="3" rx="2" />
               <path d="M9 3v18" />
               <path d="m16 15-3-3 3-3" />
             </svg>
-          </div>
+          </button>
         </div>
 
-        <!-- Queue tree: text-sm outline-none (from TreeView), each row px-1 py-0.5 rounded-sm hover:bg-accent/50 -->
-        <div class="text-sm flex-1 p-1 overflow-hidden">
-          <div class="flex flex-col">
-            {queues.map((name) => (
-              <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5" style="padding-left: 4px;">
-                <!-- Chevron slot: w-5 shrink-0 flex items-center justify-center -->
+        <!-- Queue tree: expandable namespaces -->
+        <div class="text-sm flex-1 p-1 overflow-y-auto">
+          {namespaces.map((ns) => (
+            <details class="group/ns">
+              <summary class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-colors hover:bg-[var(--color-hover)]" style="padding-left: 4px;">
                 <span class="flex w-5 shrink-0 items-center justify-center">
-                  <!-- lucide ChevronRight size-3.5 text-muted-foreground -->
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)] transition-transform duration-150 group-open/ns:rotate-90">
                     <path d="m9 18 6-6-6-6" />
                   </svg>
                 </span>
-                <!-- Namespace icon: lucide ServerIcon at size-3.5 text-muted-foreground -->
                 <span class="shrink-0">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
                     <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
@@ -117,17 +154,35 @@ const queues = [
                     <line x1="6" x2="6.01" y1="18" y2="18" />
                   </svg>
                 </span>
-                <span class="min-w-0 truncate">{name}</span>
+                <span class="min-w-0 truncate">{ns.name}</span>
+              </summary>
+              <!-- Children: depth * 12 + 4 = 16px left padding for depth 1 -->
+              <div>
+                {ns.children.map((q) => (
+                  <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 cursor-pointer transition-colors hover:bg-[var(--color-hover)]" style="padding-left: 16px;">
+                    <span class="w-5 shrink-0"></span>
+                    <span class="shrink-0">
+                      <!-- lucide Inbox for queue -->
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                      </svg>
+                    </span>
+                    <span class="min-w-0 truncate">{q.name}</span>
+                    <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2">
+                      <span class:list={["text-[10px] font-medium tabular-nums", q.active > 0 ? "text-[var(--color-success)]" : "text-[var(--color-muted)]"]}>{q.active}</span>
+                      <span class:list={["text-[10px] font-medium tabular-nums", q.dead > 0 ? "text-[var(--color-danger)]" : "text-[var(--color-muted)]"]}>{q.dead}</span>
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </details>
+          ))}
         </div>
 
-        <!-- Footer: MCP + Settings + user — from Sidebar.tsx: border-t p-1.5 space-y-0.5 -->
+        <!-- Footer: MCP + Settings + user -->
         <nav class="border-t border-[var(--color-border)] p-1.5 space-y-0.5">
-          <!-- Connect MCP: ghost button w-full justify-start text-xs, icon size-3.5 -->
-          <div class="flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)]">
-            <!-- lucide Plug -->
+          <button type="button" class="w-full flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)] cursor-pointer transition-colors hover:bg-[var(--color-hover)]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
               <path d="M12 22v-5" />
               <path d="M9 8V2" />
@@ -135,34 +190,29 @@ const queues = [
               <path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z" />
             </svg>
             <span>Connect MCP</span>
-          </div>
-          <!-- Settings -->
-          <div class="flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)]">
-            <!-- lucide Settings -->
+          </button>
+          <button type="button" class="w-full flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)] cursor-pointer transition-colors hover:bg-[var(--color-hover)]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
               <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
             <span>Settings</span>
-          </div>
-          <!-- User email -->
-          <div class="flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)] truncate">
-            <!-- lucide User -->
+          </button>
+          <button type="button" class="w-full flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)] cursor-pointer transition-colors hover:bg-[var(--color-hover)]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
               <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
             <span class="truncate">you@example.com</span>
-          </div>
+          </button>
         </nav>
       </aside>
 
-      <!-- Main panel: welcome content + tip — from WelcomeScreen.tsx layout -->
+      <!-- Main panel: welcome content + tip -->
       <main class="flex-1 flex flex-col bg-[var(--color-bg)]">
         <div class="flex-1 flex items-center justify-center px-6 py-10">
           <slot />
         </div>
-        <!-- Tip styled from WelcomeTips.tsx: border-t border-border/50 px-4 py-2 text-xs text-muted-foreground -->
         <div class="border-t border-[var(--color-border)]/50 px-4 py-2 text-xs text-[var(--color-muted)] text-center">
           <span class="mr-2 text-[var(--color-muted-dim)]">Tip:</span>
           <span>viewbus exposes an MCP server — your AI assistant can peek queues, inspect messages, and trace an ID across your whole namespace.</span>
