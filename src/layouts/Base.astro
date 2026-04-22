@@ -72,20 +72,24 @@ const ogImageUrl = new URL(ogImage, site).toString();
         document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
       }
 
-      // Tease: clicking the fake-interactive chrome wiggles the download buttons.
+      // Tease: clicking the fake-interactive chrome animates the download
+      // buttons. Each button gets a random variant per click for a playful mix.
+      const VARIANTS = ["wiggle", "pulse", "bounce", "wobble", "flash", "nudge", "shimmer"];
+      const pick = () => VARIANTS[Math.floor(Math.random() * VARIANTS.length)];
+      const clear = (btn) => { for (const v of VARIANTS) btn.classList.remove(v); };
       const downloads = document.querySelectorAll("[data-download]");
       if (downloads.length > 0) {
         document.querySelectorAll("[data-tease]").forEach((el) => {
           el.addEventListener("click", () => {
             downloads.forEach((btn) => {
-              btn.classList.remove("wiggle");
+              clear(btn);
               void btn.offsetWidth;
-              btn.classList.add("wiggle");
+              btn.classList.add(pick());
             });
           });
         });
         downloads.forEach((btn) => {
-          btn.addEventListener("animationend", () => btn.classList.remove("wiggle"));
+          btn.addEventListener("animationend", () => clear(btn));
         });
       }
     </script>
