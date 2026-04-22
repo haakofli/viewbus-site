@@ -10,8 +10,8 @@ const rendered = await Promise.all(
   entries.map(async (entry) => ({ entry, Content: (await render(entry)).Content })),
 );
 
-const title = "Changelog — ViewBus";
-const description = "Every ViewBus release, with what changed and why.";
+const title = "Changelog — viewbus";
+const description = "Every viewbus release, with what changed and why.";
 ---
 <Base title={title} description={description} path="/changelog">
   <article class="max-w-3xl mx-auto px-6 py-20 prose">
