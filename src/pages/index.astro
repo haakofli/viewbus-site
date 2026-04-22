@@ -66,27 +66,28 @@ const description = "A fast, local, private desktop app for managing Azure Servi
   </Fragment>
 
   <AppWindow>
-    <div class="text-center flex flex-col items-center max-w-md">
-      <p class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-accent)] mb-6">
+    <!-- Welcome-screen layout: flex flex-col items-center gap-6 text-center -->
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <p class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-accent)]">
         Azure Service Bus Explorer
       </p>
 
-      <h1 class="leading-none mb-6">
-        <Wordmark size="lg" />
+      <h1 class="tracking-tight leading-none">
+        <Wordmark size="welcome" />
       </h1>
 
-      <p class="text-sm md:text-base text-[var(--color-muted)] leading-relaxed mb-8">
+      <p class="text-sm text-[var(--color-muted)] leading-relaxed">
         A quiet desktop client. Browse, peek, resend, and search every queue and topic — all local, all fast.
       </p>
 
       <a
         href="https://github.com/haakofli/viewbus-site/releases/latest"
-        class="inline-flex items-center justify-center font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] rounded-[var(--radius)] px-6 py-2.5 text-sm transition-colors"
+        class="inline-flex items-center justify-center font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] rounded-[8px] h-8 px-3.5 text-sm transition-colors"
       >
         Download for Windows
       </a>
 
-      <p class="mt-6 font-mono text-[11px] text-[var(--color-muted)] tracking-wide">
+      <p class="font-mono text-[11px] text-[var(--color-muted)] tracking-wide">
         v0.1.0 · Windows 10 / 11 · Free · No telemetry
       </p>
     </div>

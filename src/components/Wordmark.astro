@@ -1,6 +1,6 @@
 ---
 export interface Props {
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "welcome" | "lg" | "xl";
   class?: string;
 }
 
@@ -9,6 +9,7 @@ const { size = "md", class: className = "" } = Astro.props;
 const sizes = {
   sm: "text-lg",
   md: "text-2xl",
+  welcome: "text-4xl",
   lg: "text-6xl md:text-7xl",
   xl: "text-7xl md:text-8xl",
 };
