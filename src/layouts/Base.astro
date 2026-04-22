@@ -59,8 +59,14 @@ const ogImageUrl = new URL(ogImage, site).toString();
     <slot name="head" />
   </head>
   <body class="min-h-screen flex flex-col">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-md focus:bg-[var(--color-fg)] focus:text-[var(--color-bg)] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg"
+    >
+      Skip to content
+    </a>
     <Nav />
-    <main class="flex-1">
+    <main id="main" class="flex-1">
       <slot />
     </main>
     <Footer />
