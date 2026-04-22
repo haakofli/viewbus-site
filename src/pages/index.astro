@@ -1,5 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
+import Wordmark from "../components/Wordmark.astro";
+import LogoMark from "../components/LogoMark.astro";
 
 const features = [
   {
@@ -63,26 +65,35 @@ const description = "A fast, local, private desktop app for managing Azure Servi
     })} />
   </Fragment>
 
-  <section class="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
-    <p class="text-sm uppercase tracking-widest text-[var(--color-accent)] mb-6">Azure Service Bus, made fast</p>
-    <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-      The Service Bus client<br />you actually want to open.
-    </h1>
-    <p class="text-xl text-[var(--color-muted)] max-w-2xl mx-auto mb-10">
-      Browse, peek, resend, and search across every queue and topic — all from a native Windows app that keeps your data on your machine.
-    </p>
-    <div class="flex flex-wrap gap-4 justify-center">
-      <a href="#download" class="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-black font-medium px-6 py-3 rounded-lg transition-colors">
+  <section class="min-h-[calc(100vh-4rem)] flex items-center">
+    <div class="max-w-3xl mx-auto px-6 py-24 text-center flex flex-col items-center">
+      <p class="font-mono text-xs uppercase tracking-[0.25em] text-[var(--color-accent)] mb-8">
+        Azure Service Bus
+      </p>
+
+      <h1 class="leading-none mb-8">
+        <Wordmark size="xl" />
+      </h1>
+
+      <p class="text-lg md:text-xl text-[var(--color-muted)] max-w-[32rem] leading-relaxed mb-10">
+        A quiet desktop client. Browse, peek, resend, and search every queue and topic — all local, all fast.
+      </p>
+
+      <a
+        href="https://github.com/haakofli/viewbus-site/releases/latest"
+        class="inline-flex items-center justify-center font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] rounded-[var(--radius)] px-6 py-3 transition-colors"
+      >
         Download for Windows
       </a>
-      <a href="#features" class="border border-[var(--color-border)] hover:border-[var(--color-fg)] px-6 py-3 rounded-lg transition-colors">
-        See features
-      </a>
-    </div>
-    <p class="mt-6 text-sm text-[var(--color-muted)]">Free · No account · No telemetry</p>
 
-    <div class="mt-16 aspect-[16/10] bg-[var(--color-border)]/40 border border-[var(--color-border)] rounded-xl overflow-hidden flex items-center justify-center text-[var(--color-muted)]">
-      <span>Hero screenshot (1920×1200)</span>
+      <p class="mt-8 font-mono text-xs text-[var(--color-muted)] tracking-wide">
+        v0.1.0 · Windows 10 / 11 · Free · No telemetry
+      </p>
+
+      <p class="mt-16 flex items-center gap-2 font-mono text-xs text-[var(--color-muted)]/60">
+        <LogoMark variant="spinner-sm" width={16} height={13} />
+        <span>checking for updates…</span>
+      </p>
     </div>
   </section>
 

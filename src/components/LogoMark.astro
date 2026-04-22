@@ -1,0 +1,56 @@
+---
+export interface Props {
+  variant?: "color" | "mono" | "spinner-sm" | "spinner-lg";
+  width?: number;
+  height?: number;
+  class?: string;
+}
+
+const { variant = "color", width = 24, height = 20, class: className = "" } = Astro.props;
+const aspect = `${width} ${height}`;
+---
+{variant === "color" && (
+  <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 20" fill="none" shape-rendering="geometricPrecision" class={className}>
+    <rect x="2" y="2" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="none" />
+    <rect x="14" y="5.5" width="5" height="5" fill="#3b82f6" />
+    <circle cx="6" cy="16" r="2" fill="currentColor" />
+    <circle cx="18" cy="16" r="2" fill="currentColor" />
+  </svg>
+)}
+
+{variant === "mono" && (
+  <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 20" fill="none" shape-rendering="geometricPrecision" class={className}>
+    <rect x="2" y="2" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="none" />
+    <rect x="14" y="5.5" width="5" height="5" fill="currentColor" />
+    <circle cx="6" cy="16" r="2" fill="currentColor" />
+    <circle cx="18" cy="16" r="2" fill="currentColor" />
+  </svg>
+)}
+
+{variant === "spinner-sm" && (
+  <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 20" fill="none" shape-rendering="geometricPrecision" class={className}>
+    <style>{`
+      @keyframes vb-slide-sm { 0% { transform: translateX(0); } 100% { transform: translateX(23px); } }
+      .vb-sq-sm { animation: vb-slide-sm 0.55s linear infinite; }
+      @media (prefers-reduced-motion: reduce) { .vb-sq-sm { animation: none; } }
+    `}</style>
+    <defs><clipPath id="vb-clip-sm"><rect x="3" y="3" width="18" height="10" rx="1" /></clipPath></defs>
+    <rect x="2" y="2" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="none" />
+    <g clip-path="url(#vb-clip-sm)"><rect class="vb-sq-sm" x="-2" y="5.5" width="5" height="5" fill="#3b82f6" /></g>
+  </svg>
+)}
+
+{variant === "spinner-lg" && (
+  <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 20" fill="none" shape-rendering="geometricPrecision" class={className}>
+    <style>{`
+      @keyframes vb-slide-lg { 0% { transform: translateX(0); } 100% { transform: translateX(23px); } }
+      .vb-sq-lg { animation: vb-slide-lg 0.9s linear infinite; }
+      @media (prefers-reduced-motion: reduce) { .vb-sq-lg { animation: none; } }
+    `}</style>
+    <defs><clipPath id="vb-clip-lg"><rect x="3" y="3" width="18" height="10" rx="1" /></clipPath></defs>
+    <rect x="2" y="2" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="none" />
+    <g clip-path="url(#vb-clip-lg)"><rect class="vb-sq-lg" x="-2" y="5.5" width="5" height="5" fill="#3b82f6" /></g>
+    <circle cx="6" cy="16" r="2" fill="currentColor" />
+    <circle cx="18" cy="16" r="2" fill="currentColor" />
+  </svg>
+)}

@@ -1,0 +1,18 @@
+---
+export interface Props {
+  size?: "sm" | "md" | "lg" | "xl";
+  class?: string;
+}
+
+const { size = "md", class: className = "" } = Astro.props;
+
+const sizes = {
+  sm: "text-lg",
+  md: "text-2xl",
+  lg: "text-6xl md:text-7xl",
+  xl: "text-7xl md:text-8xl",
+};
+---
+<span class:list={["inline-flex items-baseline tracking-tight text-[var(--color-fg)]", sizes[size], className]} aria-label="ViewBus">
+  <span class="font-normal">view</span><span class="font-bold">bus</span>
+</span>
