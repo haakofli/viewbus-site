@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import Wordmark from "../components/Wordmark.astro";
+import AppWindow from "../components/AppWindow.astro";
 
 const features = [
   {
@@ -64,32 +65,32 @@ const description = "A fast, local, private desktop app for managing Azure Servi
     })} />
   </Fragment>
 
-  <section class="min-h-[calc(100vh-4rem)] flex items-center">
-    <div class="max-w-3xl mx-auto px-6 py-24 text-center flex flex-col items-center">
-      <p class="font-mono text-xs uppercase tracking-[0.25em] text-[var(--color-accent)] mb-8">
+  <AppWindow>
+    <div class="text-center flex flex-col items-center max-w-md">
+      <p class="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--color-accent)] mb-6">
         Azure Service Bus Explorer
       </p>
 
-      <h1 class="leading-none mb-8">
-        <Wordmark size="xl" />
+      <h1 class="leading-none mb-6">
+        <Wordmark size="lg" />
       </h1>
 
-      <p class="text-lg md:text-xl text-[var(--color-muted)] max-w-[32rem] leading-relaxed mb-10">
+      <p class="text-sm md:text-base text-[var(--color-muted)] leading-relaxed mb-8">
         A quiet desktop client. Browse, peek, resend, and search every queue and topic — all local, all fast.
       </p>
 
       <a
         href="https://github.com/haakofli/viewbus-site/releases/latest"
-        class="inline-flex items-center justify-center font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] rounded-[var(--radius)] px-6 py-3 transition-colors"
+        class="inline-flex items-center justify-center font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] rounded-[var(--radius)] px-6 py-2.5 text-sm transition-colors"
       >
         Download for Windows
       </a>
 
-      <p class="mt-8 font-mono text-xs text-[var(--color-muted)] tracking-wide">
+      <p class="mt-6 font-mono text-[11px] text-[var(--color-muted)] tracking-wide">
         v0.1.0 · Windows 10 / 11 · Free · No telemetry
       </p>
     </div>
-  </section>
+  </AppWindow>
 
   <section id="features" class="max-w-6xl mx-auto px-6 py-20 scroll-mt-20">
     <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Built for the way developers actually use Service Bus.</h2>
