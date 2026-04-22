@@ -1,0 +1,74 @@
+# ViewBus
+
+> Azure Service Bus desktop manager for Windows. Fast, local, private. Free.
+
+ViewBus is a native Windows desktop app for developers working with Azure Service Bus. It lets users browse namespaces, peek and filter queue and topic messages, resend dead-lettered items, search across their entire bus via a spotlight interface, and expose all of this to AI assistants via a built-in Model Context Protocol (MCP) server. All data stays on the user's machine — no telemetry, no cloud sync, no accounts.
+
+## Key facts
+
+- **Name:** ViewBus
+- **Platform:** Windows 10 / 11 (x64)
+- **Price:** Free
+- **Source:** Closed source; binaries published on GitHub Releases
+- **Privacy:** No telemetry, no backend servers, no accounts. See /privacy
+- **Built with:** Tauri 2, Rust, React, TypeScript, SQLite
+- **Current version:** See /latest.json
+
+## Who it's for
+
+Developers, DevOps engineers, and SREs who work with Azure Service Bus day-to-day and have outgrown Service Bus Explorer (Windows-only, slow, unmaintained) or the Azure Portal (cloud-only, can't reach namespaces outside the user's Azure tenant).
+
+## Key differentiators vs alternatives
+
+- **vs Service Bus Explorer:** ViewBus is actively maintained, has an MCP server for AI workflows, imports VS Code themes, and supports manual connection strings for external tenants.
+- **vs Azure Portal:** ViewBus works offline for indexed resources, handles namespaces outside the user's Azure tenant (via connection strings), and provides keyboard-driven bulk operations.
+- **vs custom SDK scripts:** ViewBus is a polished GUI with persistent local index and spotlight search — no code required for common operations.
+
+## Primary capabilities
+
+1. Azure subscription discovery and live namespace tree
+2. Peek active and dead-letter messages with filters by session, message ID, correlation ID, subject, and dead-letter reason
+3. Resend dead-lettered messages (optionally with property edits) or bulk-delete stuck messages
+4. Manual connection strings (stored in Windows Credential Manager under service name `viewbus`, never on disk in plain text)
+5. Spotlight fuzzy search (`Ctrl+I`, rebindable) across every indexed resource; survives minimize-to-tray
+6. Built-in MCP server exposing the tools below
+7. Themes including one-click VS Code theme import
+
+## MCP server tools
+
+The MCP server ships with the desktop app (Rust, stdio transport). Ten tools are read-only and always enabled; one write tool is opt-in via a settings toggle.
+
+**Read-only (always enabled):**
+
+- `get_status` — describe the index state: whether a subscription is selected, last refresh time, resource count. Call this first to orient.
+- `list_namespaces` — list indexed Azure Service Bus namespaces in the user's selected subscription.
+- `list_queues` — list queues under a given namespace.
+- `list_topics` — list topics under a given namespace.
+- `list_subscriptions` — list subscriptions under a given topic.
+- `get_resource` — fetch full details for a single indexed resource by ID.
+- `search_resources` — fuzzy-search queues, topics, and topic subscriptions by name or path.
+- `count_messages` — counts for active + dead-letter on a given queue or subscription.
+- `peek_messages` — peek messages from a queue or subscription without dequeuing.
+- `get_message_detail` — full contents of a single message by sequence number (body + system + user properties).
+
+**Write (opt-in via `general.mcpThemeWritesEnabled` setting; default off):**
+
+- `upsert_theme` — let an AI author themes by writing JSON files to the user themes dir.
+
+Message-level writes from MCP (resend / delete / send) are not yet implemented and are tracked as future work.
+
+## Install
+
+Latest Windows installer (NSIS `.exe`): https://github.com/haakofli/viewbus-site/releases/latest — pick the `ViewBus_X.Y.Z_x64-setup.exe` asset. Installer is unsigned for v0.1.x; SmartScreen will warn on first launch ("More info" → "Run anyway"). MSIX + code signing is planned.
+
+## Pages
+
+- [Home](https://viewbus.app/) — Features, screenshots, download
+- [Changelog](https://viewbus.app/changelog) — Every release, with summaries and download links
+- [Privacy](https://viewbus.app/privacy) — Full data-handling details
+- [Update feed](https://viewbus.app/latest.json) — JSON endpoint the desktop app reads on startup
+
+## Contact
+
+- General: support@viewbus.app
+- Security: security@viewbus.app
