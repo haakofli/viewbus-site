@@ -3,8 +3,20 @@ import Base from "../layouts/Base.astro";
 
 const title = "Privacy — viewbus";
 const description = "viewbus has no telemetry, no backend servers, and no account system. Everything happens on your machine.";
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://viewbus.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Privacy", "item": "https://viewbus.app/privacy" }
+  ]
+};
 ---
 <Base title={title} description={description} path="/privacy">
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
   <article class="max-w-3xl mx-auto px-6 py-20 prose prose-invert">
     <h1 class="text-4xl font-bold tracking-tight mb-4">Privacy</h1>
     <p class="text-[var(--color-muted)] mb-12">Last updated: 2026-04-22</p>
