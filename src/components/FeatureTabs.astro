@@ -44,6 +44,34 @@ const mcpTools = [
   { name: "peek_messages", note: "read without dequeuing" },
   { name: "get_message_detail", note: "body + properties by seq no." },
 ];
+
+// Message rows mirror real MessageRow: #seq, time, DL reason, session, subject.
+const messageRows = [
+  { id: "664134", time: "18/08 14:23", reason: "LookupNotCreatedYetException", session: "2000081270", subject: "sap.s4.beh.order.v1.order.event", selected: true },
+  { id: "664138", time: "18/08 14:23", reason: "LookupNotCreatedYetException", session: "2000081270", subject: "sap.s4.beh.order.v1.order.event", selected: true },
+  { id: "664300", time: "18/08 14:23", reason: "LookupNotCreatedYetException", session: "2000076994", subject: "sap.s4.beh.order.v1.order.event", selected: false },
+  { id: "664305", time: "18/08 14:23", reason: "LookupNotCreatedYetException", session: "2000076994", subject: "sap.s4.beh.order.v1.order.event", selected: false },
+  { id: "664500", time: "18/08 14:24", reason: "InvalidOperationException", session: "2000075761", subject: "sap.s4.beh.order.v1.order.event", selected: true },
+  { id: "664504", time: "18/08 14:24", reason: "InvalidOperationException", session: "2000075761", subject: "sap.s4.beh.order.v1.order.event", selected: false },
+];
+
+// Sidebar namespaces for the Browse tab
+const browseNamespaces = [
+  {
+    name: "sb-orders-dev",
+    expanded: true,
+    children: [
+      { name: "api~orders~placement", active: 0, dead: 0, selected: false },
+      { name: "integration~from~erp~order-events", active: 0, dead: 12, selected: true },
+      { name: "private~orders~processor", active: 2, dead: 0, selected: false },
+    ],
+  },
+  { name: "sb-payments-dev", expanded: false },
+  { name: "sb-inventory-dev", expanded: false },
+  { name: "sb-customers-dev", expanded: false },
+  { name: "sb-shipping-dev", expanded: false },
+  { name: "sb-notifications-dev", expanded: false },
+];
 ---
 <section id="features" class="max-w-6xl mx-auto px-6 py-24 scroll-mt-20">
   <h2 class="reveal text-3xl md:text-4xl font-bold mb-4 tracking-tight">
@@ -64,7 +92,7 @@ const mcpTools = [
           aria-controls={`ft-panel-${f.id}`}
           aria-selected={i === 0 ? "true" : "false"}
           tabindex={i === 0 ? 0 : -1}
-          class="ft-tab relative px-4 py-2.5 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors cursor-pointer border-b-2 border-transparent -mb-px aria-selected:text-[var(--color-fg)] aria-selected:border-[var(--color-accent)]"
+          class="ft-tab relative px-4 py-2.5 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors cursor-pointer border-b-2 border-transparent -mb-px"
         >
           {f.label}
         </button>
@@ -79,7 +107,7 @@ const mcpTools = [
           id={`ft-panel-${f.id}`}
           aria-labelledby={`ft-tab-${f.id}`}
           hidden={i !== 0}
-          class="ft-panel grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-8 lg:gap-16 items-center"
+          class="ft-panel grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-8 lg:gap-16 items-center"
         >
           <!-- Copy -->
           <div>
@@ -89,155 +117,241 @@ const mcpTools = [
 
           <!-- Visual -->
           <div class="ft-visual">
+
+            {/* BROWSE — standalone sidebar mini render */}
             {f.id === "browse" && (
-              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-chrome)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]">
-                <!-- Mini titlebar strip -->
-                <div class="h-7 border-b border-[var(--color-border)] flex items-center px-3 gap-2 text-[11px] text-[var(--color-muted)]">
-                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
-                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
-                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
-                  <span class="ml-2 font-mono">acme-dev · resources</span>
+              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-chrome)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)] flex flex-col max-w-[300px]">
+                <!-- Subscription selector row -->
+                <div class="flex items-center gap-1 px-2 py-2">
+                  <div class="h-7 min-w-0 flex-1 flex items-center justify-between gap-2 px-2.5 rounded-[8px] border border-[var(--color-border)] text-xs">
+                    <span class="truncate text-[var(--color-fg)]">acme-dev</span>
+                    <svg class="shrink-0 opacity-50" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                  </div>
+                  <div class="size-8 shrink-0 grid place-items-center rounded-[8px] text-[var(--color-fg)]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                      <path d="M21 3v5h-5" />
+                      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                      <path d="M8 16H3v5" />
+                    </svg>
+                  </div>
+                  <div class="size-8 shrink-0 grid place-items-center rounded-[8px] text-[var(--color-fg)]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="18" height="18" x="3" y="3" rx="2" />
+                      <path d="M9 3v18" />
+                      <path d="m16 15-3-3 3-3" />
+                    </svg>
+                  </div>
                 </div>
-                <!-- Tree body -->
-                <div class="p-3 text-[13px] space-y-0.5 bg-[var(--color-bg)]">
-                  <div class="flex items-center gap-1 px-1.5 py-1 rounded-[6px] text-[var(--color-fg)]">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)] rotate-90"><path d="m9 18 6-6-6-6" /></svg>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
-                    <span>sb-orders-dev</span>
-                  </div>
-                  <div class="flex items-center gap-1 px-1.5 py-1 rounded-[6px]" style="padding-left: 18px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-                    <span>api~orders~placement</span>
-                    <span class="ml-auto flex items-center gap-1.5 text-[10px] tabular-nums">
-                      <span class="text-[var(--color-muted)]">0</span>
-                      <span class="text-[var(--color-muted)]">0</span>
-                    </span>
-                  </div>
-                  <!-- Selected row with left-edge accent -->
-                  <div class="relative flex items-center gap-1 px-1.5 py-1 rounded-[6px] bg-[var(--color-hover)]" style="padding-left: 18px;">
-                    <span class="absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-[var(--color-accent)]"></span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-                    <span class="text-[var(--color-fg)]">integration~from~erp~order-events</span>
-                    <span class="ml-auto flex items-center gap-1.5 text-[10px] tabular-nums">
-                      <span class="text-[var(--color-muted)]">0</span>
-                      <span class="text-[var(--color-danger)]">12</span>
-                    </span>
-                  </div>
-                  <div class="flex items-center gap-1 px-1.5 py-1 rounded-[6px]" style="padding-left: 18px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-                    <span>private~orders~processor</span>
-                    <span class="ml-auto flex items-center gap-1.5 text-[10px] tabular-nums">
-                      <span class="text-[var(--color-success)]">2</span>
-                      <span class="text-[var(--color-muted)]">0</span>
-                    </span>
-                  </div>
-                  <!-- More namespaces collapsed -->
-                  {["sb-payments-dev", "sb-inventory-dev", "sb-customers-dev", "sb-shipping-dev"].map((n) => (
-                    <div class="flex items-center gap-1 px-1.5 py-1 rounded-[6px] text-[var(--color-fg)]">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)]"><path d="m9 18 6-6-6-6" /></svg>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
-                      <span>{n}</span>
-                    </div>
+
+                <!-- Tree -->
+                <div class="text-sm p-1 flex-1">
+                  {browseNamespaces.map((ns) => (
+                    <>
+                      <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[var(--color-fg)] text-[13px]" style="padding-left: 4px;">
+                        <span class="flex w-5 shrink-0 items-center justify-center">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class:list={["text-[var(--color-muted)] transition-transform duration-150", ns.expanded && "rotate-90"]}><path d="m9 18 6-6-6-6" /></svg>
+                        </span>
+                        <span class="shrink-0">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                            <rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/>
+                            <line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>
+                          </svg>
+                        </span>
+                        <span class="min-w-0 truncate">{ns.name}</span>
+                      </div>
+                      {ns.expanded && ns.children?.map((q) => (
+                        <div class:list={["relative flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[13px]", q.selected && "bg-[var(--color-hover)]"]} style="padding-left: 16px;">
+                          {q.selected && <span class="absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-[var(--color-accent)]"></span>}
+                          <span class="w-5 shrink-0"></span>
+                          <span class="shrink-0">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                              <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                              <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+                            </svg>
+                          </span>
+                          <span class="min-w-0 truncate text-[var(--color-fg)]">{q.name}</span>
+                          <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2 text-[10px] font-medium tabular-nums">
+                            <span class={q.active > 0 ? "text-[var(--color-success)]" : "text-[var(--color-muted)]"}>{q.active}</span>
+                            <span class={q.dead > 0 ? "text-[var(--color-danger)]" : "text-[var(--color-muted)]"}>{q.dead}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </>
                   ))}
                 </div>
+
+                <!-- Footer (Connect MCP, Settings, user) -->
+                <nav class="border-t border-[var(--color-border)] p-1.5 space-y-0.5">
+                  <div class="flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg>
+                    <span>Connect MCP</span>
+                  </div>
+                  <div class="flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>Settings</span>
+                  </div>
+                </nav>
               </div>
             )}
 
+            {/* MESSAGES — faithful QueueHeader + MessageList */}
             {f.id === "messages" && (
               <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]">
-                <!-- Title row -->
-                <div class="px-4 pt-3 pb-2 border-b border-[var(--color-border)]">
-                  <div class="text-[13px] font-semibold">integration~from~erp~order-events</div>
-                  <div class="text-[11px] text-[var(--color-muted)] mt-0.5">max-size 5GB · sessions on</div>
+                <!-- Row 1: title + selection-state actions -->
+                <div class="flex items-center gap-3 px-4 py-2 min-w-0">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" class="shrink-0 text-[var(--color-fg)]/80">
+                        <path d="M2 4l6 4 6-4M2 4v8h12V4" stroke="currentColor" stroke-width="1.2" />
+                      </svg>
+                      <h4 class="truncate text-sm font-semibold min-w-0">integration~from~erp~order-events</h4>
+                    </div>
+                    <div class="mt-0.5 flex items-center gap-2 font-mono text-[11px] text-[var(--color-muted)]/70">
+                      <span class="tabular-nums">max-size 5GB</span>
+                      <span class="text-[var(--color-muted)]/40">·</span>
+                      <span class="tabular-nums">sessions on</span>
+                    </div>
+                  </div>
+                  <!-- Selection-state actions -->
+                  <div class="flex shrink-0 items-center gap-1">
+                    <span class="inline-flex h-7 items-center gap-1.5 rounded-md bg-[var(--color-fg)] text-[var(--color-bg)] px-2.5 text-[11.5px] font-medium">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 3 9-3 9 19-9z"/><path d="M6 12h16"/></svg>
+                      <span class="tabular-nums">Resend 3</span>
+                    </span>
+                    <span class="inline-flex h-7 items-center gap-1.5 rounded-md border border-[var(--color-border)] px-2.5 text-[11.5px] text-[var(--color-danger)]">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      <span>Delete</span>
+                    </span>
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)]">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                    </span>
+                  </div>
                 </div>
-                <!-- Toolbar: tabs + selected actions -->
-                <div class="flex items-center justify-between px-4 py-2 border-b border-[var(--color-border)] text-[12px]">
-                  <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-full text-[var(--color-muted)]">Active <span class="tabular-nums">0</span></span>
-                    <span class="px-2 py-0.5 rounded-full bg-[color-mix(in_oklab,var(--color-danger)_15%,transparent)] text-[var(--color-danger)] font-medium">Dead-letter <span class="tabular-nums">73</span></span>
+
+                <!-- Row 2: mode switch + peek + meta -->
+                <div class="flex items-center gap-3 px-4 py-2">
+                  <!-- ModeSwitch -->
+                  <div class="flex h-7 items-center gap-0.5 rounded-md border border-[var(--color-border)] bg-[var(--color-hover)]/40 p-0.5">
+                    <div class="flex h-6 items-center gap-1.5 rounded px-3 text-[11.5px] text-[var(--color-muted)]">
+                      <span>Active</span>
+                      <span class="font-mono text-[10px] tabular-nums">0</span>
+                    </div>
+                    <div class="flex h-6 items-center gap-1.5 rounded px-3 text-[11.5px] bg-[var(--color-bg)]" style="box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-danger) 28%, transparent)">
+                      <span class="text-[var(--color-danger)]">Dead-letter</span>
+                      <span class="font-mono text-[10px] tabular-nums text-[var(--color-danger)]">73</span>
+                    </div>
                   </div>
-                  <div class="flex items-center gap-2 text-[var(--color-muted)]">
-                    <span class="text-[var(--color-fg)] font-medium">3 selected</span>
-                    <span>·</span>
-                    <span class="text-[var(--color-accent)] hover:underline cursor-pointer">Resend</span>
-                    <span class="text-[var(--color-danger)] hover:underline cursor-pointer">Delete</span>
+                  <div class="h-4 w-px bg-[var(--color-border)]"></div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="inline-flex h-7 items-center rounded-md bg-[var(--color-fg)] text-[var(--color-bg)] min-w-[84px] justify-center px-3.5 text-[11.5px] font-medium tabular-nums">Peek 20</span>
+                    <span class="inline-flex h-7 items-center rounded-md border border-[var(--color-border)] px-3 text-[11.5px] text-[var(--color-muted)]">Peek all</span>
+                  </div>
+                  <div class="ml-auto flex items-center gap-1.5 text-[11px] text-[var(--color-muted)]">
+                    <span class="font-mono tabular-nums text-[var(--color-fg)]">3</span>
+                    <span>selected</span>
+                    <span class="text-[var(--color-muted)]/60">·</span>
+                    <span class="text-[var(--color-fg)]">Clear</span>
                   </div>
                 </div>
-                <!-- Table -->
-                <div class="text-[11.5px]">
-                  <!-- header -->
-                  <div class="grid grid-cols-[16px_64px_1fr_70px] gap-3 px-4 py-2 border-b border-[var(--color-border)] font-mono uppercase tracking-[0.15em] text-[10px] text-[var(--color-muted-dim)]">
-                    <span></span>
-                    <span>#</span>
-                    <span>DL REASON</span>
-                    <span>SESSION</span>
+
+                <!-- Row 3: search + time + filter -->
+                <div class="flex items-center gap-2 px-4 py-2">
+                  <div class="flex h-7 flex-1 items-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-hover)]/40 px-2.5 text-xs">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)]"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                    <span class="flex-1 text-[var(--color-muted)]/60">Search message body…</span>
+                    <span class="font-mono text-[10px] text-[var(--color-muted)]/60">/</span>
                   </div>
+                  <span class="inline-flex h-7 items-center gap-1.5 rounded-md border border-[var(--color-border)] px-2.5 text-[11px] text-[var(--color-muted)]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Any time</span>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </span>
+                  <span class="inline-flex h-7 items-center gap-1 rounded-md border border-[var(--color-border)] px-2.5 text-[11px] text-[var(--color-muted)]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>filter</span>
+                  </span>
+                </div>
+
+                <!-- spacer -->
+                <div class="h-2"></div>
+
+                <!-- Table header -->
+                <div class="flex items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-hover)]/30 px-4 py-2">
+                  <span class="inline-flex w-3 h-3 shrink-0 rounded-sm border border-[var(--color-border)]"></span>
+                  <span class="w-14 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">#</span>
+                  <span class="w-20 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Enqueued</span>
+                  <span class="w-32 shrink-0 truncate text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">DL Reason</span>
+                  <span class="w-20 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Session</span>
+                  <span class="min-w-0 truncate text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Subject / Type</span>
+                </div>
+
+                <!-- Rows -->
+                {messageRows.map((row) => (
+                  <div class:list={["flex cursor-pointer items-center gap-2 border-b border-[var(--color-border)]/50 px-4 py-1.5", row.selected && "bg-[var(--color-hover)]"]}>
+                    <span class:list={["inline-flex w-3 h-3 shrink-0 rounded-sm border", row.selected ? "bg-[var(--color-accent)] border-[var(--color-accent)]" : "border-[var(--color-border)]"]}>
+                      {row.selected && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="text-[var(--color-bg)]"><polyline points="20 6 9 17 4 12"/></svg>
+                      )}
+                    </span>
+                    <span class="w-14 shrink-0 truncate text-[11px] font-medium tabular-nums text-[var(--color-muted)]">#{row.id}</span>
+                    <span class="w-20 shrink-0 text-[11px] text-[var(--color-muted)]">{row.time}</span>
+                    <span class="w-32 shrink-0 truncate text-[11px] text-[var(--color-danger)]/70">{row.reason}</span>
+                    <span class="w-20 shrink-0 truncate text-[11px] text-[var(--color-info)]/70 font-mono tabular-nums">{row.session}</span>
+                    <span class="min-w-0 truncate text-[11px] text-[var(--color-fg)]/50">{row.subject}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* SPOTLIGHT — floating panel, no extra chrome */}
+            {f.id === "spotlight" && (
+              <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] shadow-2xl overflow-hidden max-w-[500px] mx-auto">
+                <!-- Search row -->
+                <div class="flex items-center gap-2 border-b border-[var(--color-border)] px-3 py-2.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)] shrink-0"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                  <span class="flex-1 text-sm text-[var(--color-fg)]">orders dead</span>
+                  <span class="inline-block w-0.5 h-4 bg-[var(--color-accent)] animate-pulse"></span>
+                  <span class="shrink-0 rounded bg-[var(--color-hover)] px-2 py-0.5 text-[11px] text-[var(--color-muted)] border border-[var(--color-border)] font-mono">acme-dev</span>
+                </div>
+
+                <!-- Results -->
+                <div class="py-1">
+                  <div class="px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Queues</div>
                   {[
-                    { id: "664134", reason: "LookupNotCreatedYet", session: "2000081270", selected: true },
-                    { id: "664138", reason: "LookupNotCreatedYet", session: "2000081270", selected: true },
-                    { id: "664300", reason: "LookupNotCreatedYet", session: "2000076994", selected: false },
-                    { id: "664305", reason: "LookupNotCreatedYet", session: "2000076994", selected: false },
-                    { id: "664500", reason: "InvalidOperation", session: "2000075761", selected: true },
-                    { id: "664504", reason: "InvalidOperation", session: "2000075761", selected: false },
-                  ].map((row) => (
-                    <div class:list={["grid grid-cols-[16px_64px_1fr_70px] gap-3 px-4 py-1.5 border-b border-[var(--color-border)]/50", row.selected && "bg-[var(--color-hover)]"]}>
-                      <span class="inline-flex items-center justify-center">
-                        <span class:list={["size-3 rounded-sm border inline-block", row.selected ? "bg-[var(--color-accent)] border-[var(--color-accent)]" : "border-[var(--color-border)]"]}></span>
-                      </span>
-                      <span class="font-mono text-[var(--color-muted)] tabular-nums">#{row.id}</span>
-                      <span class="text-[var(--color-danger)] truncate">{row.reason}</span>
-                      <span class="font-mono text-[var(--color-accent)] tabular-nums truncate">{row.session}</span>
+                    { name: "integration~from~erp~order-events", path: "sb-orders-dev", active: 0, dead: 12, selected: true },
+                    { name: "private~orders~processor", path: "sb-orders-dev", active: 2, dead: 0, selected: false },
+                    { name: "api~orders~placement", path: "sb-orders-dev", active: 0, dead: 0, selected: false },
+                  ].map((r) => (
+                    <div class:list={["flex items-center gap-2 px-3 py-1.5", r.selected && "bg-[var(--color-hover)]"]}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)] shrink-0">
+                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+                      </svg>
+                      <div class="min-w-0 flex-1">
+                        <div class="truncate text-sm">{r.name}</div>
+                        <div class="truncate text-[11px] text-[var(--color-muted)]">{r.path}</div>
+                      </div>
+                      <div class="flex items-center gap-1.5 shrink-0">
+                        <span class:list={["text-[10px] font-medium tabular-nums", r.active > 0 ? "text-[var(--color-success)]" : "text-[var(--color-muted)]/50"]}>{r.active}</span>
+                        <span class:list={["text-[10px] font-medium tabular-nums", r.dead > 0 ? "text-[var(--color-danger)]" : "text-[var(--color-muted)]/50"]}>{r.dead}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
 
-            {f.id === "spotlight" && (
-              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-chrome)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)] p-8">
-                <!-- Spotlight popup -->
-                <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]">
-                  <div class="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)] shrink-0">
-                      <circle cx="11" cy="11" r="7" />
-                      <path d="m21 21-4.3-4.3" />
-                    </svg>
-                    <span class="text-[var(--color-fg)] text-sm">orders dead</span>
-                    <span class="inline-block w-0.5 h-4 bg-[var(--color-accent)] animate-pulse"></span>
-                    <span class="ml-auto flex items-center gap-1 text-[11px] text-[var(--color-muted)]">
-                      <kbd class="font-mono px-1.5 py-0.5 rounded bg-[var(--color-hover)] text-[10px]">↵</kbd>
-                      to open
-                    </span>
-                  </div>
-                  <div class="px-2 py-1.5">
-                    <div class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.15em] text-[var(--color-muted-dim)]">Queues</div>
-                    {[
-                      { name: "integration~from~erp~order-events", path: "sb-orders-dev", selected: true },
-                      { name: "private~orders~processor", path: "sb-orders-dev", selected: false },
-                      { name: "api~orders~placement", path: "sb-orders-dev", selected: false },
-                    ].map((r) => (
-                      <div class:list={["flex items-center gap-2 px-2 py-1.5 rounded text-[12px]", r.selected && "bg-[var(--color-hover)]"]}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)] shrink-0"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-                        <span class="text-[var(--color-fg)] truncate">{r.name}</span>
-                        <span class="font-mono text-[10px] text-[var(--color-muted)] ml-auto shrink-0">{r.path}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <!-- Hint row below popup -->
-                <div class="flex items-center justify-center gap-2 mt-6 text-[11px] text-[var(--color-muted)]">
-                  <span>Press</span>
-                  <kbd class="font-mono px-1.5 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-hover)] text-[10px]">Ctrl</kbd>
-                  <span>+</span>
-                  <kbd class="font-mono px-1.5 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-hover)] text-[10px]">I</kbd>
-                  <span>from anywhere</span>
+                <!-- Footer hints -->
+                <div class="flex items-center gap-4 border-t border-[var(--color-border)] px-3 py-1.5 text-[10px] text-[var(--color-muted)]">
+                  <span>↑↓ Navigate</span>
+                  <span>↵ Select</span>
+                  <span>Esc Close</span>
                 </div>
               </div>
             )}
 
+            {/* MCP — terminal-style tool list */}
             {f.id === "mcp" && (
               <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-chrome)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)] font-mono text-[11.5px]">
-                <!-- Terminal header -->
                 <div class="h-6 border-b border-[var(--color-border)] flex items-center px-3 gap-2 text-[10px] text-[var(--color-muted)]">
                   <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
                   <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
@@ -263,10 +377,10 @@ const mcpTools = [
               </div>
             )}
 
+            {/* THEMES — two previews */}
             {f.id === "themes" && (
               <div class="grid grid-cols-2 gap-4">
-                <!-- Dark preview -->
-                <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden bg-[#0b0d10]">
+                <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden" style="background: oklch(0.145 0 0)">
                   <div class="h-6 border-b border-white/10 flex items-center px-3 gap-1">
                     <span class="size-1.5 rounded-full bg-white/20"></span>
                     <span class="size-1.5 rounded-full bg-white/20"></span>
@@ -277,13 +391,12 @@ const mcpTools = [
                     <div class="h-1.5 rounded-full bg-white/40 w-4/5"></div>
                     <div class="h-1.5 rounded-full bg-white/40 w-3/5"></div>
                     <div class="flex gap-1 pt-2">
-                      <span class="h-4 px-2 rounded bg-[#3b82f6] text-[9px] text-white flex items-center">Peek</span>
+                      <span class="h-4 px-2 rounded text-[9px] text-white flex items-center" style="background: oklch(0.62 0.16 242)">Peek</span>
                       <span class="h-4 px-2 rounded bg-white/10 text-[9px] text-white/70 flex items-center">Filter</span>
                     </div>
                   </div>
                   <div class="px-4 pb-3 pt-1 text-[10px] text-white/50 font-mono uppercase tracking-[0.15em]">Dark</div>
                 </div>
-                <!-- Light preview -->
                 <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden bg-white">
                   <div class="h-6 border-b border-black/10 flex items-center px-3 gap-1">
                     <span class="size-1.5 rounded-full bg-black/20"></span>
@@ -291,23 +404,18 @@ const mcpTools = [
                     <span class="size-1.5 rounded-full bg-black/20"></span>
                   </div>
                   <div class="p-4 space-y-2">
-                    <div class="h-2 rounded-full bg-[#0b0d10] w-2/3"></div>
-                    <div class="h-1.5 rounded-full bg-[#0b0d10]/40 w-4/5"></div>
-                    <div class="h-1.5 rounded-full bg-[#0b0d10]/40 w-3/5"></div>
+                    <div class="h-2 rounded-full w-2/3" style="background: oklch(0.145 0 0)"></div>
+                    <div class="h-1.5 rounded-full w-4/5" style="background: oklch(0.145 0 0 / 40%)"></div>
+                    <div class="h-1.5 rounded-full w-3/5" style="background: oklch(0.145 0 0 / 40%)"></div>
                     <div class="flex gap-1 pt-2">
-                      <span class="h-4 px-2 rounded bg-[#3b82f6] text-[9px] text-white flex items-center">Peek</span>
+                      <span class="h-4 px-2 rounded text-[9px] text-white flex items-center" style="background: oklch(0.62 0.16 242)">Peek</span>
                       <span class="h-4 px-2 rounded bg-black/5 text-[9px] text-black/70 flex items-center">Filter</span>
                     </div>
                   </div>
                   <div class="px-4 pb-3 pt-1 text-[10px] text-black/50 font-mono uppercase tracking-[0.15em]">Light</div>
                 </div>
-                <!-- Import hint spanning both columns -->
                 <div class="col-span-2 flex items-center justify-center gap-2 mt-2 text-[11px] text-[var(--color-muted)]">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   <span>One-click import from VS Code</span>
                 </div>
               </div>
@@ -320,7 +428,6 @@ const mcpTools = [
 </section>
 
 <style>
-  /* aria-selected ↔ border-bottom for the active tab */
   .ft-tab[aria-selected="true"] {
     color: var(--color-fg);
     border-bottom-color: var(--color-accent);

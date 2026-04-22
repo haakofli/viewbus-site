@@ -15,6 +15,7 @@
   --color-accent-hover: oklch(0.68 0.16 242);
   --color-danger: oklch(0.7 0.18 20);
   --color-success: oklch(0.75 0.18 155);
+  --color-info: oklch(0.7 0.18 260);
   --radius-sm: 6px;
   --radius: 10px;
   --radius-lg: 14px;
@@ -33,6 +34,7 @@
   --color-accent-hover: oklch(0.55 0.16 242);
   --color-danger: oklch(0.577 0.245 27.325);
   --color-success: oklch(0.55 0.2 145);
+  --color-info: oklch(0.55 0.2 260);
 }
 
 html {
