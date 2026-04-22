@@ -1,0 +1,51 @@
+---
+import Base from "../layouts/Base.astro";
+
+const title = "Privacy — ViewBus";
+const description = "ViewBus has no telemetry, no backend servers, and no account system. Everything happens on your machine.";
+---
+<Base title={title} description={description} path="/privacy">
+  <article class="max-w-3xl mx-auto px-6 py-20 prose prose-invert">
+    <h1 class="text-4xl font-bold tracking-tight mb-4">Privacy</h1>
+    <p class="text-[var(--color-muted)] mb-12">Last updated: 2026-04-22</p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">In one paragraph</h2>
+    <p>
+      ViewBus does not send telemetry, does not phone home, and has no backend servers.
+      Your Azure credentials and connection strings are used by your machine to talk to
+      Azure directly — they never touch any infrastructure operated by ViewBus (because
+      there isn't any). The SQLite index, logs, and settings files all live under your
+      user profile on disk.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">What's on your machine</h2>
+    <ul>
+      <li><strong>SQLite index</strong> at <code>%LOCALAPPDATA%\viewbus\viewbus.db</code> — resource metadata (namespace names, queue names, etc.) discovered from Azure or from connection strings you add. Contains no message bodies and no secrets.</li>
+      <li><strong>Windows Credential Manager entries</strong> under service name <code>viewbus</code> — raw Service Bus connection strings you paste in. Never written to the SQLite index or log files.</li>
+      <li><strong>Settings JSON</strong> at <code>%APPDATA%\viewbus\settings.json</code> — your theme, hotkeys, and preferences.</li>
+      <li><strong>Custom themes</strong> at <code>%APPDATA%\viewbus\themes\*.json</code> — drop a JSON file in and it shows up in Settings on next launch.</li>
+      <li><strong>Log files</strong> at <code>%LOCALAPPDATA%\viewbus\logs\</code> — daily-rotated plain-text diagnostics via <code>tracing</code>. No PII, no credentials, no message bodies. Attached only if you opt in via the in-app feedback dialog.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">What leaves your machine</h2>
+    <p>Only requests you trigger:</p>
+    <ul>
+      <li>Azure authentication (OAuth flow in your default browser; tokens go directly between Microsoft and your machine).</li>
+      <li>Azure Resource Manager + Service Bus REST / AMQP calls (direct to the endpoints in your connection strings — the app's Content Security Policy allows only <code>login.microsoftonline.com</code>, <code>management.azure.com</code>, <code>*.servicebus.windows.net</code>, and the update-check host below).</li>
+      <li>An update check on app start that reads <code>https://viewbus.app/latest.json</code> — a static JSON file with the current version number. No query parameters, no identifiers, no user agent beyond what the OS adds.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">No third parties</h2>
+    <p>
+      No analytics SDK, no crash reporter, no A/B framework, no affiliate tracking. If a
+      future version adds any of these, it will be opt-in with a clear prompt, and this
+      page will list them.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">Contact</h2>
+    <p>
+      Questions: <a href="mailto:support@viewbus.app">support@viewbus.app</a><br />
+      Security disclosures: <a href="mailto:security@viewbus.app">security@viewbus.app</a>
+    </p>
+  </article>
+</Base>

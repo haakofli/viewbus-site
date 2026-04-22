@@ -1,0 +1,37 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCollection, render } from "astro:content";
+
+const entries = (await getCollection("changelog")).sort(
+  (a, b) => b.data.publishedAt.localeCompare(a.data.publishedAt),
+);
+
+const rendered = await Promise.all(
+  entries.map(async (entry) => ({ entry, Content: (await render(entry)).Content })),
+);
+
+const title = "Changelog — ViewBus";
+const description = "Every ViewBus release, with what changed and why.";
+---
+<Base title={title} description={description} path="/changelog">
+  <article class="max-w-3xl mx-auto px-6 py-20 prose">
+    <h1 class="text-4xl font-bold tracking-tight mb-4">Changelog</h1>
+    <p class="text-[var(--color-muted)] mb-12">
+      Latest: <a href={`https://github.com/haakofli/viewbus-site/releases/tag/v${entries[0]?.data.version}`} class="underline">v{entries[0]?.data.version}</a>
+    </p>
+
+    {rendered.map(({ entry, Content }) => (
+      <section class="mb-16 pb-10 border-b border-[var(--color-border)] last:border-0">
+        <Content />
+        <p class="mt-6">
+          <a
+            class="text-[var(--color-accent)] hover:underline"
+            href={`https://github.com/haakofli/viewbus-site/releases/tag/v${entry.data.version}`}
+          >
+            Download v{entry.data.version} →
+          </a>
+        </p>
+      </section>
+    ))}
+  </article>
+</Base>
