@@ -1,0 +1,181 @@
+# ViewBus — full product reference
+
+> Azure Service Bus desktop manager for Windows. Fast, local, private. Free.
+> This file concatenates the full content of viewbus.app for AI agents that
+> want a single fetch. For the shorter product summary see /llms.txt.
+
+---
+
+## What ViewBus is
+
+ViewBus is a native Windows desktop app for developers, DevOps engineers, and SREs working with Azure Service Bus day-to-day. It lets users:
+
+- Browse Azure subscriptions and their Service Bus namespaces in a live tree.
+- Peek and filter active and dead-lettered queue and topic messages without dequeuing them.
+- Resend dead-lettered messages (optionally with edits) or bulk-delete stuck messages.
+- Search across every indexed resource from a system-wide spotlight (`Ctrl+I`, rebindable).
+- Expose all of the above to AI assistants via a built-in Model Context Protocol (MCP) server.
+
+All data stays on the user's machine — no telemetry, no cloud sync, no accounts.
+
+### Key facts
+
+- **Name:** ViewBus
+- **Platform:** Windows 10 / 11 (x64)
+- **Price:** Free
+- **Source:** Closed source; binaries published on GitHub Releases
+- **Privacy:** No telemetry, no backend servers, no accounts
+- **Built with:** Tauri 2, Rust, React, TypeScript, SQLite
+- **Current version:** See https://viewbus.app/latest.json
+
+### Who it's for
+
+Developers, DevOps engineers, and SREs who work with Azure Service Bus day-to-day and have outgrown Service Bus Explorer (Windows-only, slow, unmaintained) or the Azure Portal (cloud-only, can't reach namespaces outside the user's Azure tenant).
+
+### Differentiators vs alternatives
+
+- **vs Service Bus Explorer:** actively maintained, has an MCP server for AI workflows, imports VS Code themes, supports manual connection strings for external tenants.
+- **vs Azure Portal:** works offline for indexed resources, handles namespaces outside the user's Azure tenant (via connection strings), and supports keyboard-driven bulk operations.
+- **vs custom SDK scripts:** polished GUI with persistent local index and spotlight search — no code required for common operations.
+
+---
+
+## Feature detail
+
+### Fast tree browsing
+
+Subscriptions, namespaces, queues, and topics are indexed locally in SQLite. Navigation is instant, even on enterprise tenants with thousands of resources. No round-trip to Azure for typical browsing actions after the initial index.
+
+### Browse and act on messages
+
+Peek active and dead-letter messages without dequeuing. Filter by session ID, message ID, correlation ID, subject, or dead-letter reason. Resend dead-lettered messages (optionally with property edits) or bulk-delete stuck messages behind a safety confirmation.
+
+### Spotlight search
+
+`Ctrl+I` (rebindable) opens a system-wide fuzzy search across every indexed resource — queues, topics, subscriptions. Stays active even when ViewBus is minimized to the system tray, so it behaves as a global OS-level launcher for your Service Bus topology.
+
+### Built-in MCP server
+
+ViewBus ships a Model Context Protocol server over stdio transport. Any MCP-aware AI assistant (Claude, ChatGPT, Cursor, custom agents) can list namespaces, search resources, peek queues, and fetch full messages.
+
+### Themes and VS Code import
+
+Dark, light, or custom user themes. A one-click importer pulls your active VS Code theme into ViewBus. Custom themes drop into `%APPDATA%\viewbus\themes\` as JSON files.
+
+---
+
+## MCP server tools
+
+The MCP server is built into the desktop app (Rust, stdio transport). Ten tools are read-only and always enabled; one write tool is opt-in via a settings toggle.
+
+### Read-only tools (always enabled)
+
+- `get_status` — describe the index state: whether a subscription is selected, last refresh time, resource count. Call this first to orient.
+- `list_namespaces` — list indexed Azure Service Bus namespaces in the user's selected subscription.
+- `list_queues` — list queues under a given namespace.
+- `list_topics` — list topics under a given namespace.
+- `list_subscriptions` — list subscriptions under a given topic.
+- `get_resource` — fetch full details for a single indexed resource by ID.
+- `search_resources` — fuzzy-search queues, topics, and topic subscriptions by name or path.
+- `count_messages` — counts for active + dead-letter on a given queue or subscription.
+- `peek_messages` — peek messages from a queue or subscription without dequeuing.
+- `get_message_detail` — full contents of a single message by sequence number (body + system + user properties).
+
+### Write tools (opt-in)
+
+Write tools are gated behind the `general.mcpThemeWritesEnabled` setting and default to off.
+
+- `upsert_theme` — let an AI author themes by writing JSON files to the user's themes directory.
+
+Message-level writes from MCP (resend / delete / send) are not yet implemented and are tracked as future work.
+
+---
+
+## Install
+
+### Direct installer (current version)
+
+`https://github.com/haakofli/viewbus-site/releases/download/v0.1.0/ViewBus_0.1.0_x64-setup.exe`
+
+### Programmatic resolution (recommended for agents)
+
+An AI agent or update-checker should resolve the latest installer URL via the update feed rather than hardcoding a version:
+
+```
+curl https://viewbus.app/latest.json
+```
+
+Returns JSON with `version`, `installerUrl` (direct .exe), `platform` (`windows-x64`), `installerFormat` (`nsis`), `signed` (boolean), and `publishedAt` (ISO-8601).
+
+### First-launch caveat
+
+The installer is unsigned for the v0.1.x series. Windows SmartScreen will warn on first launch — the user must click "More info" → "Run anyway". Subsequent launches are silent. A code-signing certificate and MSIX packaging are planned; `latest.json`'s `signed` field will flip to `true` once shipped.
+
+---
+
+## Privacy promise
+
+### In one paragraph
+
+ViewBus does not send telemetry, does not phone home, and has no backend servers. Azure credentials and connection strings are used by the user's machine to talk to Azure directly — they never touch infrastructure operated by ViewBus (because there isn't any). The SQLite index, logs, and settings files all live under the user's profile on disk.
+
+### What's on the user's machine
+
+- **SQLite index** at `%LOCALAPPDATA%\viewbus\viewbus.db` — resource metadata (namespace names, queue names, etc.) discovered from Azure or from connection strings the user adds. Contains no message bodies and no secrets.
+- **Windows Credential Manager entries** under service name `viewbus` — raw Service Bus connection strings the user pastes in. Never written to the SQLite index or log files.
+- **Settings JSON** at `%APPDATA%\viewbus\settings.json` — theme, hotkeys, preferences.
+- **Custom themes** at `%APPDATA%\viewbus\themes\*.json` — drop a JSON file in and it shows up in Settings on next launch.
+- **Log files** at `%LOCALAPPDATA%\viewbus\logs\` — daily-rotated plain-text diagnostics via the `tracing` crate. No PII, no credentials, no message bodies. Attached only if the user opts in via the in-app feedback dialog.
+
+### What leaves the user's machine
+
+Only requests the user triggers:
+
+- Azure authentication (OAuth flow in the user's default browser; tokens go directly between Microsoft and the user's machine).
+- Azure Resource Manager + Service Bus REST / AMQP calls (direct to the endpoints in the user's connection strings — the app's Content Security Policy allows only `login.microsoftonline.com`, `management.azure.com`, `*.servicebus.windows.net`, and the update-check host below).
+- An update check on app start that reads `https://viewbus.app/latest.json` — a static JSON file with the current version number. No query parameters, no identifiers, no user agent beyond what the OS adds.
+
+### No third parties
+
+No analytics SDK, no crash reporter, no A/B framework, no affiliate tracking. If a future version adds any of these, it will be opt-in with a clear prompt, and the privacy page will list them.
+
+---
+
+## Changelog
+
+### 0.1.0 — 2026-04-22
+
+Initial public release.
+
+**Features**
+
+- Azure subscription discovery + live tree browsing (SQLite-backed for instant navigation)
+- Queue + topic message peeking with filters (session, message ID, correlation ID, subject, DL reason)
+- Dead-letter resend (with property edits) and bulk delete
+- Manual connection strings (stored in Windows Credential Manager, never on disk in plain text)
+- Spotlight search (`Ctrl+I`, rebindable) across all indexed resources
+- Close-to-tray with Spotlight still active
+- Built-in MCP server — 10 read-only tools (`get_status`, `list_namespaces`, `list_queues`, `list_topics`, `list_subscriptions`, `get_resource`, `search_resources`, `count_messages`, `peek_messages`, `get_message_detail`) + 1 opt-in write tool (`upsert_theme`)
+- Themes, custom user themes via `%APPDATA%\viewbus\themes\`, and one-click VS Code theme import
+- Daily-rotated local log files for support; opt-in feedback dialog attaches them when reporting bugs
+
+**Known limitations**
+
+- Windows only (macOS / Linux builds not yet available)
+- Installer is unsigned — first launch triggers Windows SmartScreen. Click "More info" → "Run anyway" once; subsequent launches are silent. Code-signing certificate + MSIX packaging is planned before Microsoft Store submission.
+
+---
+
+## Pages and endpoints
+
+- Home: https://viewbus.app/
+- Privacy: https://viewbus.app/privacy
+- Changelog: https://viewbus.app/changelog
+- Update feed (JSON): https://viewbus.app/latest.json
+- Short summary for AI agents: https://viewbus.app/llms.txt
+- Long-form reference for AI agents (this file): https://viewbus.app/llms-full.txt
+
+## Contact
+
+- General: support@viewbus.app
+- Security: security@viewbus.app
