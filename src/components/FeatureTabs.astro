@@ -106,8 +106,11 @@ const browseNamespaces = [
           role="tabpanel"
           id={`ft-panel-${f.id}`}
           aria-labelledby={`ft-tab-${f.id}`}
-          hidden={i !== 0}
-          class="ft-panel grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-8 lg:gap-16 items-center md:min-h-[520px]"
+          inert={i !== 0 ? "" : undefined}
+          class:list={[
+            "ft-panel grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-8 lg:gap-16 items-center",
+            i === 0 && "is-active",
+          ]}
         >
           <!-- Copy -->
           <div>
@@ -432,6 +435,23 @@ const browseNamespaces = [
     color: var(--color-fg);
     border-bottom-color: var(--color-accent);
   }
+
+  /* Stack all panels in the same grid cell so the container sizes to the
+     tallest panel and layout never shifts when tabs swap. */
+  .ft-panels {
+    display: grid;
+    grid-template-areas: "stack";
+  }
+  .ft-panel {
+    grid-area: stack;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 250ms ease-out;
+  }
+  .ft-panel.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
 </style>
 
 <script is:inline>
@@ -447,8 +467,13 @@ const browseNamespaces = [
           btn.setAttribute("tabindex", active ? "0" : "-1");
         });
         panels.forEach((panel, i) => {
-          if (i === index) panel.removeAttribute("hidden");
-          else panel.setAttribute("hidden", "");
+          if (i === index) {
+            panel.classList.add("is-active");
+            panel.removeAttribute("inert");
+          } else {
+            panel.classList.remove("is-active");
+            panel.setAttribute("inert", "");
+          }
         });
       };
       buttons.forEach((btn, i) => {
