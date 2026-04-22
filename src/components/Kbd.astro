@@ -1,0 +1,16 @@
+---
+export interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props;
+---
+<kbd class:list={[
+  "inline-flex items-center justify-center min-w-[1.75em] px-[0.5em] py-[0.15em]",
+  "font-mono text-[0.85em] leading-none",
+  "border border-[var(--color-border)] rounded-[var(--radius-sm)]",
+  "bg-[color-mix(in_oklab,var(--color-fg)_5%,transparent)] text-[var(--color-fg)]",
+  "tracking-normal",
+  className,
+]}>
+  <slot />
+</kbd>
