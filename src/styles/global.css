@@ -51,6 +51,24 @@ code, pre, kbd, .mono {
   font-family: var(--font-mono);
 }
 
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 400ms ease-out, transform 400ms ease-out;
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 .prose {
   line-height: 1.7;
 }

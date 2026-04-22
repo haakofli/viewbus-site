@@ -94,11 +94,14 @@ const description = "A fast, local, private desktop app for managing Azure Servi
   </AppWindow>
 
   <section id="features" class="max-w-6xl mx-auto px-6 py-20 scroll-mt-20">
-    <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Built for the way developers actually use Service Bus.</h2>
-    <p class="text-[var(--color-muted)] mb-12 max-w-2xl">Everything you'd want Service Bus Explorer to be, without the legacy baggage.</p>
+    <h2 class="reveal text-3xl md:text-4xl font-bold mb-4 tracking-tight">Built for the way developers actually use Service Bus.</h2>
+    <p class="reveal text-[var(--color-muted)] mb-12 max-w-2xl">Everything you'd want Service Bus Explorer to be, without the legacy baggage.</p>
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {features.map((f) => (
-        <article class="border border-[var(--color-border)] rounded-xl p-6 hover:border-[var(--color-accent)] transition-colors">
+      {features.map((f, i) => (
+        <article
+          class="reveal border border-[var(--color-border)] rounded-xl p-6 hover:border-[var(--color-accent)] transition-colors"
+          style={`transition-delay: ${i * 60}ms`}
+        >
           <h3 class="font-semibold text-lg mb-2">{f.title}</h3>
           <p class="text-sm text-[var(--color-muted)] leading-relaxed">{f.body}</p>
         </article>
@@ -107,7 +110,7 @@ const description = "A fast, local, private desktop app for managing Azure Servi
   </section>
 
   <section class="max-w-6xl mx-auto px-6 py-20">
-    <div class="border border-[var(--color-border)] rounded-xl p-10 md:p-16 text-center">
+    <div class="reveal border border-[var(--color-border)] rounded-xl p-10 md:p-16 text-center">
       <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Your data stays on your machine.</h2>
       <p class="text-[var(--color-muted)] max-w-2xl mx-auto leading-relaxed">
         viewbus has no backend servers, sends no telemetry, and has no account system. Your Azure credentials are used directly by your machine to talk to Azure. Connection strings live in the Windows Credential Manager, never on disk in plain text.
@@ -117,7 +120,7 @@ const description = "A fast, local, private desktop app for managing Azure Servi
   </section>
 
   <section id="download" class="max-w-6xl mx-auto px-6 py-20 scroll-mt-20">
-    <div class="text-center">
+    <div class="reveal text-center">
       <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Download viewbus</h2>
       <p class="text-[var(--color-muted)] mb-10">Windows 10 and 11. Free. No sign-up.</p>
       <a href="https://github.com/haakofli/viewbus-site/releases/latest" class="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-black font-medium px-8 py-4 rounded-lg inline-block transition-colors">
