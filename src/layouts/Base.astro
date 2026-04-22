@@ -73,20 +73,27 @@ const ogImageUrl = new URL(ogImage, site).toString();
       }
 
       // Tease: clicking the fake-interactive chrome wiggles the download buttons.
-      const downloads = document.querySelectorAll("[data-download]");
-      if (downloads.length > 0) {
-        document.querySelectorAll("[data-tease]").forEach((el) => {
-          el.addEventListener("click", () => {
-            downloads.forEach((btn) => {
-              btn.classList.remove("wiggle");
-              void btn.offsetWidth;
-              btn.classList.add("wiggle");
+      try {
+        const downloads = document.querySelectorAll("[data-download]");
+        const teases = document.querySelectorAll("[data-tease]");
+        console.log("[viewbus] wiggle wired:", { downloads: downloads.length, teases: teases.length });
+        if (downloads.length > 0 && teases.length > 0) {
+          teases.forEach((el) => {
+            el.addEventListener("click", (e) => {
+              console.log("[viewbus] tease clicked", e.currentTarget);
+              downloads.forEach((btn) => {
+                btn.classList.remove("wiggle");
+                void btn.offsetWidth;
+                btn.classList.add("wiggle");
+              });
             });
           });
-        });
-        downloads.forEach((btn) => {
-          btn.addEventListener("animationend", () => btn.classList.remove("wiggle"));
-        });
+          downloads.forEach((btn) => {
+            btn.addEventListener("animationend", () => btn.classList.remove("wiggle"));
+          });
+        }
+      } catch (err) {
+        console.error("[viewbus] wiggle wiring failed:", err);
       }
     </script>
   </body>
