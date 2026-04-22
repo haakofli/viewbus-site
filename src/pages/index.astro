@@ -2,41 +2,7 @@
 import Base from "../layouts/Base.astro";
 import Wordmark from "../components/Wordmark.astro";
 import AppWindow from "../components/AppWindow.astro";
-
-const features = [
-  {
-    title: "Fast tree browsing",
-    body: "Subscriptions, namespaces, queues, topics, and subscriptions — all indexed locally in SQLite. Navigation is instant even on enterprise tenants with thousands of resources.",
-  },
-  {
-    title: "Peek without dequeuing",
-    body: "Read active and dead-letter messages without removing them. Filter by session, message ID, correlation ID, subject, or DL reason — combine filters to narrow down a noisy queue fast. Bodies render as JSON, XML, or plain text.",
-  },
-  {
-    title: "Resend & delete",
-    body: "Requeue dead-lettered messages with edited properties. Delete stuck messages. Bulk operations with confirmation, so you don't nuke a queue by accident.",
-  },
-  {
-    title: "Manual connections",
-    body: "Paste any Service Bus connection string to reach namespaces outside your Azure account. Legacy endpoints, external tenants, shared dev buses — all first-class citizens.",
-  },
-  {
-    title: "Spotlight search",
-    body: "Ctrl+I (configurable) opens a system-wide fuzzy search across every indexed resource. Close viewbus to the tray and Spotlight still works — open anything from anywhere.",
-  },
-  {
-    title: "Built-in MCP server",
-    body: "Ships a Model Context Protocol server with 10 read-only tools so Claude, ChatGPT, or any MCP-aware AI can list namespaces, search resources, count messages, peek queues, and fetch full message details. One opt-in write tool lets the AI author themes if you enable it.",
-  },
-  {
-    title: "Themes & VS Code import",
-    body: "Dark and light modes plus custom user themes. One-click importer pulls your active VS Code theme into viewbus.",
-  },
-  {
-    title: "Everything local, always",
-    body: "No telemetry, no phone-home, no backend. Credentials stay on your machine. Connection strings live in the OS credential manager, never in plain text on disk.",
-  },
-];
+import FeatureTabs from "../components/FeatureTabs.astro";
 
 const title = "viewbus — Azure Service Bus desktop manager";
 const description = "A fast, local, private desktop app for managing Azure Service Bus. Peek messages, resend dead letters, and search your entire bus from one keyboard-driven interface. Free for Windows.";
@@ -117,21 +83,7 @@ const description = "A fast, local, private desktop app for managing Azure Servi
     </div>
   </AppWindow>
 
-  <section id="features" class="max-w-6xl mx-auto px-6 py-20 scroll-mt-20">
-    <h2 class="reveal text-3xl md:text-4xl font-bold mb-4 tracking-tight">Built for the way developers actually use Service Bus.</h2>
-    <p class="reveal text-[var(--color-muted)] mb-12 max-w-2xl">Everything you'd want Service Bus Explorer to be, without the legacy baggage.</p>
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {features.map((f, i) => (
-        <article
-          class="reveal border border-[var(--color-border)] rounded-xl p-6 hover:border-[var(--color-accent)] transition-colors"
-          style={`transition-delay: ${i * 60}ms`}
-        >
-          <h3 class="font-semibold text-lg mb-2">{f.title}</h3>
-          <p class="text-sm text-[var(--color-muted)] leading-relaxed">{f.body}</p>
-        </article>
-      ))}
-    </div>
-  </section>
+  <FeatureTabs />
 
   <section class="max-w-6xl mx-auto px-6 py-20">
     <div class="reveal border border-[var(--color-border)] rounded-xl p-10 md:p-16 text-center">
@@ -143,16 +95,4 @@ const description = "A fast, local, private desktop app for managing Azure Servi
     </div>
   </section>
 
-  <section id="download" class="max-w-6xl mx-auto px-6 py-20 scroll-mt-20">
-    <div class="reveal text-center">
-      <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Download viewbus</h2>
-      <p class="text-[var(--color-muted)] mb-10">Windows 10 and 11. Free. No sign-up.</p>
-      <a href="https://github.com/haakofli/viewbus-site/releases/latest" class="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-black font-medium px-8 py-4 rounded-lg inline-block transition-colors">
-        Latest release on GitHub
-      </a>
-      <p class="mt-6 text-sm text-[var(--color-muted)]">
-        Or grab a specific version from the <a href="/changelog" class="underline hover:text-[var(--color-fg)]">changelog</a>.
-      </p>
-    </div>
-  </section>
 </Base>

@@ -1,0 +1,361 @@
+---
+const features = [
+  {
+    id: "browse",
+    label: "Browse",
+    title: "Fast tree browsing",
+    body: "Subscriptions, namespaces, queues, topics — indexed locally in SQLite. Navigation is instant, even on enterprise tenants with thousands of resources.",
+  },
+  {
+    id: "messages",
+    label: "Messages",
+    title: "Browse and act on messages",
+    body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Requeue, edit, or bulk-delete with a safety confirmation.",
+  },
+  {
+    id: "spotlight",
+    label: "Spotlight",
+    title: "Spotlight search",
+    body: "Ctrl+I opens a system-wide fuzzy search across every indexed resource. Stays active even with viewbus closed to the tray.",
+  },
+  {
+    id: "mcp",
+    label: "MCP",
+    title: "Built-in MCP server",
+    body: "Ships a Model Context Protocol server so Claude, ChatGPT, or any MCP-aware AI can list namespaces, search resources, peek queues, and fetch full messages.",
+  },
+  {
+    id: "themes",
+    label: "Themes",
+    title: "Themes & VS Code import",
+    body: "Dark, light, or custom user themes. One-click importer pulls your active VS Code theme into viewbus.",
+  },
+];
+
+const mcpTools = [
+  { name: "get_status", note: "index state + last refresh" },
+  { name: "list_namespaces", note: "azure subscription namespaces" },
+  { name: "list_queues", note: "queues in a namespace" },
+  { name: "list_topics", note: "topics in a namespace" },
+  { name: "list_subscriptions", note: "subs under a topic" },
+  { name: "get_resource", note: "full detail for a resource" },
+  { name: "search_resources", note: "fuzzy across names + paths" },
+  { name: "count_messages", note: "active + dead-letter totals" },
+  { name: "peek_messages", note: "read without dequeuing" },
+  { name: "get_message_detail", note: "body + properties by seq no." },
+];
+---
+<section id="features" class="max-w-6xl mx-auto px-6 py-24 scroll-mt-20">
+  <h2 class="reveal text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+    Built for the way developers actually use Service Bus.
+  </h2>
+  <p class="reveal text-[var(--color-muted)] mb-12 max-w-2xl">
+    Everything you'd want Service Bus Explorer to be, without the legacy baggage.
+  </p>
+
+  <div class="reveal feature-tabs">
+    <!-- Tab list -->
+    <div role="tablist" aria-label="Feature categories" class="flex flex-wrap gap-1 border-b border-[var(--color-border)] mb-10">
+      {features.map((f, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`ft-tab-${f.id}`}
+          aria-controls={`ft-panel-${f.id}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? 0 : -1}
+          class="ft-tab relative px-4 py-2.5 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors cursor-pointer border-b-2 border-transparent -mb-px aria-selected:text-[var(--color-fg)] aria-selected:border-[var(--color-accent)]"
+        >
+          {f.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Tab panels -->
+    <div class="ft-panels">
+      {features.map((f, i) => (
+        <div
+          role="tabpanel"
+          id={`ft-panel-${f.id}`}
+          aria-labelledby={`ft-tab-${f.id}`}
+          hidden={i !== 0}
+          class="ft-panel grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-8 lg:gap-16 items-center"
+        >
+          <!-- Copy -->
+          <div>
+            <h3 class="text-2xl md:text-3xl font-semibold tracking-tight mb-4">{f.title}</h3>
+            <p class="text-[var(--color-muted)] leading-relaxed">{f.body}</p>
+          </div>
+
+          <!-- Visual -->
+          <div class="ft-visual">
+            {f.id === "browse" && (
+              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-chrome)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]">
+                <!-- Mini titlebar strip -->
+                <div class="h-7 border-b border-[var(--color-border)] flex items-center px-3 gap-2 text-[11px] text-[var(--color-muted)]">
+                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+                  <span class="ml-2 font-mono">acme-dev · resources</span>
+                </div>
+                <!-- Tree body -->
+                <div class="p-3 text-[13px] space-y-0.5 bg-[var(--color-bg)]">
+                  <div class="flex items-center gap-1 px-1.5 py-1 rounded-[6px] text-[var(--color-fg)]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)] rotate-90"><path d="m9 18 6-6-6-6" /></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+                    <span>sb-orders-dev</span>
+                  </div>
+                  <div class="flex items-center gap-1 px-1.5 py-1 rounded-[6px]" style="padding-left: 18px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                    <span>api~orders~placement</span>
+                    <span class="ml-auto flex items-center gap-1.5 text-[10px] tabular-nums">
+                      <span class="text-[var(--color-muted)]">0</span>
+                      <span class="text-[var(--color-muted)]">0</span>
+                    </span>
+                  </div>
+                  <!-- Selected row with left-edge accent -->
+                  <div class="relative flex items-center gap-1 px-1.5 py-1 rounded-[6px] bg-[var(--color-hover)]" style="padding-left: 18px;">
+                    <span class="absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-[var(--color-accent)]"></span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                    <span class="text-[var(--color-fg)]">integration~from~erp~order-events</span>
+                    <span class="ml-auto flex items-center gap-1.5 text-[10px] tabular-nums">
+                      <span class="text-[var(--color-muted)]">0</span>
+                      <span class="text-[var(--color-danger)]">12</span>
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-1 px-1.5 py-1 rounded-[6px]" style="padding-left: 18px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                    <span>private~orders~processor</span>
+                    <span class="ml-auto flex items-center gap-1.5 text-[10px] tabular-nums">
+                      <span class="text-[var(--color-success)]">2</span>
+                      <span class="text-[var(--color-muted)]">0</span>
+                    </span>
+                  </div>
+                  <!-- More namespaces collapsed -->
+                  {["sb-payments-dev", "sb-inventory-dev", "sb-customers-dev", "sb-shipping-dev"].map((n) => (
+                    <div class="flex items-center gap-1 px-1.5 py-1 rounded-[6px] text-[var(--color-fg)]">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)]"><path d="m9 18 6-6-6-6" /></svg>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)]"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+                      <span>{n}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {f.id === "messages" && (
+              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]">
+                <!-- Title row -->
+                <div class="px-4 pt-3 pb-2 border-b border-[var(--color-border)]">
+                  <div class="text-[13px] font-semibold">integration~from~erp~order-events</div>
+                  <div class="text-[11px] text-[var(--color-muted)] mt-0.5">max-size 5GB · sessions on</div>
+                </div>
+                <!-- Toolbar: tabs + selected actions -->
+                <div class="flex items-center justify-between px-4 py-2 border-b border-[var(--color-border)] text-[12px]">
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-full text-[var(--color-muted)]">Active <span class="tabular-nums">0</span></span>
+                    <span class="px-2 py-0.5 rounded-full bg-[color-mix(in_oklab,var(--color-danger)_15%,transparent)] text-[var(--color-danger)] font-medium">Dead-letter <span class="tabular-nums">73</span></span>
+                  </div>
+                  <div class="flex items-center gap-2 text-[var(--color-muted)]">
+                    <span class="text-[var(--color-fg)] font-medium">3 selected</span>
+                    <span>·</span>
+                    <span class="text-[var(--color-accent)] hover:underline cursor-pointer">Resend</span>
+                    <span class="text-[var(--color-danger)] hover:underline cursor-pointer">Delete</span>
+                  </div>
+                </div>
+                <!-- Table -->
+                <div class="text-[11.5px]">
+                  <!-- header -->
+                  <div class="grid grid-cols-[16px_64px_1fr_70px] gap-3 px-4 py-2 border-b border-[var(--color-border)] font-mono uppercase tracking-[0.15em] text-[10px] text-[var(--color-muted-dim)]">
+                    <span></span>
+                    <span>#</span>
+                    <span>DL REASON</span>
+                    <span>SESSION</span>
+                  </div>
+                  {[
+                    { id: "664134", reason: "LookupNotCreatedYet", session: "2000081270", selected: true },
+                    { id: "664138", reason: "LookupNotCreatedYet", session: "2000081270", selected: true },
+                    { id: "664300", reason: "LookupNotCreatedYet", session: "2000076994", selected: false },
+                    { id: "664305", reason: "LookupNotCreatedYet", session: "2000076994", selected: false },
+                    { id: "664500", reason: "InvalidOperation", session: "2000075761", selected: true },
+                    { id: "664504", reason: "InvalidOperation", session: "2000075761", selected: false },
+                  ].map((row) => (
+                    <div class:list={["grid grid-cols-[16px_64px_1fr_70px] gap-3 px-4 py-1.5 border-b border-[var(--color-border)]/50", row.selected && "bg-[var(--color-hover)]"]}>
+                      <span class="inline-flex items-center justify-center">
+                        <span class:list={["size-3 rounded-sm border inline-block", row.selected ? "bg-[var(--color-accent)] border-[var(--color-accent)]" : "border-[var(--color-border)]"]}></span>
+                      </span>
+                      <span class="font-mono text-[var(--color-muted)] tabular-nums">#{row.id}</span>
+                      <span class="text-[var(--color-danger)] truncate">{row.reason}</span>
+                      <span class="font-mono text-[var(--color-accent)] tabular-nums truncate">{row.session}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {f.id === "spotlight" && (
+              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-chrome)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)] p-8">
+                <!-- Spotlight popup -->
+                <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]">
+                  <div class="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)] shrink-0">
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    <span class="text-[var(--color-fg)] text-sm">orders dead</span>
+                    <span class="inline-block w-0.5 h-4 bg-[var(--color-accent)] animate-pulse"></span>
+                    <span class="ml-auto flex items-center gap-1 text-[11px] text-[var(--color-muted)]">
+                      <kbd class="font-mono px-1.5 py-0.5 rounded bg-[var(--color-hover)] text-[10px]">↵</kbd>
+                      to open
+                    </span>
+                  </div>
+                  <div class="px-2 py-1.5">
+                    <div class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.15em] text-[var(--color-muted-dim)]">Queues</div>
+                    {[
+                      { name: "integration~from~erp~order-events", path: "sb-orders-dev", selected: true },
+                      { name: "private~orders~processor", path: "sb-orders-dev", selected: false },
+                      { name: "api~orders~placement", path: "sb-orders-dev", selected: false },
+                    ].map((r) => (
+                      <div class:list={["flex items-center gap-2 px-2 py-1.5 rounded text-[12px]", r.selected && "bg-[var(--color-hover)]"]}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--color-muted)] shrink-0"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                        <span class="text-[var(--color-fg)] truncate">{r.name}</span>
+                        <span class="font-mono text-[10px] text-[var(--color-muted)] ml-auto shrink-0">{r.path}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <!-- Hint row below popup -->
+                <div class="flex items-center justify-center gap-2 mt-6 text-[11px] text-[var(--color-muted)]">
+                  <span>Press</span>
+                  <kbd class="font-mono px-1.5 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-hover)] text-[10px]">Ctrl</kbd>
+                  <span>+</span>
+                  <kbd class="font-mono px-1.5 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-hover)] text-[10px]">I</kbd>
+                  <span>from anywhere</span>
+                </div>
+              </div>
+            )}
+
+            {f.id === "mcp" && (
+              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-chrome)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)] font-mono text-[11.5px]">
+                <!-- Terminal header -->
+                <div class="h-6 border-b border-[var(--color-border)] flex items-center px-3 gap-2 text-[10px] text-[var(--color-muted)]">
+                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+                  <span class="ml-2">viewbus-mcp</span>
+                </div>
+                <div class="p-4 space-y-0.5 bg-[var(--color-bg)]">
+                  <div class="text-[var(--color-muted)]">$ viewbus-mcp --list-tools</div>
+                  <div class="text-[var(--color-accent)]">10 read-only tools · 1 opt-in write tool</div>
+                  <div class="h-2"></div>
+                  {mcpTools.map((t) => (
+                    <div class="flex gap-3">
+                      <span class="text-[var(--color-success)]">{t.name}</span>
+                      <span class="text-[var(--color-muted)] truncate">{t.note}</span>
+                    </div>
+                  ))}
+                  <div class="h-2"></div>
+                  <div class="text-[var(--color-muted)]">
+                    <span class="text-[var(--color-fg)]">upsert_theme</span>
+                    <span class="ml-3">write · opt-in via settings</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {f.id === "themes" && (
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Dark preview -->
+                <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden bg-[#0b0d10]">
+                  <div class="h-6 border-b border-white/10 flex items-center px-3 gap-1">
+                    <span class="size-1.5 rounded-full bg-white/20"></span>
+                    <span class="size-1.5 rounded-full bg-white/20"></span>
+                    <span class="size-1.5 rounded-full bg-white/20"></span>
+                  </div>
+                  <div class="p-4 space-y-2">
+                    <div class="h-2 rounded-full bg-white w-2/3"></div>
+                    <div class="h-1.5 rounded-full bg-white/40 w-4/5"></div>
+                    <div class="h-1.5 rounded-full bg-white/40 w-3/5"></div>
+                    <div class="flex gap-1 pt-2">
+                      <span class="h-4 px-2 rounded bg-[#3b82f6] text-[9px] text-white flex items-center">Peek</span>
+                      <span class="h-4 px-2 rounded bg-white/10 text-[9px] text-white/70 flex items-center">Filter</span>
+                    </div>
+                  </div>
+                  <div class="px-4 pb-3 pt-1 text-[10px] text-white/50 font-mono uppercase tracking-[0.15em]">Dark</div>
+                </div>
+                <!-- Light preview -->
+                <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden bg-white">
+                  <div class="h-6 border-b border-black/10 flex items-center px-3 gap-1">
+                    <span class="size-1.5 rounded-full bg-black/20"></span>
+                    <span class="size-1.5 rounded-full bg-black/20"></span>
+                    <span class="size-1.5 rounded-full bg-black/20"></span>
+                  </div>
+                  <div class="p-4 space-y-2">
+                    <div class="h-2 rounded-full bg-[#0b0d10] w-2/3"></div>
+                    <div class="h-1.5 rounded-full bg-[#0b0d10]/40 w-4/5"></div>
+                    <div class="h-1.5 rounded-full bg-[#0b0d10]/40 w-3/5"></div>
+                    <div class="flex gap-1 pt-2">
+                      <span class="h-4 px-2 rounded bg-[#3b82f6] text-[9px] text-white flex items-center">Peek</span>
+                      <span class="h-4 px-2 rounded bg-black/5 text-[9px] text-black/70 flex items-center">Filter</span>
+                    </div>
+                  </div>
+                  <div class="px-4 pb-3 pt-1 text-[10px] text-black/50 font-mono uppercase tracking-[0.15em]">Light</div>
+                </div>
+                <!-- Import hint spanning both columns -->
+                <div class="col-span-2 flex items-center justify-center gap-2 mt-2 text-[11px] text-[var(--color-muted)]">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  <span>One-click import from VS Code</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* aria-selected ↔ border-bottom for the active tab */
+  .ft-tab[aria-selected="true"] {
+    color: var(--color-fg);
+    border-bottom-color: var(--color-accent);
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    const tabs = document.querySelectorAll(".feature-tabs");
+    tabs.forEach((root) => {
+      const buttons = Array.from(root.querySelectorAll('[role="tab"]'));
+      const panels = Array.from(root.querySelectorAll('[role="tabpanel"]'));
+      const select = (index) => {
+        buttons.forEach((btn, i) => {
+          const active = i === index;
+          btn.setAttribute("aria-selected", active ? "true" : "false");
+          btn.setAttribute("tabindex", active ? "0" : "-1");
+        });
+        panels.forEach((panel, i) => {
+          if (i === index) panel.removeAttribute("hidden");
+          else panel.setAttribute("hidden", "");
+        });
+      };
+      buttons.forEach((btn, i) => {
+        btn.addEventListener("click", () => select(i));
+        btn.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+            e.preventDefault();
+            const delta = e.key === "ArrowRight" ? 1 : -1;
+            const next = (i + delta + buttons.length) % buttons.length;
+            select(next);
+            buttons[next].focus();
+          }
+        });
+      });
+    });
+  })();
+</script>
