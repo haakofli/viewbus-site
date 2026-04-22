@@ -76,12 +76,24 @@ const description = "A fast, local, private desktop app for managing Azure Servi
         A modern app for working with Azure Service Bus, with a companion MCP server.
       </p>
 
-      <a
-        href="https://github.com/haakofli/viewbus-site/releases/latest"
-        class="inline-flex items-center justify-center font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] rounded-[8px] h-8 px-3.5 text-sm transition-colors"
-      >
-        Download for Windows
-      </a>
+      <div class="flex flex-col sm:flex-row items-center gap-2">
+        <a
+          href="https://github.com/haakofli/viewbus-site/releases/latest"
+          class="inline-flex items-center justify-center font-medium text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] rounded-[8px] h-8 px-3.5 text-sm transition-colors"
+        >
+          Download for Windows
+        </a>
+        <button
+          type="button"
+          disabled
+          aria-disabled="true"
+          title="Coming soon"
+          class="inline-flex items-center justify-center gap-2 font-medium text-[var(--color-muted)] border border-[var(--color-border)] rounded-[8px] h-8 px-3.5 text-sm cursor-not-allowed"
+        >
+          Download for Mac
+          <span class="font-mono text-[10px] uppercase tracking-wider text-[var(--color-muted-dim)]">soon</span>
+        </button>
+      </div>
 
       <p class="font-mono text-[11px] text-[var(--color-muted)] tracking-wide">
         v0.1.0
