@@ -1,7 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
 import Wordmark from "../components/Wordmark.astro";
-import LogoMark from "../components/LogoMark.astro";
 
 const features = [
   {
@@ -68,7 +67,7 @@ const description = "A fast, local, private desktop app for managing Azure Servi
   <section class="min-h-[calc(100vh-4rem)] flex items-center">
     <div class="max-w-3xl mx-auto px-6 py-24 text-center flex flex-col items-center">
       <p class="font-mono text-xs uppercase tracking-[0.25em] text-[var(--color-accent)] mb-8">
-        Azure Service Bus
+        Azure Service Bus Explorer
       </p>
 
       <h1 class="leading-none mb-8">
@@ -88,11 +87,6 @@ const description = "A fast, local, private desktop app for managing Azure Servi
 
       <p class="mt-8 font-mono text-xs text-[var(--color-muted)] tracking-wide">
         v0.1.0 · Windows 10 / 11 · Free · No telemetry
-      </p>
-
-      <p class="mt-16 flex items-center gap-2 font-mono text-xs text-[var(--color-muted)]/60">
-        <LogoMark variant="spinner-sm" width={16} height={13} />
-        <span>checking for updates…</span>
       </p>
     </div>
   </section>
