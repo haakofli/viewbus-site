@@ -1,43 +1,51 @@
-# Astro Starter Kit: Minimal
+# viewbus-site
 
-```sh
-pnpm create astro@latest -- --template minimal
+Public marketing + release-metadata site for [ViewBus](https://viewbus.app).
+
+## Stack
+
+- Astro 6 + Tailwind 4 (via `@tailwindcss/vite`)
+- Geist + JetBrains Mono (via `@fontsource-variable/*`)
+- Deployed to GitHub Pages at `viewbus.app` on push to `main`
+- `public/latest.json` is the update feed the desktop app reads on startup
+
+## Local dev
+
+```
+pnpm install
+pnpm dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Visit http://localhost:4321.
 
-## 🚀 Project Structure
+For output that includes the sitemap, run `pnpm build && pnpm preview` — sitemap
+generation runs at build time.
 
-Inside of your Astro project, you'll see the following folders and files:
+## Cutting a release
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+1. In the private viewbus repo, bump version in `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`. Run `cargo test && pnpm test && cargo clippy --workspace`.
+2. Build the installer: `pnpm tauri build` → output at `src-tauri/target/release/bundle/nsis/ViewBus_X.Y.Z_x64-setup.exe`.
+3. Create a GitHub Release on this repo:
+   `gh release create vX.Y.Z "<installer-path>" --title "ViewBus X.Y.Z" --notes "..." --repo haakofli/viewbus-site`
+4. Update `public/latest.json` with the new version + notes + release URL + ISO-8601 `publishedAt`.
+5. Add `src/content/changelog/X.Y.Z.md` with a new entry (copy the frontmatter shape from `0.1.0.md`).
+6. Commit and push — CI deploys automatically.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Structure
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+- `src/pages/` — Astro pages (`index`, `privacy`, `changelog`)
+- `src/content/changelog/` — Markdown per release (content collection)
+- `src/content.config.ts` — Content Layer collection definitions
+- `src/layouts/Base.astro` — shared `<head>` with SEO + OG + JSON-LD slot
+- `src/components/` — Nav, Footer
+- `public/latest.json` — the update feed
+- `public/llms.txt` — agent-oriented product summary
+- `public/robots.txt` — allowlists major LLM crawlers
+- `public/og.png` — Open Graph card (placeholder — needs design polish)
+- `public/CNAME` — custom domain for GitHub Pages
+- `.github/workflows/deploy.yml` — Pages deploy on push to `main`
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Related
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- Private app repo: `haakofli/viewbus` (source — not public)
+- Update-check consumer: `src/services/updateCheck.ts` in the app repo
