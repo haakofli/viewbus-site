@@ -112,13 +112,81 @@ code, pre, kbd, .mono {
   50% { filter: brightness(1.2) saturate(1.4); }
 }
 
-.wiggle  { animation: vb-wiggle  550ms ease-in-out; }
-.pulse   { animation: vb-pulse   450ms ease-in-out; }
-.bounce  { animation: vb-bounce  700ms cubic-bezier(.68, -.55, .27, 1.55); }
-.wobble  { animation: vb-wobble  600ms ease-in-out; }
-.flash   { animation: vb-flash   600ms ease-out; }
-.nudge   { animation: vb-nudge   450ms ease-out; }
-.shimmer { animation: vb-shimmer 500ms ease-in-out; }
+@keyframes vb-glow-accent {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-accent) 45%, transparent); }
+}
+@keyframes vb-glow-info {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-info) 45%, transparent); }
+}
+@keyframes vb-glow-success {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-success) 45%, transparent); }
+}
+@keyframes vb-glow-danger {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-danger) 45%, transparent); }
+}
+@keyframes vb-squish {
+  0%, 100% { transform: scale(1, 1); }
+  30% { transform: scale(1.15, 0.85); }
+  60% { transform: scale(0.92, 1.08); }
+}
+@keyframes vb-heartbeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.1); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.1); }
+  60% { transform: scale(1); }
+}
+@keyframes vb-rainbow {
+  0%, 100% { filter: hue-rotate(0) saturate(1); }
+  50% { filter: hue-rotate(220deg) saturate(1.6); }
+}
+@keyframes vb-sweep {
+  to { transform: translateX(100%); }
+}
+@keyframes vb-shake-v {
+  0%, 100% { transform: translateY(0); }
+  15% { transform: translateY(-4px); }
+  30% { transform: translateY(4px); }
+  50% { transform: translateY(-3px); }
+  70% { transform: translateY(2px); }
+  85% { transform: translateY(-1px); }
+}
+
+.wiggle       { animation: vb-wiggle       550ms ease-in-out; }
+.pulse        { animation: vb-pulse        450ms ease-in-out; }
+.bounce       { animation: vb-bounce       700ms cubic-bezier(.68, -.55, .27, 1.55); }
+.wobble       { animation: vb-wobble       600ms ease-in-out; }
+.flash        { animation: vb-flash        600ms ease-out; }
+.nudge        { animation: vb-nudge        450ms ease-out; }
+.shimmer      { animation: vb-shimmer      500ms ease-in-out; }
+.glow-accent  { animation: vb-glow-accent  600ms ease-in-out; }
+.glow-info    { animation: vb-glow-info    600ms ease-in-out; }
+.glow-success { animation: vb-glow-success 600ms ease-in-out; }
+.glow-danger  { animation: vb-glow-danger  600ms ease-in-out; }
+.squish       { animation: vb-squish       500ms ease-in-out; }
+.heartbeat    { animation: vb-heartbeat    700ms ease-in-out; }
+.rainbow      { animation: vb-rainbow      600ms ease-in-out; }
+.shake-v      { animation: vb-shake-v      500ms ease-in-out; }
+
+/* Sweep: translucent gradient streaks across the button via a pseudo-element. */
+.sweep {
+  position: relative;
+  overflow: hidden;
+}
+.sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in oklch, var(--color-accent) 40%, transparent) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: vb-sweep 700ms ease-out;
+  pointer-events: none;
+}
 
 .prose {
   line-height: 1.7;

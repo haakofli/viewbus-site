@@ -74,7 +74,11 @@ const ogImageUrl = new URL(ogImage, site).toString();
 
       // Tease: clicking the fake-interactive chrome animates the download
       // buttons. Each button gets a random variant per click for a playful mix.
-      const VARIANTS = ["wiggle", "pulse", "bounce", "wobble", "flash", "nudge", "shimmer"];
+      const VARIANTS = [
+        "wiggle", "pulse", "bounce", "wobble", "flash", "nudge", "shimmer",
+        "glow-accent", "glow-info", "glow-success", "glow-danger",
+        "squish", "heartbeat", "rainbow", "shake-v", "sweep",
+      ];
       const pick = () => VARIANTS[Math.floor(Math.random() * VARIANTS.length)];
       const clear = (btn) => { for (const v of VARIANTS) btn.classList.remove(v); };
       const downloads = document.querySelectorAll("[data-download]");
