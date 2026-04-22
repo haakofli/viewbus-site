@@ -75,16 +75,35 @@ const ogImageUrl = new URL(ogImage, site).toString();
       // Hero → features auto-snap: scroll a little, the page glides you into
       // the first real content section. Skips touch devices (feels hostile on
       // mobile) and re-arms if the user scrolls back up to the hero.
+      // Uses a manual rAF easing because the browser's native smooth scroll
+      // is overridden to instant when prefers-reduced-motion is on.
       (function () {
         if (window.matchMedia("(max-width: 767px)").matches) return;
         const from = document.querySelector('[data-snap-from="hero"]');
         const to = document.querySelector('[data-snap-to="features"]');
         if (!from || !to) return;
 
-        const TRIGGER = 30; // px of hero scrolled past viewport top to fire
-        const REARM = -5;   // px before hero top before we re-arm
+        const TRIGGER = 30;
+        const REARM = -5;
+        const NAV_OFFSET = 56;
+        const DURATION = 750;
         let armed = true;
         let animating = false;
+
+        const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+        const smoothTo = (targetY) => {
+          const startY = window.scrollY;
+          const distance = targetY - startY;
+          const startTime = performance.now();
+          const step = (now) => {
+            const progress = Math.min((now - startTime) / DURATION, 1);
+            window.scrollTo(0, startY + distance * ease(progress));
+            if (progress < 1) requestAnimationFrame(step);
+            else animating = false;
+          };
+          requestAnimationFrame(step);
+        };
 
         const tick = () => {
           const rect = from.getBoundingClientRect();
@@ -92,8 +111,8 @@ const ogImageUrl = new URL(ogImage, site).toString();
           if (armed && !animating && rect.top < -TRIGGER) {
             armed = false;
             animating = true;
-            to.scrollIntoView({ behavior: "smooth", block: "start" });
-            window.setTimeout(() => { animating = false; }, 1000);
+            const targetY = to.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+            smoothTo(targetY);
           }
         };
         window.addEventListener("scroll", tick, { passive: true });
