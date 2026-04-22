@@ -1,6 +1,6 @@
 ---
 export interface Props {
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "welcome" | "lg" | "xl";
   class?: string;
 }
 
@@ -9,10 +9,11 @@ const { size = "md", class: className = "" } = Astro.props;
 const sizes = {
   sm: "text-lg",
   md: "text-2xl",
+  welcome: "text-4xl",
   lg: "text-6xl md:text-7xl",
   xl: "text-7xl md:text-8xl",
 };
 ---
-<span class:list={["inline-flex items-baseline tracking-tight", sizes[size], className]} aria-label="ViewBus">
-  <span class="font-normal text-[var(--color-muted)]">view</span><span class="font-bold text-[var(--color-fg)]">bus</span>
+<span class:list={["inline-flex items-baseline tracking-tight text-[var(--color-fg)]", sizes[size], className]} aria-label="viewbus">
+  <span class="font-normal opacity-60">view</span><span class="font-semibold">bus</span>
 </span>

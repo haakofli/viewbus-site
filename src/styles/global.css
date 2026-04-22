@@ -4,15 +4,18 @@
 
 :root {
   color-scheme: dark light;
-  --color-bg: #0b0d10;
-  --color-fg: #ffffff;
-  --color-muted: #7a8391;
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-chrome: #0f1216;
-  --color-accent: #3b82f6;
-  --color-accent-hover: #60a5fa;
-  --color-danger: #ef4444;
-  --color-success: #22c55e;
+  --color-bg: oklch(0.145 0 0);
+  --color-fg: oklch(0.985 0 0);
+  --color-muted: oklch(0.708 0 0);
+  --color-muted-dim: color-mix(in oklch, oklch(0.708 0 0) 60%, transparent);
+  --color-border: oklch(1 0 0 / 10%);
+  --color-chrome: oklch(0.205 0 0);
+  --color-hover: color-mix(in oklch, oklch(0.985 0 0) 8%, transparent);
+  --color-accent: oklch(0.62 0.16 242);
+  --color-accent-hover: oklch(0.68 0.16 242);
+  --color-danger: oklch(0.7 0.18 20);
+  --color-success: oklch(0.75 0.18 155);
+  --color-info: oklch(0.7 0.18 260);
   --radius-sm: 6px;
   --radius: 10px;
   --radius-lg: 14px;
@@ -21,17 +24,24 @@
 }
 
 :root.light {
-  --color-bg: #ffffff;
-  --color-fg: #0b0d10;
-  --color-muted: #6a7280;
-  --color-border: rgba(11, 13, 16, 0.08);
-  --color-chrome: #f7f8fa;
+  --color-bg: oklch(1 0 0);
+  --color-fg: oklch(0.145 0 0);
+  --color-muted: oklch(0.556 0 0);
+  --color-muted-dim: color-mix(in oklch, oklch(0.556 0 0) 60%, transparent);
+  --color-border: oklch(0.922 0 0);
+  --color-chrome: oklch(0.985 0 0);
+  --color-hover: color-mix(in oklch, oklch(0.145 0 0) 5%, transparent);
+  --color-accent-hover: oklch(0.55 0.16 242);
+  --color-danger: oklch(0.577 0.245 27.325);
+  --color-success: oklch(0.55 0.2 145);
+  --color-info: oklch(0.55 0.2 260);
 }
 
 html {
   background: var(--color-bg);
   color: var(--color-fg);
   scroll-behavior: smooth;
+  scroll-padding-top: 3.5rem; /* Account for the sticky nav */
 }
 
 body {
@@ -42,6 +52,141 @@ body {
 
 code, pre, kbd, .mono {
   font-family: var(--font-mono);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 400ms ease-out, transform 400ms ease-out;
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@keyframes vb-wiggle {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  15% { transform: translateX(-6px) rotate(-2deg); }
+  30% { transform: translateX(6px) rotate(2deg); }
+  50% { transform: translateX(-4px) rotate(-1deg); }
+  70% { transform: translateX(3px) rotate(1deg); }
+  85% { transform: translateX(-1px) rotate(0); }
+}
+@keyframes vb-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+@keyframes vb-bounce {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+  55% { transform: translateY(0); }
+  75% { transform: translateY(-3px); }
+  90% { transform: translateY(0); }
+}
+@keyframes vb-wobble {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(-5deg); }
+  30% { transform: rotate(4deg); }
+  45% { transform: rotate(-3deg); }
+  60% { transform: rotate(2deg); }
+  75% { transform: rotate(-1deg); }
+}
+@keyframes vb-flash {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  40% { box-shadow: 0 0 0 6px color-mix(in oklch, var(--color-accent) 45%, transparent); }
+}
+@keyframes vb-nudge {
+  0%, 100% { transform: translateX(0); }
+  40% { transform: translateX(8px); }
+  70% { transform: translateX(-3px); }
+}
+@keyframes vb-shimmer {
+  0%, 100% { filter: brightness(1) saturate(1); }
+  50% { filter: brightness(1.2) saturate(1.4); }
+}
+
+@keyframes vb-glow-accent {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-accent) 45%, transparent); }
+}
+@keyframes vb-glow-info {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-info) 45%, transparent); }
+}
+@keyframes vb-glow-success {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-success) 45%, transparent); }
+}
+@keyframes vb-glow-danger {
+  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
+  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-danger) 45%, transparent); }
+}
+@keyframes vb-squish {
+  0%, 100% { transform: scale(1, 1); }
+  30% { transform: scale(1.15, 0.85); }
+  60% { transform: scale(0.92, 1.08); }
+}
+@keyframes vb-heartbeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.1); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.1); }
+  60% { transform: scale(1); }
+}
+@keyframes vb-rainbow {
+  0%, 100% { filter: hue-rotate(0) saturate(1); }
+  50% { filter: hue-rotate(220deg) saturate(1.6); }
+}
+@keyframes vb-sweep {
+  to { transform: translateX(100%); }
+}
+@keyframes vb-shake-v {
+  0%, 100% { transform: translateY(0); }
+  15% { transform: translateY(-4px); }
+  30% { transform: translateY(4px); }
+  50% { transform: translateY(-3px); }
+  70% { transform: translateY(2px); }
+  85% { transform: translateY(-1px); }
+}
+
+.wiggle       { animation: vb-wiggle       550ms ease-in-out; }
+.pulse        { animation: vb-pulse        450ms ease-in-out; }
+.bounce       { animation: vb-bounce       700ms cubic-bezier(.68, -.55, .27, 1.55); }
+.wobble       { animation: vb-wobble       600ms ease-in-out; }
+.flash        { animation: vb-flash        600ms ease-out; }
+.nudge        { animation: vb-nudge        450ms ease-out; }
+.shimmer      { animation: vb-shimmer      500ms ease-in-out; }
+.glow-accent  { animation: vb-glow-accent  600ms ease-in-out; }
+.glow-info    { animation: vb-glow-info    600ms ease-in-out; }
+.glow-success { animation: vb-glow-success 600ms ease-in-out; }
+.glow-danger  { animation: vb-glow-danger  600ms ease-in-out; }
+.squish       { animation: vb-squish       500ms ease-in-out; }
+.heartbeat    { animation: vb-heartbeat    700ms ease-in-out; }
+.rainbow      { animation: vb-rainbow      600ms ease-in-out; }
+.shake-v      { animation: vb-shake-v      500ms ease-in-out; }
+
+/* Sweep: translucent gradient streaks across the button via a pseudo-element. */
+.sweep {
+  position: relative;
+  overflow: hidden;
+}
+.sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in oklch, var(--color-accent) 40%, transparent) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: vb-sweep 700ms ease-out;
+  pointer-events: none;
 }
 
 .prose {
