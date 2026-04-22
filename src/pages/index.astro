@@ -5,30 +5,90 @@ import AppWindow from "../components/AppWindow.astro";
 import FeatureTabs from "../components/FeatureTabs.astro";
 
 const title = "viewbus — Azure Service Bus desktop manager";
-const description = "A fast, local, private desktop app for managing Azure Service Bus. Peek messages, resend dead letters, and search your entire bus from one keyboard-driven interface. Free for Windows.";
+const description = "A fast, local, private desktop app for managing Azure Service Bus. Peek messages, resend dead letters, and search your entire bus from one keyboard-driven interface. Ships a built-in Model Context Protocol (MCP) server so AI assistants can list namespaces, search resources, and peek messages. Free for Windows.";
+
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "viewbus",
+  "alternateName": "ViewBus",
+  "description": description,
+  "applicationCategory": "DeveloperApplication",
+  "applicationSubCategory": "Azure Tools",
+  "operatingSystem": "Windows 10, Windows 11",
+  "processorRequirements": "x64",
+  "softwareRequirements": "Windows 10 (x64) or Windows 11",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  },
+  "url": "https://viewbus.app",
+  "downloadUrl": "https://github.com/haakofli/viewbus-site/releases/latest/download/ViewBus_0.1.0_x64-setup.exe",
+  "installUrl": "https://viewbus.app/latest.json",
+  "releaseNotes": "https://viewbus.app/changelog",
+  "screenshot": "https://viewbus.app/og.png",
+  "softwareVersion": "0.1.0",
+  "datePublished": "2026-04-22",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "license": "Proprietary (closed source, free of charge)",
+  "sameAs": [
+    "https://github.com/haakofli/viewbus-site"
+  ],
+  "author": {
+    "@type": "Person",
+    "name": "Håkon Lia",
+    "url": "https://viewbus.app"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Håkon Lia"
+  },
+  "featureList": [
+    "Browse Azure subscriptions and Service Bus namespaces in a local, SQLite-backed tree",
+    "Peek active and dead-letter queue and topic messages without dequeuing",
+    "Filter messages by session ID, message ID, correlation ID, subject, or dead-letter reason",
+    "Resend dead-lettered messages (optionally with property edits) or bulk-delete stuck messages",
+    "Spotlight fuzzy search (Ctrl+I, rebindable) across every indexed resource, system-wide",
+    "Close-to-tray with Spotlight search still active",
+    "Manual Azure Service Bus connection strings, stored in Windows Credential Manager (never on disk in plain text)",
+    "Built-in Model Context Protocol (MCP) server over stdio transport for AI assistants (Claude, ChatGPT, Cursor)",
+    "MCP tool: get_status — index state, selected subscription, last refresh, resource count",
+    "MCP tool: list_namespaces — enumerate indexed Azure Service Bus namespaces",
+    "MCP tool: list_queues — list queues in a namespace",
+    "MCP tool: list_topics — list topics in a namespace",
+    "MCP tool: list_subscriptions — list subscriptions under a topic",
+    "MCP tool: get_resource — full detail for a single indexed resource by ID",
+    "MCP tool: search_resources — fuzzy search across queues, topics, and subscriptions",
+    "MCP tool: count_messages — active and dead-letter counts for a queue or subscription",
+    "MCP tool: peek_messages — read messages without dequeuing",
+    "MCP tool: get_message_detail — full message body and properties by sequence number",
+    "MCP tool: upsert_theme (opt-in) — let an AI author ViewBus themes",
+    "Dark, light, and custom user themes; one-click VS Code theme import",
+    "No telemetry, no backend servers, no accounts — everything runs locally"
+  ],
+  "keywords": "Azure Service Bus, Service Bus Explorer alternative, dead letter queue, DLQ, message peek, resend dead letter, MCP server, Model Context Protocol, Windows desktop, Azure developer tool, queue management, topic subscription"
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://viewbus.app/"
+    }
+  ]
+};
 ---
 <Base title={title} description={description} path="/">
   <Fragment slot="head">
-    <script type="application/ld+json" is:inline set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "viewbus",
-      "description": description,
-      "applicationCategory": "DeveloperApplication",
-      "operatingSystem": "Windows 10, Windows 11",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "url": "https://viewbus.app",
-      "downloadUrl": "https://github.com/haakofli/viewbus-site/releases/latest",
-      "softwareVersion": "0.1.0",
-      "author": {
-        "@type": "Person",
-        "name": "Håkon Lia"
-      }
-    })} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(softwareApplicationSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
   </Fragment>
 
   <AppWindow>
@@ -36,6 +96,9 @@ const description = "A fast, local, private desktop app for managing Azure Servi
     <div class="flex flex-col items-center gap-6 text-center">
       <h1 class="tracking-tight leading-none">
         <Wordmark size="welcome" />
+        <span class="sr-only">
+          viewbus — Azure Service Bus desktop manager for Windows with a built-in Model Context Protocol (MCP) server
+        </span>
       </h1>
 
       <p class="max-w-md text-sm text-[var(--color-muted)] leading-relaxed">

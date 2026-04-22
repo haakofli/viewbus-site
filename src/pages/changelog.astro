@@ -12,8 +12,20 @@ const rendered = await Promise.all(
 
 const title = "Changelog — viewbus";
 const description = "Every viewbus release, with what changed and why.";
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://viewbus.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Changelog", "item": "https://viewbus.app/changelog" }
+  ]
+};
 ---
 <Base title={title} description={description} path="/changelog">
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
   <article class="max-w-3xl mx-auto px-6 py-20 prose">
     <h1 class="text-4xl font-bold tracking-tight mb-4">Changelog</h1>
     <p class="text-[var(--color-muted)] mb-12">
