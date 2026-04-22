@@ -44,19 +44,6 @@ html {
   scroll-padding-top: 3.5rem; /* Account for the sticky nav */
 }
 
-/* Desktop-only scroll snap. Mobile scrolls freely — snap on small
-   viewports fights short section heights and the soft-keyboard/address-bar
-   resize dance. */
-@media (min-width: 768px) {
-  html {
-    scroll-snap-type: y proximity;
-  }
-  .snap-section {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-  }
-}
-
 body {
   font-family: var(--font-sans);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
