@@ -59,7 +59,7 @@ Message-level writes from MCP (resend / delete / send) are not yet implemented a
 
 ## Install
 
-**Direct installer (current version):** https://github.com/haakofli/viewbus-site/releases/download/v0.1.0/ViewBus_0.1.0_x64-setup.exe
+**Direct installer (current version):** https://github.com/haakofli/viewbus-site/releases/download/v0.1.1/ViewBus_0.1.1_x64-setup.exe
 
 **Programmatic access:** `https://viewbus.app/latest.json` returns the current `version`, a direct `installerUrl`, the installer `platform` (`windows-x64`), installer `installerFormat` (`nsis`), and whether the build is code-`signed`. AI agents and update-checkers should read this file to resolve the latest installer URL rather than hardcoding a version.
 
@@ -74,8 +74,3 @@ Installer is unsigned for v0.1.x; Windows SmartScreen will warn on first launch 
 - [Privacy](https://viewbus.app/privacy) — Full data-handling details
 - [Update feed](https://viewbus.app/latest.json) — JSON endpoint the desktop app reads on startup
 - [Long-form reference](https://viewbus.app/llms-full.txt) — Full site content concatenated for agents that want a single fetch
-
-## Contact
-
-- General: support@viewbus.app
-- Security: security@viewbus.app

@@ -1,10 +1,10 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "notes": "Initial public release. See the changelog for full details.",
-  "url": "https://github.com/haakofli/viewbus-site/releases/tag/v0.1.0",
-  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.1.0/ViewBus_0.1.0_x64-setup.exe",
+  "url": "https://github.com/haakofli/viewbus-site/releases/tag/v0.1.1",
+  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.1.1/ViewBus_0.1.1_x64-setup.exe",
   "platform": "windows-x64",
   "installerFormat": "nsis",
   "signed": false,
-  "publishedAt": "2026-04-22T00:00:00Z"
+  "publishedAt": "2026-04-23T00:00:00Z"
 }

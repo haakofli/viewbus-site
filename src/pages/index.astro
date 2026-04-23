@@ -3,6 +3,7 @@ import Base from "../layouts/Base.astro";
 import Wordmark from "../components/Wordmark.astro";
 import AppWindow from "../components/AppWindow.astro";
 import FeatureTabs from "../components/FeatureTabs.astro";
+import { latest } from "../lib/latest";
 
 const title = "viewbus — Azure Service Bus desktop manager";
 const description = "A fast, local, private desktop app for managing Azure Service Bus. Peek messages, resend dead letters, and search your entire bus from one keyboard-driven interface. Ships a built-in Model Context Protocol (MCP) server so AI assistants can list namespaces, search resources, and peek messages. Free for Windows.";
@@ -25,12 +26,12 @@ const softwareApplicationSchema = {
     "availability": "https://schema.org/InStock"
   },
   "url": "https://viewbus.app",
-  "downloadUrl": "https://github.com/haakofli/viewbus-site/releases/latest/download/ViewBus_0.1.0_x64-setup.exe",
+  "downloadUrl": latest.installerUrl,
   "installUrl": "https://viewbus.app/latest.json",
   "releaseNotes": "https://viewbus.app/changelog",
   "screenshot": "https://viewbus.app/og.png",
-  "softwareVersion": "0.1.0",
-  "datePublished": "2026-04-22",
+  "softwareVersion": latest.version,
+  "datePublished": latest.publishedAt.slice(0, 10),
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "license": "Proprietary (closed source, free of charge)",
@@ -141,7 +142,7 @@ const breadcrumbSchema = {
       </div>
 
       <p class="font-mono text-[11px] text-[var(--color-muted)] tracking-wide">
-        v0.1.0
+        v{latest.version}
       </p>
     </div>
   </AppWindow>

@@ -28,7 +28,7 @@ generation runs at build time.
 3. Create a GitHub Release on this repo:
    `gh release create vX.Y.Z "<installer-path>" --title "ViewBus X.Y.Z" --notes "..." --repo haakofli/viewbus-site`
 4. Update `public/latest.json` with the new version + notes + release URL + ISO-8601 `publishedAt`.
-5. Add `src/content/changelog/X.Y.Z.md` with a new entry (copy the frontmatter shape from `0.1.0.md`).
+5. Add `src/content/changelog/X.Y.Z.md` with a new entry (copy the frontmatter shape from the newest existing entry).
 6. Commit and push — CI deploys automatically.
 
 ## Structure
