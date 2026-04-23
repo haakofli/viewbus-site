@@ -1,8 +1,8 @@
 {
-  "version": "0.1.1",
-  "notes": "Initial public release. See the changelog for full details.",
-  "url": "https://github.com/haakofli/viewbus-site/releases/tag/v0.1.1",
-  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.1.1/ViewBus_0.1.1_x64-setup.exe",
+  "version": "0.1.2",
+  "notes": "Fixes feedback send, spinner animations, and MCP binary packaging. Adds MCP support for Cursor, Codex, OpenCode, and VS Code Copilot.",
+  "url": "https://github.com/haakofli/viewbus-site/releases/tag/v0.1.2",
+  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.1.2/ViewBus_0.1.2_x64-setup.exe",
   "platform": "windows-x64",
   "installerFormat": "nsis",
   "signed": false,
