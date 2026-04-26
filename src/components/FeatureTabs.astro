@@ -55,6 +55,17 @@ const messageRows = [
   { id: "664504", time: "18/08 14:24", reason: "InvalidOperationException", session: "2000075761", subject: "sap.s4.beh.order.v1.order.event", selected: false },
 ];
 
+// Spotlight result rows. Names contain "order" + either "placement" or "submit"
+// so the typing animation can substring-match all 6 vs. 3 vs. 3.
+const spotlightRows = [
+  { name: "api~orders~placement", path: "sb-orders-dev", active: 0, dead: 0 },
+  { name: "integration~from~erp~order-placement-events", path: "sb-orders-dev", active: 0, dead: 12 },
+  { name: "private~orders~placement~processor", path: "sb-orders-dev", active: 2, dead: 0 },
+  { name: "api~orders~submit", path: "sb-orders-dev", active: 0, dead: 0 },
+  { name: "integration~from~erp~order-submit-events", path: "sb-orders-dev", active: 1, dead: 4 },
+  { name: "private~orders~submit~processor", path: "sb-orders-dev", active: 0, dead: 0 },
+];
+
 // Sidebar namespaces for the Browse tab
 const browseNamespaces = [
   {
@@ -108,7 +119,8 @@ const browseNamespaces = [
           aria-labelledby={`ft-tab-${f.id}`}
           inert={i !== 0 ? "" : undefined}
           class:list={[
-            "ft-panel grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-8 lg:gap-16 items-center",
+            "ft-panel grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-8 lg:gap-16",
+            f.id === "spotlight" ? "items-start" : "items-center",
             i === 0 && "is-active",
           ]}
         >
@@ -309,35 +321,35 @@ const browseNamespaces = [
 
             {/* SPOTLIGHT — floating panel, no extra chrome */}
             {f.id === "spotlight" && (
-              <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] shadow-2xl overflow-hidden max-w-[500px] mx-auto">
+              <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] shadow-2xl overflow-hidden max-w-[500px] mx-auto" data-spotlight>
                 <!-- Search row -->
                 <div class="flex items-center gap-2 border-b border-[var(--color-border)] px-3 py-2.5">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)] shrink-0"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-                  <span class="flex-1 text-sm text-[var(--color-fg)]">orders dead</span>
-                  <span class="inline-block w-0.5 h-4 bg-[var(--color-accent)] animate-pulse"></span>
+                  <div class="flex flex-1 items-center text-sm text-[var(--color-fg)]">
+                    <span data-spotlight-query>order</span>
+                    <span class="spotlight-caret ml-0.5 inline-block w-0.5 h-4 bg-[var(--color-fg)]"></span>
+                  </div>
                   <span class="shrink-0 rounded bg-[var(--color-hover)] px-2 py-0.5 text-[11px] text-[var(--color-muted)] border border-[var(--color-border)] font-mono">acme-dev</span>
                 </div>
 
                 <!-- Results -->
                 <div class="py-1">
                   <div class="px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Queues</div>
-                  {[
-                    { name: "integration~from~erp~order-events", path: "sb-orders-dev", active: 0, dead: 12, selected: true },
-                    { name: "private~orders~processor", path: "sb-orders-dev", active: 2, dead: 0, selected: false },
-                    { name: "api~orders~placement", path: "sb-orders-dev", active: 0, dead: 0, selected: false },
-                  ].map((r) => (
-                    <div class:list={["flex items-center gap-2 px-3 py-1.5", r.selected && "bg-[var(--color-hover)]"]}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)] shrink-0">
-                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-                        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-                      </svg>
-                      <div class="min-w-0 flex-1">
-                        <div class="truncate text-sm">{r.name}</div>
-                        <div class="truncate text-[11px] text-[var(--color-muted)]">{r.path}</div>
-                      </div>
-                      <div class="flex items-center gap-1.5 shrink-0">
-                        <span class:list={["text-[10px] font-medium tabular-nums", r.active > 0 ? "text-[var(--color-success)]" : "text-[var(--color-muted)]/50"]}>{r.active}</span>
-                        <span class:list={["text-[10px] font-medium tabular-nums", r.dead > 0 ? "text-[var(--color-danger)]" : "text-[var(--color-muted)]/50"]}>{r.dead}</span>
+                  {spotlightRows.map((r) => (
+                    <div class="spotlight-row" data-spotlight-row data-spotlight-name={r.name}>
+                      <div class="spotlight-row-inner flex items-center gap-2 px-3 py-1.5">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)] shrink-0">
+                          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                          <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+                        </svg>
+                        <div class="min-w-0 flex-1">
+                          <div class="truncate text-sm">{r.name}</div>
+                          <div class="truncate text-[11px] text-[var(--color-muted)]">{r.path}</div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                          <span class:list={["text-[10px] font-medium tabular-nums", r.active > 0 ? "text-[var(--color-success)]" : "text-[var(--color-muted)]/50"]}>{r.active}</span>
+                          <span class:list={["text-[10px] font-medium tabular-nums", r.dead > 0 ? "text-[var(--color-danger)]" : "text-[var(--color-muted)]/50"]}>{r.dead}</span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -437,10 +449,12 @@ const browseNamespaces = [
   }
 
   /* Stack all panels in the same grid cell so the container sizes to the
-     tallest panel and layout never shifts when tabs swap. */
+     tallest panel and layout never shifts when tabs swap. min-height pins the
+     section so the spotlight's dynamic height doesn't push content below. */
   .ft-panels {
     display: grid;
     grid-template-areas: "stack";
+    min-height: 26rem;
   }
   .ft-panel {
     grid-area: stack;
@@ -451,6 +465,31 @@ const browseNamespaces = [
   .ft-panel.is-active {
     opacity: 1;
     pointer-events: auto;
+  }
+
+  .spotlight-row {
+    max-height: 60px;
+    overflow: hidden;
+    transition: max-height 250ms ease-out, opacity 200ms ease-out;
+  }
+  .spotlight-row > .spotlight-row-inner {
+    transition: background-color 150ms ease-out;
+  }
+  .spotlight-row.is-dim {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .spotlight-row.is-selected > .spotlight-row-inner {
+    background: var(--color-hover);
+  }
+
+  .spotlight-caret {
+    animation: spotlight-caret-blink 1s linear infinite;
+  }
+  @keyframes spotlight-caret-blink {
+    0%, 49.9% { opacity: 1; }
+    50%, 100% { opacity: 0; }
   }
 </style>
 
@@ -489,5 +528,121 @@ const browseNamespaces = [
         });
       });
     });
+  })();
+
+  // Spotlight typing demo. Loops between "order placement" and "order submit",
+  // pausing at the "order" stem with all 6 results visible. Rows always render;
+  // non-matches dim via opacity so the panel height never changes.
+  (function () {
+    const root = document.querySelector("[data-spotlight]");
+    if (!root) return;
+    const queryEl = root.querySelector("[data-spotlight-query]");
+    const rows = Array.from(root.querySelectorAll("[data-spotlight-row]"));
+    const panel = root.closest(".ft-panel");
+    if (!queryEl || rows.length === 0 || !panel) return;
+
+    const applyQuery = (q) => {
+      queryEl.textContent = q;
+      const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);
+      let firstMatch = -1;
+      rows.forEach((row, i) => {
+        const name = (row.dataset.spotlightName || "").toLowerCase();
+        const matches = tokens.length === 0 || tokens.every((t) => name.includes(t));
+        row.classList.toggle("is-dim", !matches);
+        if (matches && firstMatch === -1) firstMatch = i;
+      });
+      rows.forEach((row, i) => {
+        row.classList.toggle("is-selected", i === firstMatch);
+      });
+    };
+
+    applyQuery("order");
+
+    const HOLD_FULL = 1500;
+    const HOLD_STEM = 700;
+    const TYPE_DELAY = 100;
+    const BACKSPACE_DELAY = 70;
+
+    const stages = [
+      { type: "type", target: "order placement" },
+      { type: "hold", ms: HOLD_FULL },
+      { type: "type", target: "order" },
+      { type: "hold", ms: HOLD_STEM },
+      { type: "type", target: "order submit" },
+      { type: "hold", ms: HOLD_FULL },
+      { type: "type", target: "order" },
+      { type: "hold", ms: HOLD_STEM },
+    ];
+
+    let active = false;
+    let timer = null;
+    let stageIdx = 0;
+
+    const scheduleNext = (delay) => {
+      timer = setTimeout(() => {
+        timer = null;
+        tick();
+      }, delay);
+    };
+
+    const tick = () => {
+      if (!active) return;
+      const stage = stages[stageIdx];
+      if (stage.type === "hold") {
+        stageIdx = (stageIdx + 1) % stages.length;
+        scheduleNext(stage.ms);
+        return;
+      }
+      const target = stage.target;
+      const current = queryEl.textContent;
+      if (current === target) {
+        stageIdx = (stageIdx + 1) % stages.length;
+        scheduleNext(0);
+        return;
+      }
+      let i = 0;
+      while (i < current.length && i < target.length && current[i] === target[i]) i++;
+      if (i < current.length) {
+        applyQuery(current.slice(0, -1));
+        scheduleNext(BACKSPACE_DELAY);
+      } else {
+        applyQuery(target.slice(0, current.length + 1));
+        scheduleNext(TYPE_DELAY);
+      }
+    };
+
+    const start = () => {
+      if (active) return;
+      active = true;
+      tick();
+    };
+    const stop = () => {
+      if (!active) return;
+      active = false;
+      if (timer !== null) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    };
+
+    let inView = false;
+    let isTab = panel.classList.contains("is-active");
+    const update = () => {
+      if (inView && isTab) start();
+      else stop();
+    };
+
+    new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) inView = e.isIntersecting;
+        update();
+      },
+      { threshold: 0.3 }
+    ).observe(panel);
+
+    new MutationObserver(() => {
+      isTab = panel.classList.contains("is-active");
+      update();
+    }).observe(panel, { attributes: true, attributeFilter: ["class"] });
   })();
 </script>
