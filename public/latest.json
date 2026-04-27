@@ -1,10 +1,10 @@
 {
-  "version": "0.2.0",
-  "notes": "Adds an in-app announcements channel for security and deprecation notices, reorders the theme picker, and cleans up brand casing across the UI. Releases now also ship an MSIX package alongside the NSIS installer.",
-  "url": "https://github.com/haakofli/viewbus-site/releases/tag/v0.2.0",
-  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.2.0/ViewBus_0.2.0_x64-setup.exe",
+  "version": "0.2.1",
+  "notes": "Fixes the in-app update check and announcements channel, which couldn't reach the server in 0.2.0 due to a missing content security policy entry. Also fixes broken download links on GitHub release pages.",
+  "url": "https://github.com/haakofli/viewbus-site/releases/tag/v0.2.1",
+  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.2.1/ViewBus_0.2.1_x64-setup.exe",
   "platform": "windows-x64",
   "installerFormat": "nsis",
   "signed": false,
-  "publishedAt": "2026-04-26T00:00:00Z"
+  "publishedAt": "2026-04-27T00:00:00Z"
 }
