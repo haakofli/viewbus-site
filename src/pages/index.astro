@@ -161,7 +161,7 @@ const breadcrumbSchema = {
   <dialog
     id="mac-download-dialog"
     aria-labelledby="mac-download-title"
-    class="m-auto max-w-md w-[calc(100%-2rem)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-chrome)] text-[var(--color-fg)] p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+    class="m-auto max-w-xl w-[calc(100%-2rem)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-chrome)] text-[var(--color-fg)] p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
   >
     <form method="dialog" class="flex flex-col gap-5 p-7 text-left">
       <div class="flex items-start gap-3">
@@ -173,13 +173,33 @@ const breadcrumbSchema = {
         </h2>
       </div>
 
-      <div class="text-sm leading-relaxed text-[var(--color-muted)] space-y-3">
+      <div class="text-sm leading-relaxed text-[var(--color-muted)] space-y-4">
         <p>
-          viewbus for macOS hasn't been notarized by Apple yet, so on first launch macOS will refuse to open it.
+          viewbus for macOS isn't notarized by Apple yet, so on first launch macOS will say it's damaged or can't be verified. You'll need to clear the quarantine flag once. Pick whichever feels easier:
         </p>
-        <p>
-          After installing, right-click (or Ctrl-click) <span class="text-[var(--color-fg)]">viewbus</span> in <span class="text-[var(--color-fg)]">Applications</span>, choose <span class="text-[var(--color-fg)]">Open</span>, then click <span class="text-[var(--color-fg)]">Open</span> again in the warning dialog. You only need to do this once.
-        </p>
+
+        <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-fg)]/[0.03] p-4 space-y-2">
+          <p class="font-medium text-[var(--color-fg)]">Option A — Terminal (one command)</p>
+          <ol class="list-decimal pl-5 space-y-1.5">
+            <li>Open the DMG and drag <span class="text-[var(--color-fg)]">ViewBus.app</span> into <span class="text-[var(--color-fg)]">/Applications</span> (don't run it from inside the DMG — quarantine re-applies).</li>
+            <li>Open <span class="text-[var(--color-fg)]">Terminal</span> and run:
+              <pre class="mt-2 px-3 py-2 rounded-md bg-[var(--color-bg)]/60 border border-[var(--color-border)] text-[12px] text-[var(--color-fg)] overflow-x-auto"><code>xattr -cr /Applications/ViewBus.app</code></pre>
+            </li>
+            <li>Launch from Launchpad or <span class="text-[var(--color-fg)]">/Applications</span>.</li>
+          </ol>
+        </div>
+
+        <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-fg)]/[0.03] p-4 space-y-2">
+          <p class="font-medium text-[var(--color-fg)]">Option B — System Settings (no Terminal)</p>
+          <ol class="list-decimal pl-5 space-y-1.5">
+            <li>Open the DMG and drag <span class="text-[var(--color-fg)]">ViewBus.app</span> into <span class="text-[var(--color-fg)]">/Applications</span>.</li>
+            <li>Try to open it — macOS will block it. Dismiss the warning.</li>
+            <li>Open <span class="text-[var(--color-fg)]">System Settings → Privacy &amp; Security</span>, scroll down, and click <span class="text-[var(--color-fg)]">Open Anyway</span> next to viewbus.</li>
+            <li>Confirm in the dialog that follows.</li>
+          </ol>
+        </div>
+
+        <p>You only need to do this once per install.</p>
       </div>
 
       <p class="text-sm text-[var(--color-fg)]">Do you still want to download?</p>
