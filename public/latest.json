@@ -1,18 +1,20 @@
 {
-  "version": "0.3.2",
-  "notes": "See changelog at https://viewbus.app/changelog/0.3.2",
-  "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.3.2/ViewBus_0.3.2_x64-setup.exe",
-  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.3.2/ViewBus_0.3.2_x64-setup.exe",
+  "version": "0.4.0",
+  "notes": "See changelog at https://viewbus.app/changelog/0.4.0",
+  "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.4.0/ViewBus_0.4.0_x64-setup.exe",
+  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.4.0/ViewBus_0.4.0_x64-setup.exe",
   "platform": "windows-x64",
   "installerFormat": "nsis",
-  "signed": false,
-  "publishedAt": "2026-04-29T08:23:27Z",
+  "signed": true,
+  "publishedAt": "2026-04-30T21:20:58Z",
+  "pub_date": "2026-04-30T21:20:58Z",
   "platforms": {
     "windows-x86_64": {
-      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.3.2/ViewBus_0.3.2_x64-setup.exe"
+      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.4.0/ViewBus_0.4.0_x64-setup.exe",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSjJucGxkbjZBNnFBU0QrVjM1OFpyVllXZWEvOUt6SXRWTVJ6Skt0aUhLelk0NXZSaXMrRWpCVGdCWC9iQ2lIR21GTnFBQWpNUjNoQmdoeDFGeTk2TURYaHJFSEhmRXdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3NTgzNzc0CWZpbGU6Vmlld0J1c18wLjQuMF94NjQtc2V0dXAuZXhlCjlpemtXaExZRXBIbXVXTXdkWXJzWHNnRWVaMDA5RFVYbHVGdENOa1FQcUc5NFE4QkZ3Ly9rQi9YQU1UUWZBQ0w1VndNT0ljUTd0QnZkRlRLaGlxckJBPT0K"
     },
     "darwin-aarch64": {
-      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.3.2/ViewBus_0.3.2_aarch64.dmg"
+      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.4.0/ViewBus_0.4.0_aarch64.dmg"
     }
   }
 }
