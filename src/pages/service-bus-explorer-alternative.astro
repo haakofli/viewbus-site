@@ -1,0 +1,95 @@
+---
+import Base from "../layouts/Base.astro";
+import { latest } from "../lib/latest";
+
+const title = "Service Bus Explorer alternative — viewbus";
+const description = "viewbus is a modern Service Bus Explorer alternative for Windows and macOS. It picks up where the original left off — local-first, OAuth-aware, with a built-in MCP server for AI assistants.";
+const path = "/service-bus-explorer-alternative";
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://viewbus.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Service Bus Explorer alternative", "item": "https://viewbus.app/service-bus-explorer-alternative" }
+  ]
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is there a modern Service Bus Explorer alternative?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "viewbus is a free desktop app for Windows and macOS that builds on the workflows Service Bus Explorer made standard — peek, dead-letter, resend — with subscription-wide indexing, OS keychain auth, and a built-in MCP server for AI assistants."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does viewbus run on macOS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, viewbus has a native macOS build for Apple Silicon. The original Service Bus Explorer is Windows-only."
+      }
+    }
+  ]
+};
+---
+<Base title={title} description={description} path={path}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <article class="max-w-2xl mx-auto px-6 py-20">
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
+      A modern Service Bus Explorer alternative
+    </h1>
+    <p class="text-lg text-[var(--color-muted)] leading-relaxed mb-12">
+      New and improved. Now on macOS, too.
+    </p>
+
+    <p class="leading-relaxed mb-5">
+      For more than a decade, Paolo Salvatori's <a href="https://github.com/paolosalvatori/ServiceBusExplorer" class="text-[var(--color-accent)] hover:underline" rel="noopener">Service Bus Explorer</a> has been the tool every Azure developer reaches for when something's gone sideways in a queue. It's free, open source, and it works. A lot of us learned what a dead-letter queue even was by staring at its message lists.
+    </p>
+    <p class="leading-relaxed mb-12">
+      viewbus exists because that tool deserves a continuation — one that runs natively on both Windows and macOS, knows about more than one namespace at a time, and plays well with the AI assistants developers reach for every day. Same problem, different decade.
+    </p>
+
+    <h2 class="text-2xl font-semibold tracking-tight mt-12 mb-4">What stays the same</h2>
+    <ul class="space-y-3 leading-relaxed mb-12 list-disc pl-6 marker:text-[var(--color-muted)]">
+      <li>No telemetry, no accounts. Your data stays on your machine.</li>
+      <li>Connection strings still work — paste one in and you're browsing. They live in the OS keychain instead of a config file.</li>
+      <li>The verbs you already know: peek, dead-letter, resend, requeue.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold tracking-tight mb-4">What's different</h2>
+    <ul class="space-y-3 leading-relaxed mb-12 list-disc pl-6 marker:text-[var(--color-muted)]">
+      <li>Sign in with Azure once and viewbus indexes every namespace, queue, topic, and subscription you can see — locally, in SQLite. Navigation stays instant across thousands of resources.</li>
+      <li><kbd class="font-mono text-[12px] px-1.5 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-fg)]/[0.04]">Ctrl+I</kbd> opens a fuzzy spotlight that searches every queue and topic at once. Works even when the window is closed to tray.</li>
+      <li>Native macOS build for Apple Silicon. Same app, same shortcuts.</li>
+      <li>An MCP server is built in. Claude, ChatGPT, Cursor, or any MCP-aware assistant can list namespaces, search resources, count messages, and peek bodies — over local stdio, no cloud round-trip.</li>
+    </ul>
+
+    <div class="flex flex-col sm:flex-row gap-3 pt-8 border-t border-[var(--color-border)]">
+      <a
+        href="/"
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap bg-[var(--color-fg)] text-[var(--color-bg)] hover:bg-[var(--color-fg)]/90 rounded-full h-11 px-6 text-sm font-medium transition-colors"
+      >
+        Get viewbus
+      </a>
+      <a
+        href="/changelog"
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap border border-[var(--color-border)] hover:bg-[var(--color-hover)] rounded-full h-11 px-6 text-sm font-medium transition-colors"
+      >
+        Changelog
+      </a>
+      <span class="inline-flex items-center text-sm text-[var(--color-muted)] sm:ml-auto">
+        Free · v{latest.version}
+      </span>
+    </div>
+  </article>
+</Base>

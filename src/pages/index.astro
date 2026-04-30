@@ -5,7 +5,7 @@ import AppWindow from "../components/AppWindow.astro";
 import FeatureTabs from "../components/FeatureTabs.astro";
 import { latest } from "../lib/latest";
 
-const title = "viewbus — Azure Service Bus desktop manager";
+const title = "viewbus — A modern Service Bus Explorer alternative";
 const description = "A fast, local, private desktop app for managing Azure Service Bus. Peek messages, resend dead letters, and search your entire bus from one keyboard-driven interface. Ships a built-in Model Context Protocol (MCP) server so AI assistants can list namespaces, search resources, and peek messages. Free for Windows and macOS.";
 
 const windowsInstaller = latest.platforms["windows-x86_64"].url;
@@ -105,8 +105,12 @@ const breadcrumbSchema = {
         </span>
       </h1>
 
+      <h2 class="max-w-xl text-base sm:text-lg font-medium text-[var(--color-fg)] leading-snug tracking-tight">
+        The modern <a href="/service-bus-explorer-alternative" class="underline decoration-[var(--color-border)] underline-offset-4 hover:decoration-[var(--color-fg)] transition-colors">Service Bus Explorer alternative</a> — for Windows and macOS.
+      </h2>
+
       <p class="max-w-md text-sm text-[var(--color-muted)] leading-relaxed">
-        A modern app for working with Azure Service Bus, with a companion MCP server.
+        Local-first desktop app for Azure Service Bus, with a built-in MCP server for AI assistants.
       </p>
 
       <div class="flex flex-col sm:flex-row items-center gap-3">
