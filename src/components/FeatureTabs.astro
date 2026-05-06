@@ -10,7 +10,7 @@ const features = [
     id: "messages",
     label: "Messages",
     title: "Browse and act on messages",
-    body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Requeue, edit, or bulk-delete with a safety confirmation.",
+    body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Edit a body before resending, compose new messages (with optional schedule), or drain a queue with a confirmed bulk action — purge, send-all-to-DL, or empty an entire DLQ.",
   },
   {
     id: "spotlight",
@@ -45,14 +45,15 @@ const mcpTools = [
   { name: "get_message_detail", note: "body + properties by seq no." },
 ];
 
-// Message rows mirror real MessageRow: #seq, time, DL reason, session, subject.
+// Message rows mirror the real MessageRow in active-queue mode: #seq, time,
+// session, subject. (DL Reason column only appears in dead-letter view.)
 const messageRows = [
-  { id: "664134", time: "18/08 14:23", reason: "LookupNotCreatedYetException", session: "2000081270", subject: "sap.s4.beh.order.v1.order.event", selected: true },
-  { id: "664138", time: "18/08 14:23", reason: "LookupNotCreatedYetException", session: "2000081270", subject: "sap.s4.beh.order.v1.order.event", selected: true },
-  { id: "664300", time: "18/08 14:23", reason: "LookupNotCreatedYetException", session: "2000076994", subject: "sap.s4.beh.order.v1.order.event", selected: false },
-  { id: "664305", time: "18/08 14:23", reason: "LookupNotCreatedYetException", session: "2000076994", subject: "sap.s4.beh.order.v1.order.event", selected: false },
-  { id: "664500", time: "18/08 14:24", reason: "InvalidOperationException", session: "2000075761", subject: "sap.s4.beh.order.v1.order.event", selected: true },
-  { id: "664504", time: "18/08 14:24", reason: "InvalidOperationException", session: "2000075761", subject: "sap.s4.beh.order.v1.order.event", selected: false },
+  { id: "664134", time: "18/08 14:23", session: "2000081270", subject: "sap.s4.beh.order.v1.order.event", selected: true },
+  { id: "664138", time: "18/08 14:23", session: "2000081270", subject: "sap.s4.beh.order.v1.order.event", selected: true },
+  { id: "664300", time: "18/08 14:23", session: "2000076994", subject: "sap.s4.beh.order.v1.order.event", selected: false },
+  { id: "664305", time: "18/08 14:23", session: "2000076994", subject: "sap.s4.beh.order.v1.order.event", selected: false },
+  { id: "664500", time: "18/08 14:24", session: "2000075761", subject: "sap.s4.beh.order.v1.order.event", selected: true },
+  { id: "664504", time: "18/08 14:24", session: "2000075761", subject: "sap.s4.beh.order.v1.order.event", selected: false },
 ];
 
 // Spotlight result rows. Names contain "order" + either "placement" or "submit"
@@ -159,6 +160,33 @@ const browseNamespaces = [
                   </div>
                 </div>
 
+                <!-- Favorites — pinned above the tree (hidden when empty in
+                     the real app; shown here so the feature is discoverable). -->
+                <div class="border-b border-[var(--color-border)]">
+                  <div class="flex items-center gap-1.5 px-3 py-1.5 text-[var(--color-muted)]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rotate-90"><path d="m9 18 6-6-6-6" /></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span class="text-[11px] font-medium uppercase tracking-wide">Favorites</span>
+                    <span class="text-[10px] tabular-nums opacity-70">1</span>
+                  </div>
+                  <div class="px-1 pb-1">
+                    <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[13px]" style="padding-left: 4px;">
+                      <span class="w-5 shrink-0"></span>
+                      <span class="shrink-0">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                          <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+                        </svg>
+                      </span>
+                      <span class="min-w-0 truncate text-[var(--color-fg)]">integration~from~erp~order-events</span>
+                      <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2 text-[10px] font-medium tabular-nums">
+                        <span class="text-[var(--color-muted)]">0</span>
+                        <span class="text-[var(--color-danger)]">12</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Tree -->
                 <div class="text-sm p-1 flex-1">
                   {browseNamespaces.map((ns) => (
@@ -196,7 +224,52 @@ const browseNamespaces = [
                   ))}
                 </div>
 
-                <!-- Footer (Connect MCP, Settings, user) -->
+                <!-- Manual Connections — first-class section above the
+                     footer for connection-string namespaces. -->
+                <div class="border-t border-[var(--color-border)]">
+                  <div class="flex items-center gap-1.5 px-3 py-1.5 text-[var(--color-muted)]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rotate-90"><path d="m9 18 6-6-6-6" /></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/>
+                      <path d="m2 22 3-3"/>
+                      <path d="M7.5 13.5 10 11"/>
+                      <path d="M10.5 16.5 13 14"/>
+                      <path d="m18 3-4 4h6l-4 4"/>
+                    </svg>
+                    <span class="text-[11px] font-medium uppercase tracking-wide">Connections</span>
+                    <span class="text-[10px] tabular-nums opacity-70 ml-auto">1</span>
+                  </div>
+                  <div class="px-1 pb-1">
+                    <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[var(--color-fg)] text-[13px]" style="padding-left: 4px;">
+                      <span class="flex w-5 shrink-0 items-center justify-center">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)] rotate-90"><path d="m9 18 6-6-6-6" /></svg>
+                      </span>
+                      <span class="shrink-0">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                          <rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/>
+                          <line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>
+                        </svg>
+                      </span>
+                      <span class="min-w-0 truncate">sb-discordbot</span>
+                    </div>
+                    <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[13px]" style="padding-left: 16px;">
+                      <span class="w-5 shrink-0"></span>
+                      <span class="shrink-0">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                          <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+                        </svg>
+                      </span>
+                      <span class="min-w-0 truncate text-[var(--color-fg)]">bot-events</span>
+                      <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2 text-[10px] font-medium tabular-nums">
+                        <span class="text-[var(--color-success)]">1</span>
+                        <span class="text-[var(--color-muted)]">0</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Footer (Connect MCP, Settings, account) -->
                 <nav class="border-t border-[var(--color-border)] p-1.5 space-y-0.5">
                   <div class="flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)]">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg>
@@ -206,13 +279,20 @@ const browseNamespaces = [
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                     <span>Settings</span>
                   </div>
+                  <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] text-left">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[var(--color-fg)]"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span class="flex flex-col min-w-0 flex-1 leading-tight">
+                      <span class="truncate text-[12px] text-[var(--color-fg)]">you@example.com</span>
+                      <span class="truncate text-[10px] text-[var(--color-muted)]">Acme Corporation</span>
+                    </span>
+                  </div>
                 </nav>
               </div>
             )}
 
             {/* MESSAGES — faithful QueueHeader + MessageList */}
             {f.id === "messages" && (
-              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]">
+              <div class="relative rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]">
                 <!-- Row 1: title + selection-state actions -->
                 <div class="flex items-center gap-3 px-4 py-2 min-w-0">
                   <div class="min-w-0 flex-1">
@@ -228,33 +308,32 @@ const browseNamespaces = [
                       <span class="tabular-nums">sessions on</span>
                     </div>
                   </div>
-                  <!-- Selection-state actions -->
+                  <!-- Selection-state actions. Resend appears for any selection;
+                       Delete is DLQ-only and hidden here (this is an Active queue).
+                       The `…` overflow opens the bulk-action menu shown below. -->
                   <div class="flex shrink-0 items-center gap-1">
                     <span class="inline-flex h-7 items-center gap-1.5 rounded-md bg-[var(--color-fg)] text-[var(--color-bg)] px-2.5 text-[11.5px] font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 3 9-3 9 19-9z"/><path d="M6 12h16"/></svg>
                       <span class="tabular-nums">Resend 3</span>
                     </span>
-                    <span class="inline-flex h-7 items-center gap-1.5 rounded-md border border-[var(--color-border)] px-2.5 text-[11.5px] text-[var(--color-danger)]">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                      <span>Delete</span>
-                    </span>
-                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)]">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-fg)]">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
                     </span>
                   </div>
                 </div>
 
                 <!-- Row 2: mode switch + peek + meta -->
                 <div class="flex items-center gap-3 px-4 py-2">
-                  <!-- ModeSwitch -->
+                  <!-- ModeSwitch — Active selected so the overflow menu can
+                       show "Send all to dead-letter" (gated to active-mode). -->
                   <div class="flex h-7 items-center gap-0.5 rounded-md border border-[var(--color-border)] bg-[var(--color-hover)]/40 p-0.5">
-                    <div class="flex h-6 items-center gap-1.5 rounded px-3 text-[11.5px] text-[var(--color-muted)]">
-                      <span>Active</span>
-                      <span class="font-mono text-[10px] tabular-nums">0</span>
+                    <div class="flex h-6 items-center gap-1.5 rounded px-3 text-[11.5px] bg-[var(--color-bg)]" style="box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-success) 28%, transparent)">
+                      <span class="text-[var(--color-success)]">Active</span>
+                      <span class="font-mono text-[10px] tabular-nums text-[var(--color-success)]">73</span>
                     </div>
-                    <div class="flex h-6 items-center gap-1.5 rounded px-3 text-[11.5px] bg-[var(--color-bg)]" style="box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-danger) 28%, transparent)">
-                      <span class="text-[var(--color-danger)]">Dead-letter</span>
-                      <span class="font-mono text-[10px] tabular-nums text-[var(--color-danger)]">73</span>
+                    <div class="flex h-6 items-center gap-1.5 rounded px-3 text-[11.5px] text-[var(--color-muted)]">
+                      <span>Dead-letter</span>
+                      <span class="font-mono text-[10px] tabular-nums">4</span>
                     </div>
                   </div>
                   <div class="h-4 w-px bg-[var(--color-border)]"></div>
@@ -291,13 +370,12 @@ const browseNamespaces = [
                 <!-- spacer -->
                 <div class="h-2"></div>
 
-                <!-- Table header -->
+                <!-- Table header (active-queue columns: no DL Reason). -->
                 <div class="flex items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-hover)]/30 px-4 py-2">
                   <span class="inline-flex w-3 h-3 shrink-0 rounded-sm border border-[var(--color-border)]"></span>
                   <span class="w-14 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">#</span>
                   <span class="w-20 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Enqueued</span>
-                  <span class="w-32 shrink-0 truncate text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">DL Reason</span>
-                  <span class="w-20 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Session</span>
+                  <span class="w-24 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Session</span>
                   <span class="min-w-0 truncate text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Subject / Type</span>
                 </div>
 
@@ -311,11 +389,24 @@ const browseNamespaces = [
                     </span>
                     <span class="w-14 shrink-0 truncate text-[11px] font-medium tabular-nums text-[var(--color-muted)]">#{row.id}</span>
                     <span class="w-20 shrink-0 text-[11px] text-[var(--color-muted)]">{row.time}</span>
-                    <span class="w-32 shrink-0 truncate text-[11px] text-[var(--color-danger)]/70">{row.reason}</span>
-                    <span class="w-20 shrink-0 truncate text-[11px] text-[var(--color-info)]/70 font-mono tabular-nums">{row.session}</span>
+                    <span class="w-24 shrink-0 truncate text-[11px] text-[var(--color-info)]/70 font-mono tabular-nums">{row.session}</span>
                     <span class="min-w-0 truncate text-[11px] text-[var(--color-fg)]/50">{row.subject}</span>
                   </div>
                 ))}
+
+                <!-- Overflow `…` popover, rendered open so visitors immediately
+                     see the bulk-action surface. Active-mode shows both items;
+                     Send-to-DL is hidden in DL view (it would be a no-op there). -->
+                <div class="absolute right-3 top-[calc(2.75rem)] z-10 min-w-[220px] rounded-md border border-[var(--color-border)] bg-[var(--color-chrome)] p-1 shadow-lg ring-1 ring-[var(--color-fg)]/10">
+                  <div class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[12px] text-[var(--color-fg)]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 3 9-3 9 19-9z"/><path d="M6 12h16"/></svg>
+                    <span>Send all to dead-letter</span>
+                  </div>
+                  <div class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[12px] text-[var(--color-danger)]">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span>Purge all messages</span>
+                  </div>
+                </div>
               </div>
             )}
 

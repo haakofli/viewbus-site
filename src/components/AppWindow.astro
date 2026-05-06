@@ -136,8 +136,61 @@ const namespaces: Namespace[] = [
           </button>
         </div>
 
+        <!-- Favorites — pinned above the Azure tree. Hidden in the real app
+             when the user has none; shown here so visitors see the feature. -->
+        <details class="group/fav border-b border-[var(--color-border)] bg-[var(--color-chrome)]" open>
+          <summary class="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 transition-transform duration-150 group-open/fav:rotate-90">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span class="text-[11px] font-medium uppercase tracking-wide">Favorites</span>
+            <span class="text-[10px] tabular-nums text-[var(--color-muted)]/70">2</span>
+            <span class="ml-auto size-5 grid place-items-center rounded transition-colors hover:bg-[var(--color-hover)]" data-tease>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M8 16H3v5" />
+              </svg>
+            </span>
+          </summary>
+          <div class="px-1 pb-1">
+            <div data-tease class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 cursor-pointer transition-colors hover:bg-[var(--color-hover)]" style="padding-left: 4px;">
+              <span class="w-5 shrink-0"></span>
+              <span class="shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                  <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                  <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                </svg>
+              </span>
+              <span class="min-w-0 truncate">integration~from~erp~order-events</span>
+              <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2">
+                <span class="text-[10px] font-medium tabular-nums text-[var(--color-muted)]">0</span>
+                <span class="text-[10px] font-medium tabular-nums text-[var(--color-danger)]">12</span>
+              </span>
+            </div>
+            <div data-tease class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 cursor-pointer transition-colors hover:bg-[var(--color-hover)]" style="padding-left: 4px;">
+              <span class="w-5 shrink-0"></span>
+              <span class="shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                  <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                  <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                </svg>
+              </span>
+              <span class="min-w-0 truncate">private~orders~processor</span>
+              <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2">
+                <span class="text-[10px] font-medium tabular-nums text-[var(--color-success)]">2</span>
+                <span class="text-[10px] font-medium tabular-nums text-[var(--color-muted)]">0</span>
+              </span>
+            </div>
+          </div>
+        </details>
+
         <!-- Queue tree: expandable namespaces -->
-        <div class="text-sm flex-1 p-1 overflow-y-auto">
+        <div class="text-sm flex-1 p-1 overflow-y-auto min-h-[120px]">
           {namespaces.map((ns) => (
             <details class="group/ns">
               <summary class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-colors hover:bg-[var(--color-hover)]" style="padding-left: 4px;">
@@ -180,6 +233,91 @@ const namespaces: Namespace[] = [
           ))}
         </div>
 
+        <!-- Drag handle between Azure tree and Manual Connections (3px,
+             cursor-row-resize in the real app — visible when expanded). -->
+        <div class="h-[3px] bg-[var(--color-border)]/40"></div>
+
+        <!-- Manual Connections — first-class section for connection-string
+             namespaces, pinned above the footer. Always renders (even empty)
+             so users know where to add one. -->
+        <details class="group/conn border-t border-[var(--color-border)] bg-[var(--color-chrome)]" open>
+          <summary class="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 transition-transform duration-150 group-open/conn:rotate-90">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+              <path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/>
+              <path d="m2 22 3-3"/>
+              <path d="M7.5 13.5 10 11"/>
+              <path d="M10.5 16.5 13 14"/>
+              <path d="m18 3-4 4h6l-4 4"/>
+            </svg>
+            <span class="text-[11px] font-medium uppercase tracking-wide">Connections</span>
+            <span class="text-[10px] tabular-nums text-[var(--color-muted)]/70 ml-auto">1</span>
+          </summary>
+          <div class="pb-1">
+            <div class="px-1">
+              <details class="group/cns" open>
+                <summary class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-colors hover:bg-[var(--color-hover)]" style="padding-left: 4px;">
+                  <span class="flex w-5 shrink-0 items-center justify-center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)] transition-transform duration-150 group-open/cns:rotate-90">
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  </span>
+                  <span class="shrink-0">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                      <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+                      <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+                      <line x1="6" x2="6.01" y1="6" y2="6" />
+                      <line x1="6" x2="6.01" y1="18" y2="18" />
+                    </svg>
+                  </span>
+                  <span class="min-w-0 truncate">sb-discordbot</span>
+                </summary>
+                <div>
+                  <div data-tease class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 cursor-pointer transition-colors hover:bg-[var(--color-hover)]" style="padding-left: 16px;">
+                    <span class="w-5 shrink-0"></span>
+                    <span class="shrink-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                      </svg>
+                    </span>
+                    <span class="min-w-0 truncate">bot-commands</span>
+                    <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2">
+                      <span class="text-[10px] font-medium tabular-nums text-[var(--color-muted)]">0</span>
+                      <span class="text-[10px] font-medium tabular-nums text-[var(--color-muted)]">0</span>
+                    </span>
+                  </div>
+                  <div data-tease class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 cursor-pointer transition-colors hover:bg-[var(--color-hover)]" style="padding-left: 16px;">
+                    <span class="w-5 shrink-0"></span>
+                    <span class="shrink-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
+                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                      </svg>
+                    </span>
+                    <span class="min-w-0 truncate">bot-events</span>
+                    <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2">
+                      <span class="text-[10px] font-medium tabular-nums text-[var(--color-success)]">1</span>
+                      <span class="text-[10px] font-medium tabular-nums text-[var(--color-muted)]">0</span>
+                    </span>
+                  </div>
+                </div>
+              </details>
+            </div>
+            <div class="px-1.5 pt-1">
+              <button type="button" data-tease class="w-full flex h-7 items-center justify-center gap-1.5 px-2 rounded-[6px] border border-dashed border-[var(--color-border)] text-[11px] text-[var(--color-muted)] cursor-pointer transition-colors hover:bg-[var(--color-hover)] hover:text-[var(--color-fg)]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14"/>
+                  <path d="M12 5v14"/>
+                </svg>
+                <span>Add connection</span>
+              </button>
+            </div>
+          </div>
+        </details>
+
         <!-- Footer: MCP + Settings + user -->
         <nav class="border-t border-[var(--color-border)] p-1.5 space-y-0.5">
           <button type="button" data-tease class="w-full flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)] cursor-pointer transition-colors hover:bg-[var(--color-hover)]">
@@ -198,12 +336,15 @@ const namespaces: Namespace[] = [
             </svg>
             <span>Settings</span>
           </button>
-          <button type="button" data-tease class="w-full flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)] cursor-pointer transition-colors hover:bg-[var(--color-hover)]">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+          <button type="button" data-tease class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] text-left cursor-pointer transition-colors hover:bg-[var(--color-hover)]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[var(--color-fg)]">
               <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            <span class="truncate">you@example.com</span>
+            <span class="flex flex-col min-w-0 flex-1 text-left leading-tight">
+              <span class="truncate text-[12px] text-[var(--color-fg)]">you@example.com</span>
+              <span class="truncate text-[10px] text-[var(--color-muted)]">Acme Corporation</span>
+            </span>
           </button>
         </nav>
       </aside>
