@@ -19,7 +19,7 @@ const breadcrumbSchema = {
   </Fragment>
   <article class="max-w-3xl mx-auto px-6 py-20 prose prose-invert">
     <h1 class="text-4xl font-bold tracking-tight mb-4">Privacy</h1>
-    <p class="text-[var(--color-muted)] mb-12">Last updated: 2026-04-23</p>
+    <p class="text-[var(--color-muted)] mb-12">Last updated: 2026-05-06</p>
 
     <p>
       viewbus does not send telemetry, does not phone home, and has no backend servers.
@@ -31,19 +31,35 @@ const breadcrumbSchema = {
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">What's on your machine</h2>
     <ul>
-      <li><strong>SQLite index</strong> at <code>%LOCALAPPDATA%\viewbus\viewbus.db</code> — resource metadata (namespace names, queue names, etc.) discovered from Azure or from connection strings you add. Contains no message bodies and no secrets.</li>
-      <li><strong>Windows Credential Manager entries</strong> under service name <code>viewbus</code> — raw Service Bus connection strings you paste in. Never written to the SQLite index or log files.</li>
-      <li><strong>Settings JSON</strong> at <code>%APPDATA%\viewbus\settings.json</code> — your theme, hotkeys, and preferences.</li>
-      <li><strong>Custom themes</strong> at <code>%APPDATA%\viewbus\themes\*.json</code> — drop a JSON file in and it shows up in Settings on next launch.</li>
-      <li><strong>Log files</strong> at <code>%LOCALAPPDATA%\viewbus\logs\</code> — daily-rotated plain-text diagnostics via <code>tracing</code>. No PII, no credentials, no message bodies. Attached only if you opt in via the in-app feedback dialog.</li>
+      <li><strong>SQLite index</strong> — resource metadata (namespace names, queue names, etc.) discovered from Azure or from connection strings you add. Contains no message bodies and no secrets.
+        <ul>
+          <li>Windows: <code>%LOCALAPPDATA%\viewbus\viewbus.db</code></li>
+          <li>macOS: <code>~/Library/Application Support/viewbus/viewbus.db</code></li>
+        </ul>
+      </li>
+      <li><strong>OS keychain entries</strong> under service name <code>viewbus</code> — raw Service Bus connection strings you paste in. Stored in the Windows Credential Manager on Windows and the macOS Keychain on Mac. Never written to the SQLite index or log files.</li>
+      <li><strong>Settings JSON</strong> — your theme, hotkeys, and preferences.
+        <ul>
+          <li>Windows: <code>%APPDATA%\viewbus\settings.json</code></li>
+          <li>macOS: <code>~/Library/Application Support/viewbus/settings.json</code></li>
+        </ul>
+      </li>
+      <li><strong>Custom themes</strong> in the <code>themes/</code> subfolder of the settings directory above — drop a JSON file in and it shows up in Settings on next launch.</li>
+      <li><strong>Log files</strong> — daily-rotated plain-text diagnostics via <code>tracing</code>. No PII, no credentials, no message bodies. Attached only if you opt in via the in-app feedback dialog.
+        <ul>
+          <li>Windows: <code>%LOCALAPPDATA%\viewbus\logs\</code></li>
+          <li>macOS: <code>~/Library/Application Support/viewbus/logs/</code></li>
+        </ul>
+      </li>
     </ul>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">What leaves your machine</h2>
     <p>Only requests you trigger:</p>
     <ul>
-      <li>Azure authentication (OAuth flow in your default browser; tokens go directly between Microsoft and your machine).</li>
-      <li>Azure Resource Manager + Service Bus REST / AMQP calls (direct to the endpoints in your connection strings — the app's Content Security Policy allows only <code>login.microsoftonline.com</code>, <code>management.azure.com</code>, <code>*.servicebus.windows.net</code>, and the update-check host below).</li>
+      <li>Azure authentication (OAuth flow in your default browser; tokens go directly between Microsoft and your machine). If your account belongs to several tenants, viewbus enumerates them so you can pick the active one — that enumeration is also a direct call to Microsoft.</li>
+      <li>Azure Resource Manager + Service Bus REST / AMQP calls (direct to the endpoints in your connection strings — the app's Content Security Policy allows only <code>login.microsoftonline.com</code>, <code>management.azure.com</code>, <code>*.servicebus.windows.net</code>, and the static viewbus.app hosts below).</li>
       <li>An update check on app start that reads <code>https://viewbus.app/latest.json</code> — a static JSON file with the current version number. No query parameters, no identifiers, no user agent beyond what the OS adds.</li>
+      <li>An announcements check on app start that reads <code>https://viewbus.app/announcements.json</code> — the same kind of static file. Notices that don't apply to your version are filtered locally; dismissed ones are remembered in <code>localStorage</code>.</li>
     </ul>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">No third parties</h2>

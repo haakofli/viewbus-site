@@ -69,6 +69,7 @@ const faqSchema = {
     <h2 class="text-2xl font-semibold tracking-tight mb-4">What's different</h2>
     <ul class="space-y-3 leading-relaxed mb-12 list-disc pl-6 marker:text-[var(--color-muted)]">
       <li>Sign in with Azure once and viewbus indexes every namespace, queue, topic, and subscription you can see — locally, in SQLite. Navigation stays instant across thousands of resources.</li>
+      <li>Multi-tenant aware. If your account spans several Azure tenants, viewbus enumerates them and lets you flip between them from the account dialog. Sidebar tree, search, and MCP results all stay scoped to the active tenant.</li>
       <li><kbd class="font-mono text-[12px] px-1.5 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-fg)]/[0.04]">Ctrl+I</kbd> opens a fuzzy spotlight that searches every queue and topic at once. Works even when the window is closed to tray.</li>
       <li>Native macOS build for Apple Silicon. Same app, same shortcuts.</li>
       <li>An MCP server is built in. Claude, ChatGPT, Cursor, or any MCP-aware assistant can list namespaces, search resources, count messages, and peek bodies — over local stdio, no cloud round-trip.</li>

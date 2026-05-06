@@ -52,12 +52,15 @@ const softwareApplicationSchema = {
   },
   "featureList": [
     "Browse Azure subscriptions and Service Bus namespaces in a local, SQLite-backed tree",
+    "Multi-tenant Azure sign-in — switch between tenants from the account dialog; sidebar, search, and MCP results stay scoped to the active tenant",
     "Peek active and dead-letter queue and topic messages without dequeuing",
     "Filter messages by session ID, message ID, correlation ID, subject, or dead-letter reason",
-    "Resend dead-lettered messages (optionally with property edits) or bulk-delete stuck messages",
+    "Edit message body and properties in an inline Monaco diff editor before resending",
+    "Compose and schedule brand-new messages with full property and content-type control",
+    "Bulk operations: purge an active queue, dead-letter every active message, or empty an entire dead-letter queue with progress and cancel",
     "Spotlight fuzzy search (Ctrl+I, rebindable) across every indexed resource, system-wide",
     "Close-to-tray with Spotlight search still active",
-    "Manual Azure Service Bus connection strings, stored in Windows Credential Manager (never on disk in plain text)",
+    "Manual Azure Service Bus connection strings, stored in the OS keychain (Windows Credential Manager / macOS Keychain) — never on disk in plain text",
     "Built-in Model Context Protocol (MCP) server over stdio transport for AI assistants (Claude, ChatGPT, Cursor)",
     "MCP tool: get_status — index state, selected subscription, last refresh, resource count",
     "MCP tool: list_namespaces — enumerate indexed Azure Service Bus namespaces",
@@ -156,7 +159,7 @@ const breadcrumbSchema = {
     <div class="reveal">
       <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Your data stays on your machine.</h2>
       <p class="text-[var(--color-muted)] leading-relaxed">
-        viewbus has no backend servers, sends no telemetry, and has no account system. Your Azure credentials are used directly by your machine to talk to Azure. Connection strings live in the Windows Credential Manager, never on disk in plain text.
+        viewbus has no backend servers, sends no telemetry, and has no account system. Your Azure credentials are used directly by your machine to talk to Azure. Connection strings live in the OS keychain — Windows Credential Manager on Windows, macOS Keychain on Mac — never on disk in plain text.
       </p>
       <a href="/privacy" class="inline-block mt-6 text-[var(--color-accent)] hover:underline">Read the full privacy promise →</a>
     </div>
