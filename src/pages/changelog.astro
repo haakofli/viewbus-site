@@ -3,7 +3,9 @@ import Base from "../layouts/Base.astro";
 import { getCollection, render } from "astro:content";
 
 const entries = (await getCollection("changelog")).sort(
-  (a, b) => b.data.publishedAt.localeCompare(a.data.publishedAt),
+  (a, b) =>
+    b.data.publishedAt.localeCompare(a.data.publishedAt) ||
+    b.data.version.localeCompare(a.data.version, undefined, { numeric: true }),
 );
 
 const rendered = await Promise.all(

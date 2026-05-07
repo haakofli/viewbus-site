@@ -10,7 +10,7 @@ const features = [
     id: "messages",
     label: "Messages",
     title: "Browse and act on messages",
-    body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Edit a body before resending, compose new messages (with optional schedule), or drain a queue with a confirmed bulk action — purge, send-all-to-DL, or empty an entire DLQ.",
+    body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Edit a body before resending, compose new messages, or drain a queue with a confirmed bulk action — purge, send-all-to-DL, or empty an entire DLQ.",
   },
   {
     id: "spotlight",
@@ -27,8 +27,8 @@ const features = [
   {
     id: "themes",
     label: "Themes",
-    title: "Themes & VS Code import",
-    body: "Dark, light, or custom user themes. One-click importer pulls your active VS Code theme into viewbus.",
+    title: "Built-in themes & VS Code import",
+    body: "Six built-in dark and light themes — including a warm Clave theme. One-click importer pulls your active VS Code theme into viewbus.",
   },
 ];
 
@@ -45,695 +45,268 @@ const mcpTools = [
   { name: "get_message_detail", note: "body + properties by seq no." },
 ];
 
-// Message rows mirror the real MessageRow in active-queue mode: #seq, time,
-// session, subject. (DL Reason column only appears in dead-letter view.)
-const messageRows = [
-  { id: "664134", time: "18/08 14:23", session: "2000081270", subject: "sap.s4.beh.order.v1.order.event", selected: true },
-  { id: "664138", time: "18/08 14:23", session: "2000081270", subject: "sap.s4.beh.order.v1.order.event", selected: true },
-  { id: "664300", time: "18/08 14:23", session: "2000076994", subject: "sap.s4.beh.order.v1.order.event", selected: false },
-  { id: "664305", time: "18/08 14:23", session: "2000076994", subject: "sap.s4.beh.order.v1.order.event", selected: false },
-  { id: "664500", time: "18/08 14:24", session: "2000075761", subject: "sap.s4.beh.order.v1.order.event", selected: true },
-  { id: "664504", time: "18/08 14:24", session: "2000075761", subject: "sap.s4.beh.order.v1.order.event", selected: false },
-];
-
-// Spotlight result rows. Names contain "order" + either "placement" or "submit"
-// so the typing animation can substring-match all 6 vs. 3 vs. 3.
-const spotlightRows = [
-  { name: "api~orders~placement", path: "sb-orders-dev", active: 0, dead: 0 },
-  { name: "integration~from~erp~order-placement-events", path: "sb-orders-dev", active: 0, dead: 12 },
-  { name: "private~orders~placement~processor", path: "sb-orders-dev", active: 2, dead: 0 },
-  { name: "api~orders~submit", path: "sb-orders-dev", active: 0, dead: 0 },
-  { name: "integration~from~erp~order-submit-events", path: "sb-orders-dev", active: 1, dead: 4 },
-  { name: "private~orders~submit~processor", path: "sb-orders-dev", active: 0, dead: 0 },
-];
-
-// Sidebar namespaces for the Browse tab
-const browseNamespaces = [
-  {
-    name: "sb-orders-dev",
-    expanded: true,
-    children: [
-      { name: "api~orders~placement", active: 0, dead: 0, selected: false },
-      { name: "integration~from~erp~order-events", active: 0, dead: 12, selected: true },
-      { name: "private~orders~processor", active: 2, dead: 0, selected: false },
-    ],
-  },
-  { name: "sb-payments-dev", expanded: false },
-  { name: "sb-inventory-dev", expanded: false },
-  { name: "sb-customers-dev", expanded: false },
-  { name: "sb-shipping-dev", expanded: false },
-  { name: "sb-notifications-dev", expanded: false },
-];
+const visualMaxWidth: Record<string, string> = {
+  browse: "max-w-[280px]",
+  messages: "max-w-[560px]",
+  spotlight: "max-w-[480px]",
+  mcp: "max-w-[480px]",
+  themes: "max-w-[560px]",
+};
 ---
-<section id="features" data-snap-to="features" class="max-w-6xl mx-auto px-6 py-24 scroll-mt-20">
-  <h2 class="reveal text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+<section id="features" data-snap-to="features" class="max-w-6xl mx-auto px-6 py-20 md:py-24 scroll-mt-20">
+  <h2 class="reveal text-3xl md:text-4xl font-bold mb-4 tracking-tight text-center">
     Built for the way developers actually use Service Bus.
   </h2>
-  <p class="reveal text-[var(--color-muted)] mb-12 max-w-2xl">
+  <p class="reveal text-[var(--color-muted)] mb-10 md:mb-12 max-w-2xl mx-auto text-center">
     Everything you'd want Service Bus Explorer to be, without the legacy baggage.
   </p>
 
-  <div class="reveal feature-tabs">
-    <!-- Tab list -->
-    <div role="tablist" aria-label="Feature categories" class="flex flex-wrap gap-1 border-b border-[var(--color-border)] mb-10">
+  <div
+    class="reveal ft-carousel relative"
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="viewbus features"
+  >
+    <!-- Track. Native scroll-snap handles swipe / trackpad scroll;
+         buttons and dots drive the same scrollTo programmatically. -->
+    <div class="ft-track" tabindex="0" aria-live="polite">
+      {features.map((f, i) => (
+        <article
+          class="ft-slide"
+          role="group"
+          aria-roledescription="slide"
+          aria-label={`${i + 1} of ${features.length}: ${f.title}`}
+          data-index={i}
+        >
+          <div class="grid md:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center px-2 md:px-10 lg:px-16">
+            <div class="md:max-w-md md:justify-self-end">
+              <h3 class="text-2xl md:text-3xl font-semibold tracking-tight mb-4">{f.title}</h3>
+              <p class="text-[var(--color-muted)] leading-relaxed">{f.body}</p>
+            </div>
+            <div class="flex justify-center md:justify-start min-w-0">
+              {f.id === "mcp" ? (
+                <div class={`dark-card lifted w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden font-mono text-[11.5px] ${visualMaxWidth[f.id]}`}>
+                  <div class="h-7 border-b border-[var(--color-border)] flex items-center px-3 gap-2 text-[10px] text-[var(--color-muted)]">
+                    <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+                    <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+                    <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+                    <span class="ml-2">viewbus-mcp</span>
+                  </div>
+                  <div class="p-4 space-y-0.5 text-[var(--color-fg)]">
+                    <div class="text-[var(--color-muted)]">$ viewbus-mcp --list-tools</div>
+                    <div class="text-[var(--color-accent)]">10 read-only tools · 1 opt-in write tool</div>
+                    <div class="h-2"></div>
+                    {mcpTools.map((t) => (
+                      <div class="flex gap-3">
+                        <span class="text-[var(--color-success)] shrink-0">{t.name}</span>
+                        <span class="text-[var(--color-muted)] truncate">{t.note}</span>
+                      </div>
+                    ))}
+                    <div class="h-2"></div>
+                    <div class="text-[var(--color-muted)]">
+                      <span class="text-[var(--color-fg)]">upsert_theme</span>
+                      <span class="ml-3">write · opt-in via settings</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div class={`dark-card lifted w-full rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-bg)] ${visualMaxWidth[f.id]}`}>
+                  <img
+                    src={`/screenshots/feature-${f.id}.png`}
+                    alt={f.title}
+                    loading="lazy"
+                    decoding="async"
+                    class="block w-full h-auto"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <!-- Prev / Next nav. Hidden on touch-only / narrow screens — swipe is faster. -->
+    <button type="button" class="ft-nav ft-prev lifted-sm" aria-label="Previous feature" data-direction="-1">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m15 18-6-6 6-6" />
+      </svg>
+    </button>
+    <button type="button" class="ft-nav ft-next lifted-sm" aria-label="Next feature" data-direction="1">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m9 18 6-6-6-6" />
+      </svg>
+    </button>
+
+    <!-- Dot indicators. Width grows on the active dot for a clear "you are here". -->
+    <div class="ft-dots" role="tablist" aria-label="Choose feature slide">
       {features.map((f, i) => (
         <button
           type="button"
           role="tab"
-          id={`ft-tab-${f.id}`}
-          aria-controls={`ft-panel-${f.id}`}
+          aria-label={f.title}
           aria-selected={i === 0 ? "true" : "false"}
           tabindex={i === 0 ? 0 : -1}
-          class="ft-tab relative px-4 py-2.5 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors cursor-pointer border-b-2 border-transparent -mb-px rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-        >
-          {f.label}
-        </button>
-      ))}
-    </div>
-
-    <!-- Tab panels -->
-    <div class="ft-panels">
-      {features.map((f, i) => (
-        <div
-          role="tabpanel"
-          id={`ft-panel-${f.id}`}
-          aria-labelledby={`ft-tab-${f.id}`}
-          inert={i !== 0 ? "" : undefined}
-          class:list={[
-            "ft-panel grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-8 lg:gap-16",
-            f.id === "spotlight" ? "items-start" : "items-center",
-            i === 0 && "is-active",
-          ]}
-        >
-          <!-- Copy -->
-          <div>
-            <h3 class="text-2xl md:text-3xl font-semibold tracking-tight mb-4">{f.title}</h3>
-            <p class="text-[var(--color-muted)] leading-relaxed">{f.body}</p>
-          </div>
-
-          <!-- Visual -->
-          <div class="ft-visual">
-
-            {/* BROWSE — standalone sidebar mini render */}
-            {f.id === "browse" && (
-              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-chrome)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)] flex flex-col max-w-[300px]">
-                <!-- Subscription selector row -->
-                <div class="flex items-center gap-1 px-2 py-2">
-                  <div class="h-7 min-w-0 flex-1 flex items-center justify-between gap-2 px-2.5 rounded-[8px] border border-[var(--color-border)] text-xs">
-                    <span class="truncate text-[var(--color-fg)]">acme-dev</span>
-                    <svg class="shrink-0 opacity-50" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-                  </div>
-                  <div class="size-8 shrink-0 grid place-items-center rounded-[8px] text-[var(--color-fg)]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                      <path d="M21 3v5h-5" />
-                      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                      <path d="M8 16H3v5" />
-                    </svg>
-                  </div>
-                  <div class="size-8 shrink-0 grid place-items-center rounded-[8px] text-[var(--color-fg)]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect width="18" height="18" x="3" y="3" rx="2" />
-                      <path d="M9 3v18" />
-                      <path d="m16 15-3-3 3-3" />
-                    </svg>
-                  </div>
-                </div>
-
-                <!-- Favorites — pinned above the tree (hidden when empty in
-                     the real app; shown here so the feature is discoverable). -->
-                <div class="border-b border-[var(--color-border)]">
-                  <div class="flex items-center gap-1.5 px-3 py-1.5 text-[var(--color-muted)]">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rotate-90"><path d="m9 18 6-6-6-6" /></svg>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    <span class="text-[11px] font-medium uppercase tracking-wide">Favorites</span>
-                    <span class="text-[10px] tabular-nums opacity-70">1</span>
-                  </div>
-                  <div class="px-1 pb-1">
-                    <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[13px]" style="padding-left: 4px;">
-                      <span class="w-5 shrink-0"></span>
-                      <span class="shrink-0">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
-                          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-                          <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-                        </svg>
-                      </span>
-                      <span class="min-w-0 truncate text-[var(--color-fg)]">integration~from~erp~order-events</span>
-                      <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2 text-[10px] font-medium tabular-nums">
-                        <span class="text-[var(--color-muted)]">0</span>
-                        <span class="text-[var(--color-danger)]">12</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Tree -->
-                <div class="text-sm p-1 flex-1">
-                  {browseNamespaces.map((ns) => (
-                    <>
-                      <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[var(--color-fg)] text-[13px]" style="padding-left: 4px;">
-                        <span class="flex w-5 shrink-0 items-center justify-center">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class:list={["text-[var(--color-muted)] transition-transform duration-150", ns.expanded && "rotate-90"]}><path d="m9 18 6-6-6-6" /></svg>
-                        </span>
-                        <span class="shrink-0">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
-                            <rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/>
-                            <line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>
-                          </svg>
-                        </span>
-                        <span class="min-w-0 truncate">{ns.name}</span>
-                      </div>
-                      {ns.expanded && ns.children?.map((q) => (
-                        <div class:list={["relative flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[13px]", q.selected && "bg-[var(--color-hover)]"]} style="padding-left: 16px;">
-                          {q.selected && <span class="absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-[var(--color-accent)]"></span>}
-                          <span class="w-5 shrink-0"></span>
-                          <span class="shrink-0">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
-                              <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-                              <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-                            </svg>
-                          </span>
-                          <span class="min-w-0 truncate text-[var(--color-fg)]">{q.name}</span>
-                          <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2 text-[10px] font-medium tabular-nums">
-                            <span class={q.active > 0 ? "text-[var(--color-success)]" : "text-[var(--color-muted)]"}>{q.active}</span>
-                            <span class={q.dead > 0 ? "text-[var(--color-danger)]" : "text-[var(--color-muted)]"}>{q.dead}</span>
-                          </span>
-                        </div>
-                      ))}
-                    </>
-                  ))}
-                </div>
-
-                <!-- Manual Connections — first-class section above the
-                     footer for connection-string namespaces. -->
-                <div class="border-t border-[var(--color-border)]">
-                  <div class="flex items-center gap-1.5 px-3 py-1.5 text-[var(--color-muted)]">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rotate-90"><path d="m9 18 6-6-6-6" /></svg>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/>
-                      <path d="m2 22 3-3"/>
-                      <path d="M7.5 13.5 10 11"/>
-                      <path d="M10.5 16.5 13 14"/>
-                      <path d="m18 3-4 4h6l-4 4"/>
-                    </svg>
-                    <span class="text-[11px] font-medium uppercase tracking-wide">Connections</span>
-                    <span class="text-[10px] tabular-nums opacity-70 ml-auto">1</span>
-                  </div>
-                  <div class="px-1 pb-1">
-                    <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[var(--color-fg)] text-[13px]" style="padding-left: 4px;">
-                      <span class="flex w-5 shrink-0 items-center justify-center">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)] rotate-90"><path d="m9 18 6-6-6-6" /></svg>
-                      </span>
-                      <span class="shrink-0">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
-                          <rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/>
-                          <line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>
-                        </svg>
-                      </span>
-                      <span class="min-w-0 truncate">sb-discordbot</span>
-                    </div>
-                    <div class="flex items-center gap-1 rounded-[6px] px-1 py-0.5 text-[13px]" style="padding-left: 16px;">
-                      <span class="w-5 shrink-0"></span>
-                      <span class="shrink-0">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)]">
-                          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-                          <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-                        </svg>
-                      </span>
-                      <span class="min-w-0 truncate text-[var(--color-fg)]">bot-events</span>
-                      <span class="ml-auto flex shrink-0 items-center gap-1.5 pl-2 text-[10px] font-medium tabular-nums">
-                        <span class="text-[var(--color-success)]">1</span>
-                        <span class="text-[var(--color-muted)]">0</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Footer (Connect MCP, Settings, account) -->
-                <nav class="border-t border-[var(--color-border)] p-1.5 space-y-0.5">
-                  <div class="flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></svg>
-                    <span>Connect MCP</span>
-                  </div>
-                  <div class="flex h-7 items-center gap-1 px-2.5 rounded-[8px] text-[12px] text-[var(--color-fg)]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span>Settings</span>
-                  </div>
-                  <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] text-left">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-[var(--color-fg)]"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    <span class="flex flex-col min-w-0 flex-1 leading-tight">
-                      <span class="truncate text-[12px] text-[var(--color-fg)]">you@example.com</span>
-                      <span class="truncate text-[10px] text-[var(--color-muted)]">Acme Corporation</span>
-                    </span>
-                  </div>
-                </nav>
-              </div>
-            )}
-
-            {/* MESSAGES — faithful QueueHeader + MessageList */}
-            {f.id === "messages" && (
-              <div class="relative rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]">
-                <!-- Row 1: title + selection-state actions -->
-                <div class="flex items-center gap-3 px-4 py-2 min-w-0">
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2 min-w-0">
-                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" class="shrink-0 text-[var(--color-fg)]/80">
-                        <path d="M2 4l6 4 6-4M2 4v8h12V4" stroke="currentColor" stroke-width="1.2" />
-                      </svg>
-                      <h4 class="truncate text-sm font-semibold min-w-0">integration~from~erp~order-events</h4>
-                    </div>
-                    <div class="mt-0.5 flex items-center gap-2 font-mono text-[11px] text-[var(--color-muted)]/70">
-                      <span class="tabular-nums">max-size 5GB</span>
-                      <span class="text-[var(--color-muted)]/40">·</span>
-                      <span class="tabular-nums">sessions on</span>
-                    </div>
-                  </div>
-                  <!-- Selection-state actions. Resend appears for any selection;
-                       Delete is DLQ-only and hidden here (this is an Active queue).
-                       The `…` overflow opens the bulk-action menu shown below. -->
-                  <div class="flex shrink-0 items-center gap-1">
-                    <span class="inline-flex h-7 items-center gap-1.5 rounded-md bg-[var(--color-fg)] text-[var(--color-bg)] px-2.5 text-[11.5px] font-medium">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 3 9-3 9 19-9z"/><path d="M6 12h16"/></svg>
-                      <span class="tabular-nums">Resend 3</span>
-                    </span>
-                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-fg)]">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Row 2: mode switch + peek + meta -->
-                <div class="flex items-center gap-3 px-4 py-2">
-                  <!-- ModeSwitch — Active selected so the overflow menu can
-                       show "Send all to dead-letter" (gated to active-mode). -->
-                  <div class="flex h-7 items-center gap-0.5 rounded-md border border-[var(--color-border)] bg-[var(--color-hover)]/40 p-0.5">
-                    <div class="flex h-6 items-center gap-1.5 rounded px-3 text-[11.5px] bg-[var(--color-bg)]" style="box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-success) 28%, transparent)">
-                      <span class="text-[var(--color-success)]">Active</span>
-                      <span class="font-mono text-[10px] tabular-nums text-[var(--color-success)]">73</span>
-                    </div>
-                    <div class="flex h-6 items-center gap-1.5 rounded px-3 text-[11.5px] text-[var(--color-muted)]">
-                      <span>Dead-letter</span>
-                      <span class="font-mono text-[10px] tabular-nums">4</span>
-                    </div>
-                  </div>
-                  <div class="h-4 w-px bg-[var(--color-border)]"></div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="inline-flex h-7 items-center rounded-md bg-[var(--color-fg)] text-[var(--color-bg)] min-w-[84px] justify-center px-3.5 text-[11.5px] font-medium tabular-nums">Peek 20</span>
-                    <span class="inline-flex h-7 items-center rounded-md border border-[var(--color-border)] px-3 text-[11.5px] text-[var(--color-muted)]">Peek all</span>
-                  </div>
-                  <div class="ml-auto flex items-center gap-1.5 text-[11px] text-[var(--color-muted)]">
-                    <span class="font-mono tabular-nums text-[var(--color-fg)]">3</span>
-                    <span>selected</span>
-                    <span class="text-[var(--color-muted)]/60">·</span>
-                    <span class="text-[var(--color-fg)]">Clear</span>
-                  </div>
-                </div>
-
-                <!-- Row 3: search + time + filter -->
-                <div class="flex items-center gap-2 px-4 py-2">
-                  <div class="flex h-7 flex-1 items-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-hover)]/40 px-2.5 text-xs">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)]"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-                    <span class="flex-1 text-[var(--color-muted)]/60">Search message body…</span>
-                    <span class="font-mono text-[10px] text-[var(--color-muted)]/60">/</span>
-                  </div>
-                  <span class="inline-flex h-7 items-center gap-1.5 rounded-md border border-[var(--color-border)] px-2.5 text-[11px] text-[var(--color-muted)]">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <span>Any time</span>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
-                  </span>
-                  <span class="inline-flex h-7 items-center gap-1 rounded-md border border-[var(--color-border)] px-2.5 text-[11px] text-[var(--color-muted)]">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <span>filter</span>
-                  </span>
-                </div>
-
-                <!-- spacer -->
-                <div class="h-2"></div>
-
-                <!-- Table header (active-queue columns: no DL Reason). -->
-                <div class="flex items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-hover)]/30 px-4 py-2">
-                  <span class="inline-flex w-3 h-3 shrink-0 rounded-sm border border-[var(--color-border)]"></span>
-                  <span class="w-14 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">#</span>
-                  <span class="w-20 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Enqueued</span>
-                  <span class="w-24 shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Session</span>
-                  <span class="min-w-0 truncate text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Subject / Type</span>
-                </div>
-
-                <!-- Rows -->
-                {messageRows.map((row) => (
-                  <div class:list={["flex cursor-pointer items-center gap-2 border-b border-[var(--color-border)]/50 px-4 py-1.5", row.selected && "bg-[var(--color-hover)]"]}>
-                    <span class:list={["inline-flex w-3 h-3 shrink-0 rounded-sm border", row.selected ? "bg-[var(--color-accent)] border-[var(--color-accent)]" : "border-[var(--color-border)]"]}>
-                      {row.selected && (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="text-[var(--color-bg)]"><polyline points="20 6 9 17 4 12"/></svg>
-                      )}
-                    </span>
-                    <span class="w-14 shrink-0 truncate text-[11px] font-medium tabular-nums text-[var(--color-muted)]">#{row.id}</span>
-                    <span class="w-20 shrink-0 text-[11px] text-[var(--color-muted)]">{row.time}</span>
-                    <span class="w-24 shrink-0 truncate text-[11px] text-[var(--color-info)]/70 font-mono tabular-nums">{row.session}</span>
-                    <span class="min-w-0 truncate text-[11px] text-[var(--color-fg)]/50">{row.subject}</span>
-                  </div>
-                ))}
-
-                <!-- Overflow `…` popover, rendered open so visitors immediately
-                     see the bulk-action surface. Active-mode shows both items;
-                     Send-to-DL is hidden in DL view (it would be a no-op there). -->
-                <div class="absolute right-3 top-[calc(2.75rem)] z-10 min-w-[220px] rounded-md border border-[var(--color-border)] bg-[var(--color-chrome)] p-1 shadow-lg ring-1 ring-[var(--color-fg)]/10">
-                  <div class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[12px] text-[var(--color-fg)]">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 3 9-3 9 19-9z"/><path d="M6 12h16"/></svg>
-                    <span>Send all to dead-letter</span>
-                  </div>
-                  <div class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[12px] text-[var(--color-danger)]">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    <span>Purge all messages</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* SPOTLIGHT — floating panel, no extra chrome */}
-            {f.id === "spotlight" && (
-              <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] shadow-2xl overflow-hidden max-w-[500px] mx-auto" data-spotlight>
-                <!-- Search row -->
-                <div class="flex items-center gap-2 border-b border-[var(--color-border)] px-3 py-2.5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="text-[var(--color-muted)] shrink-0"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-                  <div class="flex flex-1 items-center text-sm text-[var(--color-fg)]">
-                    <span data-spotlight-query>order</span>
-                    <span class="spotlight-caret ml-0.5 inline-block w-0.5 h-4 bg-[var(--color-fg)]"></span>
-                  </div>
-                  <span class="shrink-0 rounded bg-[var(--color-hover)] px-2 py-0.5 text-[11px] text-[var(--color-muted)] border border-[var(--color-border)] font-mono">acme-dev</span>
-                </div>
-
-                <!-- Results -->
-                <div class="py-1">
-                  <div class="px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-[var(--color-muted)]">Queues</div>
-                  {spotlightRows.map((r) => (
-                    <div class="spotlight-row" data-spotlight-row data-spotlight-name={r.name}>
-                      <div class="spotlight-row-inner flex items-center gap-2 px-3 py-1.5">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--color-muted)] shrink-0">
-                          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-                          <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-                        </svg>
-                        <div class="min-w-0 flex-1">
-                          <div class="truncate text-sm">{r.name}</div>
-                          <div class="truncate text-[11px] text-[var(--color-muted)]">{r.path}</div>
-                        </div>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                          <span class:list={["text-[10px] font-medium tabular-nums", r.active > 0 ? "text-[var(--color-success)]" : "text-[var(--color-muted)]/50"]}>{r.active}</span>
-                          <span class:list={["text-[10px] font-medium tabular-nums", r.dead > 0 ? "text-[var(--color-danger)]" : "text-[var(--color-muted)]/50"]}>{r.dead}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <!-- Footer hints -->
-                <div class="flex items-center gap-4 border-t border-[var(--color-border)] px-3 py-1.5 text-[10px] text-[var(--color-muted)]">
-                  <span>↑↓ Navigate</span>
-                  <span>↵ Select</span>
-                  <span>Esc Close</span>
-                </div>
-              </div>
-            )}
-
-            {/* MCP — terminal-style tool list */}
-            {f.id === "mcp" && (
-              <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-chrome)] overflow-hidden shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)] font-mono text-[11.5px]">
-                <div class="h-6 border-b border-[var(--color-border)] flex items-center px-3 gap-2 text-[10px] text-[var(--color-muted)]">
-                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
-                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
-                  <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
-                  <span class="ml-2">viewbus-mcp</span>
-                </div>
-                <div class="p-4 space-y-0.5 bg-[var(--color-bg)]">
-                  <div class="text-[var(--color-muted)]">$ viewbus-mcp --list-tools</div>
-                  <div class="text-[var(--color-accent)]">10 read-only tools · 1 opt-in write tool</div>
-                  <div class="h-2"></div>
-                  {mcpTools.map((t) => (
-                    <div class="flex gap-3">
-                      <span class="text-[var(--color-success)]">{t.name}</span>
-                      <span class="text-[var(--color-muted)] truncate">{t.note}</span>
-                    </div>
-                  ))}
-                  <div class="h-2"></div>
-                  <div class="text-[var(--color-muted)]">
-                    <span class="text-[var(--color-fg)]">upsert_theme</span>
-                    <span class="ml-3">write · opt-in via settings</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* THEMES — two previews */}
-            {f.id === "themes" && (
-              <div class="grid grid-cols-2 gap-4">
-                <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden" style="background: oklch(0.145 0 0)">
-                  <div class="h-6 border-b border-white/10 flex items-center px-3 gap-1">
-                    <span class="size-1.5 rounded-full bg-white/20"></span>
-                    <span class="size-1.5 rounded-full bg-white/20"></span>
-                    <span class="size-1.5 rounded-full bg-white/20"></span>
-                  </div>
-                  <div class="p-4 space-y-2">
-                    <div class="h-2 rounded-full bg-white w-2/3"></div>
-                    <div class="h-1.5 rounded-full bg-white/40 w-4/5"></div>
-                    <div class="h-1.5 rounded-full bg-white/40 w-3/5"></div>
-                    <div class="flex gap-1 pt-2">
-                      <span class="h-4 px-2 rounded text-[9px] text-white flex items-center" style="background: oklch(0.62 0.16 242)">Peek</span>
-                      <span class="h-4 px-2 rounded bg-white/10 text-[9px] text-white/70 flex items-center">Filter</span>
-                    </div>
-                  </div>
-                  <div class="px-4 pb-3 pt-1 text-[10px] text-white/50 font-mono uppercase tracking-[0.15em]">Dark</div>
-                </div>
-                <div class="rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden bg-white">
-                  <div class="h-6 border-b border-black/10 flex items-center px-3 gap-1">
-                    <span class="size-1.5 rounded-full bg-black/20"></span>
-                    <span class="size-1.5 rounded-full bg-black/20"></span>
-                    <span class="size-1.5 rounded-full bg-black/20"></span>
-                  </div>
-                  <div class="p-4 space-y-2">
-                    <div class="h-2 rounded-full w-2/3" style="background: oklch(0.145 0 0)"></div>
-                    <div class="h-1.5 rounded-full w-4/5" style="background: oklch(0.145 0 0 / 40%)"></div>
-                    <div class="h-1.5 rounded-full w-3/5" style="background: oklch(0.145 0 0 / 40%)"></div>
-                    <div class="flex gap-1 pt-2">
-                      <span class="h-4 px-2 rounded text-[9px] text-white flex items-center" style="background: oklch(0.62 0.16 242)">Peek</span>
-                      <span class="h-4 px-2 rounded bg-black/5 text-[9px] text-black/70 flex items-center">Filter</span>
-                    </div>
-                  </div>
-                  <div class="px-4 pb-3 pt-1 text-[10px] text-black/50 font-mono uppercase tracking-[0.15em]">Light</div>
-                </div>
-                <div class="col-span-2 flex items-center justify-center gap-2 mt-2 text-[11px] text-[var(--color-muted)]">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  <span>One-click import from VS Code</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+          data-dot
+          data-index={i}
+          class="ft-dot"
+        ></button>
       ))}
     </div>
   </div>
 </section>
 
-<style>
-  .ft-tab[aria-selected="true"] {
-    color: var(--color-fg);
-    border-bottom-color: var(--color-accent);
-  }
-
-  /* Stack all panels in the same grid cell so the container sizes to the
-     tallest panel and layout never shifts when tabs swap. min-height pins the
-     section so the spotlight's dynamic height doesn't push content below. */
-  .ft-panels {
-    display: grid;
-    grid-template-areas: "stack";
-    min-height: 26rem;
-  }
-  .ft-panel {
-    grid-area: stack;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 250ms ease-out;
-  }
-  .ft-panel.is-active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .spotlight-row {
-    max-height: 60px;
-    overflow: hidden;
-    transition: max-height 250ms ease-out, opacity 200ms ease-out;
-  }
-  .spotlight-row > .spotlight-row-inner {
-    transition: background-color 150ms ease-out;
-  }
-  .spotlight-row.is-dim {
-    max-height: 0;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .spotlight-row.is-selected > .spotlight-row-inner {
-    background: var(--color-hover);
-  }
-
-  .spotlight-caret {
-    animation: spotlight-caret-blink 1s linear infinite;
-  }
-  @keyframes spotlight-caret-blink {
-    0%, 49.9% { opacity: 1; }
-    50%, 100% { opacity: 0; }
-  }
-</style>
-
 <script is:inline>
   (function () {
-    const tabs = document.querySelectorAll(".feature-tabs");
-    tabs.forEach((root) => {
-      const buttons = Array.from(root.querySelectorAll('[role="tab"]'));
-      const panels = Array.from(root.querySelectorAll('[role="tabpanel"]'));
-      const select = (index) => {
-        buttons.forEach((btn, i) => {
-          const active = i === index;
-          btn.setAttribute("aria-selected", active ? "true" : "false");
-          btn.setAttribute("tabindex", active ? "0" : "-1");
-        });
-        panels.forEach((panel, i) => {
-          if (i === index) {
-            panel.classList.add("is-active");
-            panel.removeAttribute("inert");
-          } else {
-            panel.classList.remove("is-active");
-            panel.setAttribute("inert", "");
-          }
+    const AUTOPLAY_MS = 6000;
+
+    document.querySelectorAll(".ft-carousel").forEach((root) => {
+      const track = root.querySelector(".ft-track");
+      const slides = Array.from(root.querySelectorAll(".ft-slide"));
+      const dots = Array.from(root.querySelectorAll("[data-dot]"));
+      const prev = root.querySelector(".ft-prev");
+      const next = root.querySelector(".ft-next");
+      if (!track || slides.length === 0) return;
+
+      let current = 0;
+      let autoplayTimer = null;
+      let inView = false;
+      let interacted = false;
+      let scrollSettleTimer = null;
+
+      const updateDots = () => {
+        dots.forEach((dot, i) => {
+          dot.setAttribute("aria-selected", i === current ? "true" : "false");
+          dot.setAttribute("tabindex", i === current ? "0" : "-1");
         });
       };
-      buttons.forEach((btn, i) => {
-        btn.addEventListener("click", () => select(i));
-        btn.addEventListener("keydown", (e) => {
+
+      const goTo = (index) => {
+        const wrapped = ((index % slides.length) + slides.length) % slides.length;
+        const target = slides[wrapped];
+        // When the autoplay wraps from the last slide back to the first
+        // (or someone clicks the prev button on slide 0), jump instantly
+        // instead of animating the whole track backwards.
+        const isLongJump = Math.abs(wrapped - current) > 1;
+        track.scrollTo({
+          left: target.offsetLeft - track.offsetLeft,
+          behavior: isLongJump ? "auto" : "smooth",
+        });
+        current = wrapped;
+        updateDots();
+      };
+
+      const startAutoplay = () => {
+        if (interacted || autoplayTimer !== null) return;
+        autoplayTimer = window.setInterval(() => {
+          goTo(current + 1);
+        }, AUTOPLAY_MS);
+      };
+
+      const stopAutoplay = () => {
+        if (autoplayTimer !== null) {
+          window.clearInterval(autoplayTimer);
+          autoplayTimer = null;
+        }
+      };
+
+      const sync = () => {
+        if (inView && !interacted) startAutoplay();
+        else stopAutoplay();
+      };
+
+      const markInteracted = () => {
+        interacted = true;
+        stopAutoplay();
+      };
+
+      // Prev / Next buttons
+      [prev, next].forEach((btn) => {
+        if (!btn) return;
+        btn.addEventListener("click", () => {
+          markInteracted();
+          const dir = parseInt(btn.getAttribute("data-direction") || "1", 10);
+          goTo(current + dir);
+        });
+      });
+
+      // Dots
+      dots.forEach((dot, i) => {
+        dot.addEventListener("click", () => {
+          markInteracted();
+          goTo(i);
+        });
+        dot.addEventListener("keydown", (e) => {
           if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
             e.preventDefault();
+            markInteracted();
             const delta = e.key === "ArrowRight" ? 1 : -1;
-            const next = (i + delta + buttons.length) % buttons.length;
-            select(next);
-            buttons[next].focus();
+            goTo(current + delta);
+            dots[current].focus();
           }
         });
       });
-    });
-  })();
 
-  // Spotlight typing demo. Loops between "order placement" and "order submit",
-  // pausing at the "order" stem with all 6 results visible. Rows always render;
-  // non-matches dim via opacity so the panel height never changes.
-  (function () {
-    const root = document.querySelector("[data-spotlight]");
-    if (!root) return;
-    const queryEl = root.querySelector("[data-spotlight-query]");
-    const rows = Array.from(root.querySelectorAll("[data-spotlight-row]"));
-    const panel = root.closest(".ft-panel");
-    if (!queryEl || rows.length === 0 || !panel) return;
-
-    const applyQuery = (q) => {
-      queryEl.textContent = q;
-      const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);
-      let firstMatch = -1;
-      rows.forEach((row, i) => {
-        const name = (row.dataset.spotlightName || "").toLowerCase();
-        const matches = tokens.length === 0 || tokens.every((t) => name.includes(t));
-        row.classList.toggle("is-dim", !matches);
-        if (matches && firstMatch === -1) firstMatch = i;
+      // Track keyboard nav (focus the track, then arrow keys scroll panels)
+      track.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          markInteracted();
+          goTo(current + (e.key === "ArrowRight" ? 1 : -1));
+        }
       });
-      rows.forEach((row, i) => {
-        row.classList.toggle("is-selected", i === firstMatch);
+
+      // Native scroll (swipe / trackpad) — sync index to whichever slide
+      // ended up centered after the user finished scrolling.
+      track.addEventListener("scroll", () => {
+        if (scrollSettleTimer) clearTimeout(scrollSettleTimer);
+        scrollSettleTimer = window.setTimeout(() => {
+          const trackRect = track.getBoundingClientRect();
+          const trackCenter = trackRect.left + trackRect.width / 2;
+          let closest = current;
+          let closestDist = Infinity;
+          slides.forEach((s, i) => {
+            const r = s.getBoundingClientRect();
+            const slideCenter = r.left + r.width / 2;
+            const dist = Math.abs(slideCenter - trackCenter);
+            if (dist < closestDist) {
+              closest = i;
+              closestDist = dist;
+            }
+          });
+          if (closest !== current) {
+            current = closest;
+            updateDots();
+            // Treat manual swipe as user interaction.
+            markInteracted();
+          }
+        }, 120);
       });
-    };
 
-    applyQuery("order");
+      // Hover pause (resume on leave, unless user has clicked / swiped)
+      root.addEventListener("mouseenter", stopAutoplay);
+      root.addEventListener("mouseleave", () => { if (!interacted) startAutoplay(); });
 
-    const HOLD_FULL = 1500;
-    const HOLD_STEM = 700;
-    const TYPE_DELAY = 100;
-    const BACKSPACE_DELAY = 70;
+      // Pause when tab is hidden.
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) stopAutoplay();
+        else sync();
+      });
 
-    const stages = [
-      { type: "type", target: "order placement" },
-      { type: "hold", ms: HOLD_FULL },
-      { type: "type", target: "order" },
-      { type: "hold", ms: HOLD_STEM },
-      { type: "type", target: "order submit" },
-      { type: "hold", ms: HOLD_FULL },
-      { type: "type", target: "order" },
-      { type: "hold", ms: HOLD_STEM },
-    ];
-
-    let active = false;
-    let timer = null;
-    let stageIdx = 0;
-
-    const scheduleNext = (delay) => {
-      timer = setTimeout(() => {
-        timer = null;
-        tick();
-      }, delay);
-    };
-
-    const tick = () => {
-      if (!active) return;
-      const stage = stages[stageIdx];
-      if (stage.type === "hold") {
-        stageIdx = (stageIdx + 1) % stages.length;
-        scheduleNext(stage.ms);
-        return;
-      }
-      const target = stage.target;
-      const current = queryEl.textContent;
-      if (current === target) {
-        stageIdx = (stageIdx + 1) % stages.length;
-        scheduleNext(0);
-        return;
-      }
-      let i = 0;
-      while (i < current.length && i < target.length && current[i] === target[i]) i++;
-      if (i < current.length) {
-        applyQuery(current.slice(0, -1));
-        scheduleNext(BACKSPACE_DELAY);
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) inView = entry.isIntersecting;
+            sync();
+          },
+          { threshold: 0.1 }
+        ).observe(root);
       } else {
-        applyQuery(target.slice(0, current.length + 1));
-        scheduleNext(TYPE_DELAY);
+        inView = true;
+        sync();
       }
-    };
 
-    const start = () => {
-      if (active) return;
-      active = true;
-      tick();
-    };
-    const stop = () => {
-      if (!active) return;
-      active = false;
-      if (timer !== null) {
-        clearTimeout(timer);
-        timer = null;
-      }
-    };
-
-    let inView = false;
-    let isTab = panel.classList.contains("is-active");
-    const update = () => {
-      if (inView && isTab) start();
-      else stop();
-    };
-
-    new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) inView = e.isIntersecting;
-        update();
-      },
-      { threshold: 0.3 }
-    ).observe(panel);
-
-    new MutationObserver(() => {
-      isTab = panel.classList.contains("is-active");
-      update();
-    }).observe(panel, { attributes: true, attributeFilter: ["class"] });
+      updateDots();
+    });
   })();
 </script>

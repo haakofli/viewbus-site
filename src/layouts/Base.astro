@@ -20,8 +20,8 @@ const ogImageUrl = new URL(ogImage, site).toString();
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark light" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f7eddc" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)" />
     <meta name="author" content="Håkon Lia" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
@@ -51,8 +51,9 @@ const ogImageUrl = new URL(ogImage, site).toString();
     <meta name="twitter:image:alt" content="viewbus — Azure Service Bus desktop manager for Windows and macOS" />
 
     <script is:inline>
+      // Cream is the brand. Only honor an explicit "dark" preference.
       const pref = localStorage.getItem("viewbus-site-theme");
-      if (pref === "light" || (!pref && window.matchMedia("(prefers-color-scheme: light)").matches)) {
+      if (pref !== "dark") {
         document.documentElement.classList.add("light");
       }
     </script>
