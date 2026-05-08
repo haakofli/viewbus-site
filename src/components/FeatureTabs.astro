@@ -85,7 +85,7 @@ const visualMaxWidth: Record<string, string> = {
             </div>
             <div class="flex justify-center md:justify-start min-w-0">
               {f.id === "mcp" ? (
-                <div class={`dark-card lifted w-full rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden font-mono text-[11.5px] ${visualMaxWidth[f.id]}`}>
+                <div class={`dark-card lifted w-full rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden font-mono text-[11.5px] ${visualMaxWidth[f.id]}`}>
                   <div class="h-7 border-b border-[var(--color-border)] flex items-center px-3 gap-2 text-[10px] text-[var(--color-muted)]">
                     <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
                     <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
@@ -110,7 +110,7 @@ const visualMaxWidth: Record<string, string> = {
                   </div>
                 </div>
               ) : (
-                <div class={`dark-card lifted w-full rounded-[var(--radius-lg)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-bg)] ${visualMaxWidth[f.id]}`}>
+                <div class={`dark-card lifted w-full rounded-[var(--radius)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-bg)] ${visualMaxWidth[f.id]}`}>
                   <img
                     src={`/screenshots/feature-${f.id}.png`}
                     alt={f.title}
