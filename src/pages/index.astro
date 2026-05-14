@@ -171,7 +171,7 @@ const breadcrumbSchema = {
   <dialog
     id="mac-brew-dialog"
     aria-labelledby="mac-brew-title"
-    class="m-auto max-w-md w-[calc(100%-2rem)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-chrome)] text-[var(--color-fg)] p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+    class="brew-dialog m-auto max-w-lg w-[calc(100%-2rem)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-chrome)] text-[var(--color-fg)] p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
   >
     <form method="dialog" class="relative flex flex-col gap-5 p-7 text-center">
       <button
@@ -195,7 +195,7 @@ const breadcrumbSchema = {
       </p>
 
       <div class="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]/60 px-3 py-2 text-left">
-        <code data-brew-cmd class="font-mono text-[12px] text-[var(--color-fg)] flex-1 whitespace-nowrap overflow-x-auto"><span class="text-[var(--color-muted)] select-none">$ </span>brew install --cask haakofli/viewbus/viewbus</code>
+        <code data-brew-cmd class="brew-cmd font-mono text-[12px] text-[var(--color-fg)] flex-1 whitespace-nowrap overflow-x-auto"><span class="text-[var(--color-muted)] select-none">$ </span>brew install --cask haakofli/viewbus/viewbus</code>
         <button
           type="button"
           data-brew-inline-copy
@@ -399,5 +399,13 @@ const breadcrumbSchema = {
       }
     })();
   </script>
+
+  <style>
+    /* Hide the native scrollbar on the brew command — the Copy button is the
+       primary affordance, and Windows' default scrollbar arrows look terrible
+       inside a small inline pill. Users can still scroll/select the text. */
+    .brew-cmd { scrollbar-width: none; }
+    .brew-cmd::-webkit-scrollbar { display: none; }
+  </style>
 
 </Base>
