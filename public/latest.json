@@ -1,20 +1,17 @@
 {
-  "version": "0.5.1",
-  "notes": "See changelog at https://viewbus.app/changelog/0.5.1",
-  "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.5.1/ViewBus_0.5.1_x64-setup.exe",
-  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.5.1/ViewBus_0.5.1_x64-setup.exe",
+  "version": "0.5.2",
+  "notes": "See changelog at https://viewbus.app/changelog/0.5.2",
+  "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.5.2/ViewBus_0.5.2_x64-setup.exe",
+  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.5.2/ViewBus_0.5.2_x64-setup.exe",
   "platform": "windows-x64",
   "installerFormat": "nsis",
   "signed": true,
-  "publishedAt": "2026-05-06T14:02:54Z",
-  "pub_date": "2026-05-06T14:02:54Z",
+  "publishedAt": "2026-05-14T10:56:44Z",
+  "pub_date": "2026-05-14T10:56:44Z",
   "platforms": {
     "windows-x86_64": {
-      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.5.1/ViewBus_0.5.1_x64-setup.exe",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSjJucGxkbjZBNnRDOHhMQ1VBbGdMMGpEZkYvVjdqamFFVnpIeDdnK0Z2emFpRUFKbkdpOUNObFB4YU1RZjFneFdlUUJ2VjZLNkRGU2Vkbk5Rb2crcFdXc3NFeThhTlFFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc4MDc1OTA1CWZpbGU6Vmlld0J1c18wLjUuMV94NjQtc2V0dXAuZXhlCitKd1c4WHFmekRWVzc4OWlxMmExUnV6Y0ZCN0VURXhmUHI2TEhlblhSUEJKY0ZoblpPK1lYSXlwVEpwOVFPdEhMNlk1OGptbzhKd1dhbys2UDBKY0FBPT0K"
-    },
-    "darwin-aarch64": {
-      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.5.1/ViewBus_0.5.1_aarch64.dmg"
+      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.5.2/ViewBus_0.5.2_x64-setup.exe",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSjJucGxkbjZBNnYzYVdaSUc0M1UvVW9HL2haR2Z5VnJqRUc5eHYvc2hkRUI3VmVwc3pRSElrYk9rWDZ1c0llZ3JEUzRSWmlTS0RNR3JaUmxmVlBSaXlobzkwMHBHcHdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc4NzU1OTQ1CWZpbGU6Vmlld0J1c18wLjUuMl94NjQtc2V0dXAuZXhlCjZmSU1xMjFXcVVMQ0lpYU1JWU9iMTB6d3RvYXZNa3NIakJxSFl4aC9jeng2QVBxSm15UFhQV0pwK3diK09zWHNzN1NESjlDL29DdTNuQWhlVlJYMkJRPT0K"
     }
   }
 }
