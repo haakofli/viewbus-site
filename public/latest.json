@@ -12,6 +12,9 @@
     "windows-x86_64": {
       "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.5.2/ViewBus_0.5.2_x64-setup.exe",
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSjJucGxkbjZBNnYzYVdaSUc0M1UvVW9HL2haR2Z5VnJqRUc5eHYvc2hkRUI3VmVwc3pRSElrYk9rWDZ1c0llZ3JEUzRSWmlTS0RNR3JaUmxmVlBSaXlobzkwMHBHcHdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc4NzU1OTQ1CWZpbGU6Vmlld0J1c18wLjUuMl94NjQtc2V0dXAuZXhlCjZmSU1xMjFXcVVMQ0lpYU1JWU9iMTB6d3RvYXZNa3NIakJxSFl4aC9jeng2QVBxSm15UFhQV0pwK3diK09zWHNzN1NESjlDL29DdTNuQWhlVlJYMkJRPT0K"
+    },
+    "darwin-aarch64": {
+      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.5.2/ViewBus_0.5.2_aarch64.dmg"
     }
   }
 }

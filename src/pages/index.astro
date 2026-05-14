@@ -6,8 +6,8 @@ import { latest } from "../lib/latest";
 const title = "viewbus — A modern Service Bus Explorer alternative";
 const description = "A fast, local, private desktop app for managing Azure Service Bus. Peek messages, resend dead letters, and search your entire bus from one keyboard-driven interface. Ships a built-in Model Context Protocol (MCP) server so AI assistants can list namespaces, search resources, and peek messages. Free for Windows and macOS.";
 
-const windowsInstaller = latest.platforms["windows-x86_64"].url;
-const macInstaller = latest.platforms["darwin-aarch64"].url;
+const windowsInstaller = latest.platforms["windows-x86_64"]?.url ?? latest.installerUrl;
+const macInstaller = latest.platforms["darwin-aarch64"]?.url ?? null;
 
 const softwareApplicationSchema = {
   "@context": "https://schema.org",
@@ -107,7 +107,7 @@ const breadcrumbSchema = {
       </p>
 
       <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-        <!-- Mac: secondary, glassy pill — opens unsigned-app notice modal -->
+        <!-- Mac: secondary, glassy pill — opens Install via Homebrew modal -->
         <button
           type="button"
           data-download
@@ -118,7 +118,7 @@ const breadcrumbSchema = {
           <svg width="15" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
           </svg>
-          Download for macOS
+          Install for macOS
         </button>
 
         <!-- Windows: primary, inverted fill — direct download -->
@@ -167,6 +167,80 @@ const breadcrumbSchema = {
     </div>
   </section>
 
+  <!-- Mac primary path: install via Homebrew -->
+  <dialog
+    id="mac-brew-dialog"
+    aria-labelledby="mac-brew-title"
+    class="m-auto max-w-md w-[calc(100%-2rem)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-chrome)] text-[var(--color-fg)] p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+  >
+    <form method="dialog" class="relative flex flex-col gap-5 p-7 text-center">
+      <button
+        type="button"
+        data-brew-close
+        aria-label="Close"
+        class="absolute top-3 right-3 inline-flex items-center justify-center h-7 w-7 rounded-md text-[var(--color-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-hover)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <h2 id="mac-brew-title" class="text-lg font-semibold leading-snug mt-1">
+        Install via Homebrew
+      </h2>
+
+      <p class="text-sm text-[var(--color-muted)] leading-relaxed">
+        To install ViewBus, run the following command in your terminal:
+      </p>
+
+      <div class="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]/60 px-3 py-2 text-left">
+        <code data-brew-cmd class="font-mono text-[12px] text-[var(--color-fg)] flex-1 whitespace-nowrap overflow-x-auto"><span class="text-[var(--color-muted)] select-none">$ </span>brew install --cask haakofli/viewbus/viewbus</code>
+        <button
+          type="button"
+          data-brew-inline-copy
+          aria-label="Copy command"
+          class="shrink-0 inline-flex items-center justify-center h-7 w-7 rounded-md text-[var(--color-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-hover)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        </button>
+      </div>
+
+      {macInstaller && (
+        <button
+          type="button"
+          data-brew-to-dmg
+          class="text-xs text-[var(--color-muted)] hover:text-[var(--color-fg)] underline underline-offset-2 cursor-pointer transition-colors"
+        >
+          No Homebrew? Install from DMG
+        </button>
+      )}
+
+      <div class="flex justify-center gap-2 pt-1">
+        <button
+          type="button"
+          data-brew-cancel
+          class="inline-flex items-center justify-center rounded-full h-10 px-6 text-sm font-medium border border-[var(--color-border)] bg-transparent hover:bg-[var(--color-hover)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          data-brew-copy
+          class="inline-flex items-center justify-center rounded-full h-10 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] hover:bg-[var(--color-fg)]/90 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-chrome)]"
+        >
+          <span data-brew-copy-label>Copy</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Mac fallback: manual DMG with quarantine-clearing instructions.
+       Only rendered when a Mac installer URL is known. -->
+  {macInstaller && (
   <dialog
     id="mac-download-dialog"
     aria-labelledby="mac-download-title"
@@ -231,40 +305,98 @@ const breadcrumbSchema = {
       </div>
     </form>
   </dialog>
+  )}
 
   <script is:inline>
     (() => {
-      const dialog = document.getElementById("mac-download-dialog");
-      if (!(dialog instanceof HTMLDialogElement)) return;
+      const brewDialog = document.getElementById("mac-brew-dialog");
+      const dmgDialog = document.getElementById("mac-download-dialog");
+      if (!(brewDialog instanceof HTMLDialogElement)) return;
 
+      const hasDmgDialog = dmgDialog instanceof HTMLDialogElement;
       const triggers = document.querySelectorAll("[data-mac-download]");
-      const cancelBtn = dialog.querySelector("[data-mac-cancel]");
-      const confirmBtn = dialog.querySelector("[data-mac-confirm]");
-      let pendingUrl = "";
+      const brewCmd = "brew install --cask haakofli/viewbus/viewbus";
 
+      let dmgPendingUrl = "";
+
+      function openDmgModal(url) {
+        if (!hasDmgDialog) {
+          if (url) window.location.href = url;
+          return;
+        }
+        dmgPendingUrl = url;
+        if (typeof dmgDialog.showModal === "function") {
+          dmgDialog.showModal();
+        } else if (url) {
+          window.location.href = url;
+        }
+      }
+
+      // Trigger → open brew modal (primary path)
       triggers.forEach((btn) => {
         btn.addEventListener("click", (event) => {
           event.preventDefault();
-          pendingUrl = btn.getAttribute("data-mac-installer") || "";
-          if (typeof dialog.showModal === "function") {
-            dialog.showModal();
-          } else if (pendingUrl) {
-            window.location.href = pendingUrl;
+          const installer = btn.getAttribute("data-mac-installer") || "";
+          brewDialog.dataset.macInstaller = installer;
+          if (typeof brewDialog.showModal === "function") {
+            brewDialog.showModal();
+          } else if (installer) {
+            window.location.href = installer;
           }
         });
       });
 
-      cancelBtn?.addEventListener("click", () => dialog.close());
+      // Brew modal: copy logic
+      const copyLabelEl = brewDialog.querySelector("[data-brew-copy-label]");
 
-      confirmBtn?.addEventListener("click", () => {
-        dialog.close();
-        if (pendingUrl) window.location.href = pendingUrl;
+      async function copyBrewCommand() {
+        try {
+          await navigator.clipboard.writeText(brewCmd);
+          if (copyLabelEl) {
+            const original = copyLabelEl.textContent;
+            copyLabelEl.textContent = "Copied!";
+            setTimeout(() => { copyLabelEl.textContent = original; }, 1500);
+          }
+        } catch (e) {
+          // Clipboard unavailable — select the command so the user can copy manually.
+          const code = brewDialog.querySelector("[data-brew-cmd]");
+          const sel = window.getSelection && window.getSelection();
+          if (code && sel) {
+            const range = document.createRange();
+            range.selectNode(code);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }
+      }
+
+      brewDialog.querySelector("[data-brew-copy]")?.addEventListener("click", copyBrewCommand);
+      brewDialog.querySelector("[data-brew-inline-copy]")?.addEventListener("click", copyBrewCommand);
+      brewDialog.querySelector("[data-brew-cancel]")?.addEventListener("click", () => brewDialog.close());
+      brewDialog.querySelector("[data-brew-close]")?.addEventListener("click", () => brewDialog.close());
+
+      // Brew modal: "No Homebrew?" → close brew, open DMG fallback
+      brewDialog.querySelector("[data-brew-to-dmg]")?.addEventListener("click", () => {
+        const installer = brewDialog.dataset.macInstaller || "";
+        brewDialog.close();
+        openDmgModal(installer);
       });
 
-      // Click outside the form (on the backdrop) closes the dialog.
-      dialog.addEventListener("click", (event) => {
-        if (event.target === dialog) dialog.close();
+      brewDialog.addEventListener("click", (event) => {
+        if (event.target === brewDialog) brewDialog.close();
       });
+
+      // DMG fallback modal handlers
+      if (hasDmgDialog) {
+        dmgDialog.querySelector("[data-mac-cancel]")?.addEventListener("click", () => dmgDialog.close());
+        dmgDialog.querySelector("[data-mac-confirm]")?.addEventListener("click", () => {
+          dmgDialog.close();
+          if (dmgPendingUrl) window.location.href = dmgPendingUrl;
+        });
+        dmgDialog.addEventListener("click", (event) => {
+          if (event.target === dmgDialog) dmgDialog.close();
+        });
+      }
     })();
   </script>
 

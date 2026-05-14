@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+type Platform = { url: string; signature?: string };
+
 type LatestRelease = {
   version: string;
   notes: string;
@@ -10,10 +12,10 @@ type LatestRelease = {
   installerFormat: string;
   signed: boolean;
   publishedAt: string;
-  platforms: {
-    "windows-x86_64": { url: string };
-    "darwin-aarch64": { url: string };
-  };
+  platforms: Partial<{
+    "windows-x86_64": Platform;
+    "darwin-aarch64": Platform;
+  }>;
 };
 
 const raw = fs.readFileSync(path.resolve("public/latest.json"), "utf-8");
