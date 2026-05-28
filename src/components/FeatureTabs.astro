@@ -11,6 +11,15 @@ const features = [
     label: "Messages",
     title: "Browse and act on messages",
     body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Edit a body before resending, compose new messages, or drain a queue with a confirmed bulk action — purge, send-all-to-DL, or empty an entire DLQ.",
+    wide: true,
+  },
+  {
+    id: "monitoring",
+    label: "Monitoring",
+    title: "Set up automatic monitoring and alerting",
+    body: "Pick exactly which queues, topics, and subscriptions to watch, and which ones should alert. Runs in the background at a low cost to your machine.",
+    isNew: true,
+    wide: true,
   },
   {
     id: "spotlight",
@@ -47,7 +56,8 @@ const mcpTools = [
 
 const visualMaxWidth: Record<string, string> = {
   browse: "max-w-[280px]",
-  messages: "max-w-[560px]",
+  messages: "max-w-[720px]",
+  monitoring: "max-w-[720px]",
   spotlight: "max-w-[480px]",
   mcp: "max-w-[480px]",
   themes: "max-w-[560px]",
@@ -78,8 +88,17 @@ const visualMaxWidth: Record<string, string> = {
           aria-label={`${i + 1} of ${features.length}: ${f.title}`}
           data-index={i}
         >
-          <div class="grid md:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center px-2 md:px-10 lg:px-16">
+          <div class={`grid items-center gap-10 ${f.wide ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:gap-8 lg:gap-10 px-2 md:px-6 lg:px-8" : "md:grid-cols-2 md:gap-12 lg:gap-16 px-2 md:px-10 lg:px-16"}`}>
             <div class="md:max-w-md md:justify-self-end">
+              {f.isNew && (
+                <span
+                  class="inline-flex items-center gap-1.5 mb-3 rounded-full bg-[var(--color-accent)] text-[var(--color-bg)] px-2.5 py-1 text-[11px] font-mono font-bold uppercase tracking-[0.16em] shadow-sm"
+                  aria-label="New feature"
+                >
+                  <span class="size-1.5 rounded-full bg-[var(--color-bg)]" aria-hidden="true"></span>
+                  New
+                </span>
+              )}
               <h3 class="text-2xl md:text-3xl font-semibold tracking-tight mb-4">{f.title}</h3>
               <p class="text-[var(--color-muted)] leading-relaxed">{f.body}</p>
             </div>
