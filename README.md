@@ -23,13 +23,22 @@ generation runs at build time.
 
 ## Cutting a release
 
-1. In the private viewbus repo, bump version in `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`. Run `cargo test && pnpm test && cargo clippy --workspace`.
-2. Build the installer: `pnpm tauri build` → output at `src-tauri/target/release/bundle/nsis/ViewBus_X.Y.Z_x64-setup.exe`.
-3. Create a GitHub Release on this repo:
-   `gh release create vX.Y.Z "<installer-path>" --title "ViewBus X.Y.Z" --notes "..." --repo haakofli/viewbus-site`
-4. Update `public/latest.json` with the new version + notes + release URL + ISO-8601 `publishedAt`.
-5. Add `src/content/changelog/X.Y.Z.md` with a new entry (copy the frontmatter shape from the newest existing entry).
-6. Commit and push — CI deploys automatically.
+Releases are **driven from the `haakofli/viewbus` repo**, not here. Pushing a
+`v*.*.*` tag there runs a GitHub Action (`release.yml`) that builds the
+installers, creates the GitHub Release on *this* repo, rewrites
+`public/latest.json`, and writes a changelog stub at
+`src/content/changelog/<version>.md`. **Do not create releases or hand-edit
+`latest.json` here** — the next release will overwrite them.
+
+The only manual follow-up on this repo: **fill in the auto-generated changelog
+stub.** It ships as `summary: "TODO: fill in summary."` and a `TODO: write
+changelog entry.` body, and the in-app update toast links users straight to
+`https://viewbus.app/changelog/<version>` — so an unedited stub ships a TODO to
+users.
+
+Full flow, secrets, and the locked installer-filename contract:
+`viewbus/CLAUDE.md` → "Release Coordination" and
+`viewbus/docs/wiki/release/release-flow.md`.
 
 ## Structure
 
