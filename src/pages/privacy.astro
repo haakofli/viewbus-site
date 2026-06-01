@@ -17,9 +17,9 @@ const breadcrumbSchema = {
   <Fragment slot="head">
     <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
   </Fragment>
-  <article class="max-w-3xl mx-auto px-6 py-20 prose prose-invert">
+  <article class="max-w-3xl mx-auto px-6 py-20 prose">
     <h1 class="text-4xl font-bold tracking-tight mb-4">Privacy</h1>
-    <p class="text-[var(--color-muted)] mb-12">Last updated: 2026-05-06</p>
+    <p class="text-[var(--color-muted)] mb-12">Last updated: 2026-06-01</p>
 
     <p>
       viewbus does not send telemetry, does not phone home, and has no backend servers.
@@ -58,7 +58,7 @@ const breadcrumbSchema = {
     <ul>
       <li>Azure authentication (OAuth flow in your default browser; tokens go directly between Microsoft and your machine). If your account belongs to several tenants, viewbus enumerates them so you can pick the active one — that enumeration is also a direct call to Microsoft.</li>
       <li>Azure Resource Manager + Service Bus REST / AMQP calls (direct to the endpoints in your connection strings — the app's Content Security Policy allows only <code>login.microsoftonline.com</code>, <code>management.azure.com</code>, <code>*.servicebus.windows.net</code>, and the static viewbus.app hosts below).</li>
-      <li>An update check on app start that reads <code>https://viewbus.app/latest.json</code> — a static JSON file with the current version number. No query parameters, no identifiers, no user agent beyond what the OS adds.</li>
+      <li>An update check on app start that reads <code>https://viewbus.app/latest.json</code> — a static JSON file with the current version number. No query parameters, no identifiers, no user agent beyond what the OS adds. Apps installed from the Microsoft Store are updated through the Store instead.</li>
       <li>An announcements check on app start that reads <code>https://viewbus.app/announcements.json</code> — the same kind of static file. Notices that don't apply to your version are filtered locally; dismissed ones are remembered in <code>localStorage</code>.</li>
     </ul>
 

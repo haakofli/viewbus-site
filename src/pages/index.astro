@@ -9,6 +9,46 @@ const description = "A fast, local, private desktop app for managing Azure Servi
 const windowsInstaller = latest.platforms["windows-x86_64"]?.url ?? latest.installerUrl;
 const macInstaller = latest.platforms["darwin-aarch64"]?.url ?? null;
 
+// Microsoft Store listing — the trusted Windows path (Microsoft re-signs the
+// package, so no SmartScreen warning, and it auto-updates via the Store). Stable
+// across releases, so it lives here, NOT in latest.json (which the release
+// workflow regenerates). Set to "" to fall back to the direct .exe download.
+const storeUrl = "https://apps.microsoft.com/detail/9p0q5zmlv15k";
+
+// Most-requested features — open issues in THIS repo labeled `feature-request`,
+// ranked by 👍 reactions. Fetched at build time only: the page stays static, no
+// runtime calls, no per-visitor GitHub hits. A scheduled rebuild refreshes the
+// counts. Any failure (offline / rate-limit / no label yet) falls back to an
+// empty list and the "be the first" prompt.
+interface FeatureRequest { title: string; url: string; votes: number; body: string; }
+let featureRequests: FeatureRequest[] = [];
+try {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 5000);
+  const query = "repo:haakofli/viewbus-site is:issue is:open label:feature-request";
+  const res = await fetch(
+    `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&sort=reactions-%2B1&order=desc&per_page=5`,
+    {
+      headers: { "User-Agent": "viewbus-site", Accept: "application/vnd.github+json" },
+      signal: ctrl.signal,
+    },
+  );
+  clearTimeout(timer);
+  if (res.ok) {
+    const data = await res.json();
+    featureRequests = (data.items ?? []).map((i: any) => ({
+      title: i.title as string,
+      url: i.html_url as string,
+      votes: (i.reactions?.["+1"] as number) ?? 0,
+      body: ((i.body as string) ?? "").replace(/\s+/g, " ").trim().slice(0, 120),
+    }));
+  }
+} catch {
+  featureRequests = [];
+}
+const featureRequestNewUrl =
+  "https://github.com/haakofli/viewbus-site/issues/new?template=feature_request.md";
+
 const softwareApplicationSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -99,33 +139,23 @@ const breadcrumbSchema = {
   <section class="relative overflow-hidden">
     <div class="max-w-6xl mx-auto px-6 pt-12 md:pt-20 pb-16 md:pb-24 text-center">
       <h1 class="text-5xl sm:text-6xl md:text-7xl font-semibold tracking-tight leading-[0.95] text-[var(--color-fg)]">
-        The local-first<br />Service Bus explorer
+        The fastest way to debug your Azure Service&nbsp;Buses
       </h1>
 
       <p class="mt-6 max-w-2xl mx-auto text-base md:text-lg text-[var(--color-muted)] leading-relaxed">
-        Built in Rust. Stays on your machine. Ships an MCP server so AI assistants can peek queues for you.
+        Search, inspect, edit, and resend messages in seconds — with custom dead-letter alerts and MCP-powered debugging built in.
       </p>
 
       <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-        <!-- Mac: secondary, glassy pill — opens Install via Homebrew modal -->
-        <button
-          type="button"
-          data-download
-          data-mac-download
-          data-mac-installer={macInstaller}
-          class="lifted-sm inline-flex items-center gap-2.5 whitespace-nowrap bg-[var(--color-chrome)] hover:bg-[color-mix(in_oklab,var(--color-chrome)_88%,var(--color-fg))] border border-[var(--color-border)] rounded-full h-11 px-5 text-sm font-medium text-[var(--color-fg)] cursor-pointer transition-[background-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-        >
-          <svg width="15" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-          </svg>
-          Install for macOS
-        </button>
-
-        <!-- Windows: primary, inverted fill — direct download -->
+        <!-- Windows: opens the Store-vs-direct modal via JS. Without JS the href
+             still downloads the .exe directly. Emphasis (filled) is the default;
+             the OS-detect script promotes the visitor's platform. -->
         <a
           href={windowsInstaller}
           data-download
-          class="lifted-sm inline-flex items-center gap-2.5 whitespace-nowrap bg-[var(--color-fg)] text-[var(--color-bg)] hover:bg-[color-mix(in_oklab,var(--color-fg)_88%,transparent)] rounded-full h-11 px-6 text-sm font-medium transition-[background-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+          data-win-download
+          data-os="win"
+          class="dl-btn dl-emph lifted-sm inline-flex items-center gap-2.5 whitespace-nowrap rounded-full h-11 px-6 text-sm font-medium transition-[background-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <rect x="0" y="0" width="10" height="10" />
@@ -135,10 +165,25 @@ const breadcrumbSchema = {
           </svg>
           Download for Windows
         </a>
+
+        <!-- macOS: opens the Install-via-Homebrew modal. -->
+        <button
+          type="button"
+          data-download
+          data-mac-download
+          data-os="mac"
+          data-mac-installer={macInstaller}
+          class="dl-btn dl-soft lifted-sm inline-flex items-center gap-2.5 whitespace-nowrap rounded-full h-11 px-6 text-sm font-medium cursor-pointer transition-[background-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+        >
+          <svg width="15" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+          </svg>
+          Install for macOS
+        </button>
       </div>
 
       <p class="mt-5 font-mono text-[11px] text-[var(--color-muted)] tracking-wide">
-        v{latest.version}
+        Free · v{latest.version} · no account, no telemetry
       </p>
 
       <div class="lifted-xl mt-14 md:mt-20 max-w-5xl mx-auto rounded-[var(--radius)] overflow-hidden border border-[var(--color-border)] bg-[oklch(0.18_0.01_260)]">
@@ -157,13 +202,174 @@ const breadcrumbSchema = {
 
   <FeatureTabs />
 
-  <section class="max-w-3xl mx-auto px-6 py-24 text-center">
-    <div class="reveal">
-      <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Your data stays on your machine.</h2>
-      <p class="text-[var(--color-muted)] leading-relaxed">
-        viewbus has no backend servers, sends no telemetry, and has no account system. Your Azure credentials are used directly by your machine to talk to Azure. Connection strings live in the OS keychain — Windows Credential Manager on Windows, macOS Keychain on Mac — never on disk in plain text.
+  <section class="max-w-4xl mx-auto px-6 py-24 md:py-32">
+    <h2 class="reveal text-3xl md:text-4xl font-bold mb-4 tracking-tight text-center">
+      How it compares
+    </h2>
+    <p class="reveal text-[var(--color-muted)] mb-10 md:mb-12 max-w-2xl mx-auto text-center leading-relaxed">
+      The classic <span class="text-[var(--color-fg)]">Service Bus Explorer</span> is Windows-only; the Azure Portal can't search across resources or alert you. Here's where viewbus fits — and where the others still win.
+    </p>
+
+    <div class="reveal overflow-x-auto -mx-6 px-6">
+      <table class="w-full min-w-[34rem] border-collapse text-sm">
+        <caption class="sr-only">Feature comparison of viewbus, Service Bus Explorer, and the Azure Portal</caption>
+        <thead>
+          <tr class="border-b border-[var(--color-border)]">
+            <th scope="col" class="py-3 pr-4 text-left"></th>
+            <th scope="col" class="py-3 px-4 text-center text-base font-semibold text-[var(--color-fg)] bg-[color-mix(in_oklab,var(--color-accent)_8%,transparent)] rounded-t-[var(--radius)]">viewbus</th>
+            <th scope="col" class="py-3 px-4 text-center font-medium text-[var(--color-muted)] leading-tight">Service Bus<br />Explorer</th>
+            <th scope="col" class="py-3 px-4 text-center font-medium text-[var(--color-muted)]">Azure Portal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-[var(--color-border)]">
+            <th scope="row" class="py-3.5 pr-4 text-left font-normal text-[var(--color-fg)]">Native app for Mac &amp; Windows</th>
+            <td class="py-3.5 px-4 text-center bg-[color-mix(in_oklab,var(--color-accent)_8%,transparent)]"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block" role="img" aria-label="Yes"><path d="M20 6 9 17l-5-5"/></svg></td>
+            <td class="py-3.5 px-4 text-center text-xs text-[var(--color-muted)]">Windows only</td>
+            <td class="py-3.5 px-4 text-center text-xs text-[var(--color-muted)]">In-browser</td>
+          </tr>
+          <tr class="border-b border-[var(--color-border)]">
+            <th scope="row" class="py-3.5 pr-4 text-left font-normal text-[var(--color-fg)]">Search message bodies across queues, topics &amp; subscriptions</th>
+            <td class="py-3.5 px-4 text-center bg-[color-mix(in_oklab,var(--color-accent)_8%,transparent)]"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block" role="img" aria-label="Yes"><path d="M20 6 9 17l-5-5"/></svg></td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted-dim)]" aria-label="No">—</td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted-dim)]" aria-label="No">—</td>
+          </tr>
+          <tr class="border-b border-[var(--color-border)]">
+            <th scope="row" class="py-3.5 pr-4 text-left font-normal text-[var(--color-fg)]">Edit &amp; resend, with a side-by-side diff</th>
+            <td class="py-3.5 px-4 text-center bg-[color-mix(in_oklab,var(--color-accent)_8%,transparent)]"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block" role="img" aria-label="Yes"><path d="M20 6 9 17l-5-5"/></svg></td>
+            <td class="py-3.5 px-4 text-center text-xs text-[var(--color-muted)]">Limited</td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted-dim)]" aria-label="No">—</td>
+          </tr>
+          <tr class="border-b border-[var(--color-border)]">
+            <th scope="row" class="py-3.5 pr-4 text-left font-normal text-[var(--color-fg)]">Alerts when a queue or subscription crosses a threshold</th>
+            <td class="py-3.5 px-4 text-center bg-[color-mix(in_oklab,var(--color-accent)_8%,transparent)]"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block" role="img" aria-label="Yes"><path d="M20 6 9 17l-5-5"/></svg></td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted-dim)]" aria-label="No">—</td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted-dim)]" aria-label="No">—</td>
+          </tr>
+          <tr class="border-b border-[var(--color-border)]">
+            <th scope="row" class="py-3.5 pr-4 text-left font-normal text-[var(--color-fg)]">AI assistant access (MCP server)</th>
+            <td class="py-3.5 px-4 text-center bg-[color-mix(in_oklab,var(--color-accent)_8%,transparent)]"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block" role="img" aria-label="Yes"><path d="M20 6 9 17l-5-5"/></svg></td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted-dim)]" aria-label="No">—</td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted-dim)]" aria-label="No">—</td>
+          </tr>
+          <tr class="border-b border-[var(--color-border)]">
+            <th scope="row" class="py-3.5 pr-4 text-left font-normal text-[var(--color-fg)]">Relay, Event Hubs &amp; Notification Hubs</th>
+            <td class="py-3.5 px-4 text-center bg-[color-mix(in_oklab,var(--color-accent)_8%,transparent)] text-[var(--color-muted-dim)]" aria-label="No">—</td>
+            <td class="py-3.5 px-4 text-center"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--color-success)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block" role="img" aria-label="Yes"><path d="M20 6 9 17l-5-5"/></svg></td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted-dim)]" aria-label="No">—</td>
+          </tr>
+          <tr>
+            <th scope="row" class="py-3.5 pr-4 text-left font-normal text-[var(--color-fg)]">Price</th>
+            <td class="py-3.5 px-4 text-center font-medium text-[var(--color-fg)] bg-[color-mix(in_oklab,var(--color-accent)_8%,transparent)] rounded-b-[var(--radius)]">Free</td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted)]">Free</td>
+            <td class="py-3.5 px-4 text-center text-[var(--color-muted)]">Free</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <section class="max-w-4xl mx-auto px-6 py-24 md:py-32">
+    <h2 class="reveal text-3xl md:text-4xl font-bold mb-4 tracking-tight text-center">
+      On the roadmap
+    </h2>
+    <p class="reveal text-[var(--color-muted)] mb-10 md:mb-12 max-w-2xl mx-auto text-center leading-relaxed">
+      Free, and shipping often. A few things already in the works:
+    </p>
+    <ul class="reveal grid gap-x-10 gap-y-10 sm:grid-cols-2">
+      <li>
+        <h3 class="font-semibold mb-1.5">Dead-letter trends</h3>
+        <p class="text-sm text-[var(--color-muted)] leading-relaxed">History and sparklines per resource, so you can spot a backlog that started building two days ago — not just right now.</p>
+      </li>
+      <li>
+        <h3 class="font-semibold mb-1.5">More message formats</h3>
+        <p class="text-sm text-[var(--color-muted)] leading-relaxed">Syntax-highlighted XML, YAML, and protobuf bodies — not just JSON and plain text.</p>
+      </li>
+      <li>
+        <h3 class="font-semibold mb-1.5">Local emulator support</h3>
+        <p class="text-sm text-[var(--color-muted)] leading-relaxed">Point viewbus at the local Azure Service Bus emulator for development, right beside your real namespaces.</p>
+      </li>
+      <li>
+        <h3 class="font-semibold mb-1.5">Theme marketplace</h3>
+        <p class="text-sm text-[var(--color-muted)] leading-relaxed">Browse and one-click-install community-made viewbus themes, share your own, and export your full setup to move between machines.</p>
+      </li>
+    </ul>
+
+    <div class="reveal mt-14">
+      <div class="flex items-center justify-between gap-4 mb-4">
+        <h3 class="text-lg font-semibold">Most requested</h3>
+        <a
+          href={featureRequestNewUrl}
+          target="_blank"
+          rel="noopener"
+          class="text-sm text-[var(--color-accent)] hover:underline whitespace-nowrap"
+        >
+          Request a feature →
+        </a>
+      </div>
+      {featureRequests.length > 0 ? (
+        <ul class="grid gap-x-10 gap-y-10 sm:grid-cols-2">
+          {featureRequests.map((f) => (
+            <li>
+              <a href={f.url} target="_blank" rel="noopener" class="group block">
+                <div class="mb-1.5 flex items-start justify-between gap-3">
+                  <h4 class="font-semibold leading-snug transition-colors group-hover:text-[var(--color-accent)]">{f.title}</h4>
+                  <span class="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--color-border)] px-2 py-0.5 font-mono text-xs text-[var(--color-muted)]">▲ {f.votes}</span>
+                </div>
+                {f.body && (
+                  <p class="text-sm text-[var(--color-muted)] leading-relaxed">{f.body}{f.body.length >= 120 ? "…" : ""}</p>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="text-center text-sm text-[var(--color-muted)]">
+          No requests yet —{" "}
+          <a href={featureRequestNewUrl} target="_blank" rel="noopener" class="text-[var(--color-accent)] hover:underline">
+            be the first to suggest a feature
+          </a>.
+        </p>
+      )}
+      <p class="mt-4 text-center text-xs text-[var(--color-muted)]">
+        Open any request to upvote it on GitHub — the most-wanted ship first.
       </p>
-      <a href="/privacy" class="inline-block mt-6 text-[var(--color-accent)] hover:underline">Read the full privacy promise →</a>
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-6 py-24 md:py-32">
+    <div class="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+      <div class="reveal">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Your data never leaves your machine.</h2>
+        <div class="mt-5 space-y-3 text-[var(--color-muted)] leading-relaxed">
+          <p>
+            No backend, no telemetry, no account. When you sign in, it's to <span class="text-[var(--color-fg)]">your own Azure</span> — not to viewbus. Tokens and connection strings stay in your OS keychain, never on disk in plain text.
+          </p>
+          <p>
+            We can't see your namespaces or your messages, and we're <span class="text-[var(--color-accent)]">not training any AI on what you do</span>. Don't take our word for it — open the network inspector and see exactly where traffic goes.
+          </p>
+        </div>
+        <a href="/privacy" class="inline-block mt-6 text-[var(--color-accent)] hover:underline">Read the full privacy promise →</a>
+      </div>
+
+      <div class="reveal dark-card lifted overflow-hidden rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-bg)] font-mono text-[12px]">
+        <div class="flex h-7 items-center gap-2 border-b border-[var(--color-border)] px-3 text-[10px] text-[var(--color-muted)]">
+          <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+          <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+          <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
+          <span class="ml-2">network · outbound</span>
+        </div>
+        <div class="space-y-1.5 p-4 text-[var(--color-fg)]">
+          <div class="flex items-center gap-2"><span class="shrink-0 text-[var(--color-success)]">→</span><span class="truncate">login.microsoftonline.com</span><span class="ml-auto shrink-0 text-[var(--color-muted)]">sign-in</span></div>
+          <div class="flex items-center gap-2"><span class="shrink-0 text-[var(--color-success)]">→</span><span class="truncate">management.azure.com</span><span class="ml-auto shrink-0 text-[var(--color-muted)]">your subscriptions</span></div>
+          <div class="flex items-center gap-2"><span class="shrink-0 text-[var(--color-success)]">→</span><span class="truncate">*.servicebus.windows.net</span><span class="ml-auto shrink-0 text-[var(--color-muted)]">your messages</span></div>
+          <div class="flex items-center gap-2"><span class="shrink-0 text-[var(--color-success)]">→</span><span class="truncate">viewbus.app/latest.json</span><span class="ml-auto shrink-0 text-[var(--color-muted)]">update check</span></div>
+          <div class="h-2"></div>
+          <div class="text-[var(--color-muted)]">✓ no telemetry · no analytics · no account</div>
+          <div class="text-[var(--color-muted)]">✓ nothing about you is ever uploaded</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -307,6 +513,92 @@ const breadcrumbSchema = {
   </dialog>
   )}
 
+  <!-- Windows primary path: install from the Microsoft Store (signed, no SmartScreen). -->
+  {storeUrl && (
+  <dialog
+    id="win-download-dialog"
+    data-installer={windowsInstaller}
+    aria-labelledby="win-download-title"
+    class="m-auto max-w-lg w-[calc(100%-2rem)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-chrome)] text-[var(--color-fg)] p-0 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+  >
+    <form method="dialog" class="relative flex flex-col gap-5 p-7 text-center">
+      <button
+        type="button"
+        data-win-close
+        aria-label="Close"
+        class="absolute top-3 right-3 inline-flex items-center justify-center h-7 w-7 rounded-md text-[var(--color-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-hover)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <h2 id="win-download-title" class="mt-1 text-lg font-semibold leading-snug">
+        Download for Windows
+      </h2>
+
+      <a
+        href={storeUrl}
+        target="_blank"
+        rel="noopener"
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full h-11 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] hover:bg-[var(--color-fg)]/90 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-chrome)]"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="0" width="10" height="10" /><rect x="12" y="0" width="10" height="10" /><rect x="0" y="12" width="10" height="10" /><rect x="12" y="12" width="10" height="10" />
+        </svg>
+        Get it from the Microsoft Store
+      </a>
+      <div class="flex items-center gap-3 text-[11px] uppercase tracking-wider text-[var(--color-muted)]">
+        <span class="h-px flex-1 bg-[var(--color-border)]"></span>or<span class="h-px flex-1 bg-[var(--color-border)]"></span>
+      </div>
+
+      <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-fg)]/[0.03] p-4 text-left text-sm leading-relaxed text-[var(--color-muted)] space-y-3">
+        <p>
+          Prefer a direct installer? The <code class="font-mono text-[12px] text-[var(--color-fg)]">.exe</code> isn't signed yet, so Windows SmartScreen warns once — click <span class="text-[var(--color-fg)]">More info → Run anyway</span>.
+        </p>
+        <div class="flex justify-center">
+          <button
+            type="button"
+            data-win-confirm
+            class="inline-flex items-center justify-center rounded-full h-9 px-4 text-sm font-medium border border-[var(--color-border)] bg-transparent hover:bg-[var(--color-hover)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+          >
+            Download the .exe anyway
+          </button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+  )}
+
+  <script is:inline>
+    (() => {
+      const dlg = document.getElementById("win-download-dialog");
+      const triggers = document.querySelectorAll("[data-win-download]");
+      // No Store dialog (storeUrl empty) → the trigger's href downloads the .exe directly.
+      if (!(dlg instanceof HTMLDialogElement)) return;
+
+      triggers.forEach((el) => {
+        el.addEventListener("click", (event) => {
+          // No <dialog> support → let the link fall through to the .exe download.
+          if (typeof dlg.showModal !== "function") return;
+          event.preventDefault();
+          dlg.showModal();
+        });
+      });
+
+      dlg.querySelector("[data-win-close]")?.addEventListener("click", () => dlg.close());
+      dlg.querySelector("[data-win-confirm]")?.addEventListener("click", () => {
+        const url = dlg.dataset.installer || "";
+        dlg.close();
+        if (url) window.location.href = url;
+      });
+      dlg.addEventListener("click", (event) => {
+        if (event.target === dlg) dlg.close();
+      });
+    })();
+  </script>
+
   <script is:inline>
     (() => {
       const brewDialog = document.getElementById("mac-brew-dialog");
@@ -400,7 +692,41 @@ const breadcrumbSchema = {
     })();
   </script>
 
+  <script is:inline>
+    // Promote the download button that matches the visitor's OS. The SSR
+    // default keeps Windows emphasized + first; on macOS we swap the emphasis
+    // and order so Mac visitors — our cross-platform differentiator — get the
+    // primary CTA instead of the secondary one.
+    (() => {
+      const platform =
+        (navigator.userAgentData && navigator.userAgentData.platform) ||
+        navigator.platform ||
+        navigator.userAgent ||
+        "";
+      if (!/mac|iphone|ipad|ipod/i.test(platform)) return;
+      const mac = document.querySelector('[data-os="mac"]');
+      const win = document.querySelector('[data-os="win"]');
+      if (!mac || !win) return;
+      mac.classList.replace("dl-soft", "dl-emph");
+      win.classList.replace("dl-emph", "dl-soft");
+      mac.style.order = "0";
+      win.style.order = "1";
+    })();
+  </script>
+
   <style>
+    /* Download CTA color treatments. Sizing/layout/focus stay as inline utility
+       classes; only the fill-vs-outline emphasis lives here so the OS-detect
+       script can swap a single class between the two buttons. */
+    .dl-emph { background: var(--color-fg); color: var(--color-bg); }
+    .dl-emph:hover { background: color-mix(in oklab, var(--color-fg) 88%, transparent); }
+    .dl-soft {
+      background: var(--color-chrome);
+      color: var(--color-fg);
+      border: 1px solid var(--color-border);
+    }
+    .dl-soft:hover { background: color-mix(in oklab, var(--color-chrome) 88%, var(--color-fg)); }
+
     /* Hide the native scrollbar on the brew command — the Copy button is the
        primary affordance, and Windows' default scrollbar arrows look terrible
        inside a small inline pill. Users can still scroll/select the text. */

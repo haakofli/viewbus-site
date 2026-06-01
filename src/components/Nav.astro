@@ -7,6 +7,7 @@ const links = [
   { href: "/changelog", label: "Changelog" },
   { href: "/privacy", label: "Privacy" },
 ];
+const coffeeUrl = "https://buymeacoffee.com/hakonlia";
 ---
 <nav class="lifted sticky top-0 z-50 backdrop-blur-xl backdrop-saturate-150 bg-[color-mix(in_oklab,var(--color-bg)_65%,transparent)]">
   <div class="max-w-6xl mx-auto px-6 h-14 grid grid-cols-[auto_1fr_auto] items-center gap-6">
@@ -23,10 +24,10 @@ const links = [
 
     <div class="flex items-center justify-end gap-2">
       <a
-        href="https://buymeacoffee.com/hakonlia"
+        href={coffeeUrl}
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[var(--color-muted)] hover:text-[var(--color-fg)] text-xs font-medium border border-[var(--color-border)] hover:border-[color-mix(in_oklab,var(--color-fg)_25%,transparent)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+        class="hidden md:inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[var(--color-muted)] hover:text-[var(--color-fg)] text-xs font-medium border border-[var(--color-border)] hover:border-[color-mix(in_oklab,var(--color-fg)_25%,transparent)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
@@ -37,12 +38,90 @@ const links = [
         </svg>
         <span>Buy me a coffee</span>
       </a>
+
+      <!-- Mobile menu toggle -->
+      <button
+        type="button"
+        id="nav-toggle"
+        aria-label="Open menu"
+        aria-controls="nav-mobile"
+        aria-expanded="false"
+        class="md:hidden inline-flex items-center justify-center size-9 -mr-1.5 rounded-md text-[var(--color-fg)] hover:bg-[var(--color-hover)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+      >
+        <svg data-nav-open width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+        <svg data-nav-close class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
     </div>
   </div>
 
-  <ul class="md:hidden flex items-center justify-center gap-5 px-6 pb-2 text-sm text-[var(--color-muted)]">
-    {links.map(({ href, label }) => (
-      <li><a href={href} class="hover:text-[var(--color-fg)] transition-colors">{label}</a></li>
-    ))}
-  </ul>
+  <!-- Mobile drawer -->
+  <div id="nav-mobile" class="md:hidden hidden border-t border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_92%,transparent)]">
+    <ul class="flex flex-col px-6 py-2">
+      {links.map(({ href, label }) => (
+        <li>
+          <a
+            href={href}
+            data-nav-link
+            class="block py-2.5 text-sm text-[var(--color-muted)] hover:text-[var(--color-fg)] transition-colors"
+          >
+            {label}
+          </a>
+        </li>
+      ))}
+      <li class="py-2.5">
+        <a
+          href={coffeeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-nav-link
+          class="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full text-[var(--color-fg)] text-sm font-medium border border-[var(--color-border)] hover:border-[color-mix(in_oklab,var(--color-fg)_25%,transparent)] transition-colors"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+            <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+            <line x1="6" y1="2" x2="6" y2="4" />
+            <line x1="10" y1="2" x2="10" y2="4" />
+            <line x1="14" y1="2" x2="14" y2="4" />
+          </svg>
+          <span>Buy me a coffee</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const btn = document.getElementById("nav-toggle");
+      const panel = document.getElementById("nav-mobile");
+      if (!btn || !panel) return;
+      const openIcon = btn.querySelector("[data-nav-open]");
+      const closeIcon = btn.querySelector("[data-nav-close]");
+      const setOpen = (open) => {
+        panel.classList.toggle("hidden", !open);
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+        openIcon && openIcon.classList.toggle("hidden", open);
+        closeIcon && closeIcon.classList.toggle("hidden", !open);
+      };
+      btn.addEventListener("click", () => setOpen(panel.classList.contains("hidden")));
+      panel.querySelectorAll("[data-nav-link]").forEach((a) =>
+        a.addEventListener("click", () => setOpen(false)),
+      );
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+      // Collapse if the viewport grows into the desktop layout.
+      const mq = window.matchMedia("(min-width: 768px)");
+      mq.addEventListener("change", (e) => {
+        if (e.matches) setOpen(false);
+      });
+    })();
+  </script>
 </nav>

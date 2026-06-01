@@ -5,22 +5,39 @@ import { latest } from "../lib/latest";
 const year = new Date().getFullYear();
 
 const links = [
+  { href: "/changelog", label: "changelog" },
   { href: "/privacy", label: "privacy" },
-  { href: "https://github.com/haakofli/viewbus-site", label: "github" },
+  { href: "https://github.com/haakofli/viewbus-site", label: "github", external: true },
+  {
+    href: "https://github.com/haakofli/viewbus-site/issues/new?template=feature_request.md",
+    label: "request a feature",
+    external: true,
+  },
+  { href: "https://buymeacoffee.com/hakonlia", label: "buy me a coffee", external: true },
 ];
 ---
 <footer class="mt-32 border-t border-[var(--color-border)]">
   <div class="max-w-6xl mx-auto px-6 py-10 space-y-6">
     <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-      <div class="flex items-baseline gap-3">
-        <Wordmark size="sm" />
-        <span class="font-mono text-xs text-[var(--color-muted)]">v{latest.version}</span>
+      <div class="flex flex-col gap-1">
+        <div class="flex items-baseline gap-3">
+          <Wordmark size="sm" />
+          <span class="font-mono text-xs text-[var(--color-muted)]">v{latest.version}</span>
+        </div>
+        <p class="text-xs text-[var(--color-muted)]">The fastest way to debug Azure Service Bus.</p>
       </div>
-      <ul class="flex flex-wrap items-center gap-x-3 text-sm text-[var(--color-muted)]">
-        {links.map(({ href, label }, i) => (
+      <ul class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-muted)]">
+        {links.map(({ href, label, external }, i) => (
           <>
             {i > 0 && <li aria-hidden="true" class="text-[var(--color-muted)]/60">·</li>}
-            <li><a href={href} class="hover:text-[var(--color-fg)] transition-colors">{label}</a></li>
+            <li>
+              <a
+                href={href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer" : undefined}
+                class="hover:text-[var(--color-fg)] transition-colors"
+              >{label}</a>
+            </li>
           </>
         ))}
       </ul>

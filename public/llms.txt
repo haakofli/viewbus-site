@@ -1,38 +1,41 @@
 # ViewBus
 
-> Azure Service Bus desktop manager for Windows. Fast, local, private. Free.
+> The fastest way to debug Azure Service Bus. A fast, native desktop app for Windows and macOS. Free, local, private.
 
-ViewBus is a native Windows desktop app for developers working with Azure Service Bus. It lets users browse namespaces, peek and filter queue and topic messages, resend dead-lettered items, search across their entire bus via a spotlight interface, and expose all of this to AI assistants via a built-in Model Context Protocol (MCP) server. All data stays on the user's machine — no telemetry, no cloud sync, no accounts.
+ViewBus is a native desktop app (Windows + macOS) for developers working with Azure Service Bus. It lets users browse namespaces, search for a message across every queue, topic, and dead-letter queue at once, edit and resend dead-lettered messages with a side-by-side diff, set background alerts on dead-letter backlogs, and expose all of this to AI assistants via a built-in Model Context Protocol (MCP) server. All data stays on the user's machine — no telemetry, no cloud sync, no accounts.
 
 ## Key facts
 
-- **Name:** ViewBus
-- **Platform:** Windows 10 / 11 (x64)
+- **Name:** ViewBus (stylized "viewbus")
+- **Platform:** Windows 10 / 11 (x64) and macOS (Apple Silicon; Intel via Rosetta)
 - **Price:** Free
-- **Source:** Closed source; binaries published on GitHub Releases
+- **Source:** Closed source; distributed via the Microsoft Store and GitHub Releases
 - **Privacy:** No telemetry, no backend servers, no accounts. See /privacy
 - **Built with:** Tauri 2, Rust, React, TypeScript, SQLite
-- **Current version:** See /latest.json
+- **Current version:** See https://viewbus.app/latest.json
 
 ## Who it's for
 
-Developers, DevOps engineers, and SREs who work with Azure Service Bus day-to-day and have outgrown Service Bus Explorer (Windows-only, slow, unmaintained) or the Azure Portal (cloud-only, can't reach namespaces outside the user's Azure tenant).
+Developers, DevOps engineers, and SREs who work with Azure Service Bus and want something faster and more capable than Paolo Salvatori's Service Bus Explorer (still maintained, but Windows-only, .NET Framework, and with no message-body search) or the Azure Portal's built-in Service Bus Explorer (limited search, no cross-resource view, low peek caps).
 
 ## Key differentiators vs alternatives
 
-- **vs Service Bus Explorer:** ViewBus is actively maintained, has an MCP server for AI workflows, imports VS Code themes, and supports manual connection strings for external tenants.
-- **vs Azure Portal:** ViewBus works offline for indexed resources, handles namespaces outside the user's Azure tenant (via connection strings), and provides keyboard-driven bulk operations.
-- **vs custom SDK scripts:** ViewBus is a polished GUI with persistent local index and spotlight search — no code required for common operations.
+- **vs Service Bus Explorer:** native on macOS as well as Windows; searches message *bodies* across queues, topics, and subscriptions at once; edits and resends messages with a side-by-side diff; sets background dead-letter alerts; ships an MCP server; imports VS Code themes; stores manual connection strings in the OS keychain.
+- **vs the Azure Portal:** finds a message across every resource at once (the Portal can't), no 100-message peek caps, background alerting, reaches namespaces outside the user's tenant via connection strings, keyboard-driven bulk operations.
+- **vs Microsoft's official Azure MCP Server:** that server exposes Service Bus *metadata* (counts, status) but cannot peek dead-letter messages or trace a message across queues — ViewBus's MCP server can.
+- **vs custom SDK scripts:** a polished GUI with a persistent local index and spotlight search — no code for common operations.
 
 ## Primary capabilities
 
-1. Azure subscription discovery and live namespace tree
-2. Peek active and dead-letter messages with filters by session, message ID, correlation ID, subject, and dead-letter reason
-3. Resend dead-lettered messages (optionally with property edits) or bulk-delete stuck messages
-4. Manual connection strings (stored in Windows Credential Manager under service name `viewbus`, never on disk in plain text)
-5. Spotlight fuzzy search (`Ctrl+I`, rebindable) across every indexed resource; survives minimize-to-tray
-6. Built-in MCP server exposing the tools below
-7. Themes including one-click VS Code theme import
+1. Azure subscription discovery and a live, locally-indexed namespace tree (SQLite); multi-tenant aware (switch tenants from the account dialog).
+2. Peek active and dead-letter messages with filters by session, message ID, correlation ID, subject, or dead-letter reason.
+3. Search message bodies across every queue, topic, and dead-letter queue in a namespace at once.
+4. Edit a message body/properties in a side-by-side diff editor, then resend (single or filtered-bulk); bulk-delete or empty a dead-letter queue behind a confirmation.
+5. Background dead-letter monitoring with custom per-resource alert thresholds and native notifications (opt-in).
+6. Manual connection strings, stored in the OS keychain (Windows Credential Manager / macOS Keychain), never on disk in plain text.
+7. Spotlight fuzzy search (Ctrl+I, rebindable) across every indexed resource, system-wide; survives minimize-to-tray.
+8. Built-in MCP server exposing the tools below.
+9. Dark, light, and custom user themes; one-click VS Code theme import.
 
 ## MCP server tools
 
@@ -40,18 +43,18 @@ The MCP server ships with the desktop app (Rust, stdio transport). Ten tools are
 
 **Read-only (always enabled):**
 
-- `get_status` — describe the index state: whether a subscription is selected, last refresh time, resource count. Call this first to orient.
-- `list_namespaces` — list indexed Azure Service Bus namespaces in the user's selected subscription.
-- `list_queues` — list queues under a given namespace.
-- `list_topics` — list topics under a given namespace.
-- `list_subscriptions` — list subscriptions under a given topic.
-- `get_resource` — fetch full details for a single indexed resource by ID.
-- `search_resources` — fuzzy-search queues, topics, and topic subscriptions by name or path.
-- `count_messages` — counts for active + dead-letter on a given queue or subscription.
+- `get_status` — index state: whether a subscription is selected, last refresh time, resource count. Call this first to orient.
+- `list_namespaces` — indexed Azure Service Bus namespaces in the selected subscription.
+- `list_queues` — queues under a namespace.
+- `list_topics` — topics under a namespace.
+- `list_subscriptions` — subscriptions under a topic.
+- `get_resource` — full details for a single indexed resource by ID.
+- `search_resources` — fuzzy-search queues, topics, and subscriptions by name or path.
+- `count_messages` — active + dead-letter counts for a queue or subscription.
 - `peek_messages` — peek messages from a queue or subscription without dequeuing.
 - `get_message_detail` — full contents of a single message by sequence number (body + system + user properties).
 
-**Write (opt-in via `general.mcpThemeWritesEnabled` setting; default off):**
+**Write (opt-in via `general.mcpThemeWritesEnabled`; default off):**
 
 - `upsert_theme` — let an AI author themes by writing JSON files to the user themes dir.
 
@@ -59,18 +62,16 @@ Message-level writes from MCP (resend / delete / send) are not yet implemented a
 
 ## Install
 
-**Direct installer (current version):** https://github.com/haakofli/viewbus-site/releases/download/v0.1.1/ViewBus_0.1.1_x64-setup.exe
-
-**Programmatic access:** `https://viewbus.app/latest.json` returns the current `version`, a direct `installerUrl`, the installer `platform` (`windows-x64`), installer `installerFormat` (`nsis`), and whether the build is code-`signed`. AI agents and update-checkers should read this file to resolve the latest installer URL rather than hardcoding a version.
-
-**Releases page (human-readable):** https://github.com/haakofli/viewbus-site/releases/latest
-
-Installer is unsigned for v0.1.x; Windows SmartScreen will warn on first launch ("More info" → "Run anyway"). Code signing and MSIX packaging are planned — the `signed` field in `latest.json` will flip to `true` once shipped.
+- **Windows — Microsoft Store (recommended):** https://apps.microsoft.com/detail/9p0q5zmlv15k — signed by Microsoft, no SmartScreen warning, auto-updates via the Store.
+- **Windows — direct installer:** the NSIS `.exe` on GitHub Releases. It isn't code-signed yet, so Windows SmartScreen warns once ("More info" → "Run anyway"). Resolve the current URL from https://viewbus.app/latest.json or https://github.com/haakofli/viewbus-site/releases/latest.
+- **macOS — Homebrew (recommended):** `brew install --cask haakofli/viewbus/viewbus`. A `.dmg` is also on GitHub Releases; it isn't notarized yet, so first launch needs a one-time unlock (`xattr -cr /Applications/ViewBus.app`, or right-click → Open).
+- **Programmatic:** https://viewbus.app/latest.json returns `version`, per-platform download URLs, and signing status — agents should read it rather than hardcoding a version.
 
 ## Pages
 
-- [Home](https://viewbus.app/) — Features, screenshots, download
-- [Changelog](https://viewbus.app/changelog) — Every release, with summaries and download links
-- [Privacy](https://viewbus.app/privacy) — Full data-handling details
-- [Update feed](https://viewbus.app/latest.json) — JSON endpoint the desktop app reads on startup
-- [Long-form reference](https://viewbus.app/llms-full.txt) — Full site content concatenated for agents that want a single fetch
+- [Home](https://viewbus.app/) — features, screenshots, download
+- [Service Bus Explorer alternative](https://viewbus.app/service-bus-explorer-alternative) — positioning vs the original
+- [Changelog](https://viewbus.app/changelog) — every release with summaries and download links
+- [Privacy](https://viewbus.app/privacy) — full data-handling details
+- [Update feed](https://viewbus.app/latest.json) — JSON the desktop app reads on startup
+- [Long-form reference](https://viewbus.app/llms-full.txt) — full site content concatenated for a single fetch

@@ -1,0 +1,29 @@
+---
+import Base from "../layouts/Base.astro";
+
+const title = "Page not found — viewbus";
+const description = "That page doesn't exist.";
+---
+<Base title={title} description={description} path="/404">
+  <section class="max-w-2xl mx-auto px-6 py-32 text-center">
+    <p class="font-mono text-sm uppercase tracking-[0.22em] text-[var(--color-muted)] mb-4">404</p>
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">Page not found</h1>
+    <p class="text-[var(--color-muted)] leading-relaxed mb-8">
+      That page doesn't exist — it may have moved, or never did. Let's get you back on track.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a
+        href="/"
+        class="inline-flex items-center justify-center rounded-full h-11 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] hover:bg-[var(--color-fg)]/90 transition-colors"
+      >
+        Back home
+      </a>
+      <a
+        href="/changelog"
+        class="inline-flex items-center justify-center rounded-full h-11 px-6 text-sm font-medium border border-[var(--color-border)] hover:bg-[var(--color-hover)] transition-colors"
+      >
+        Changelog
+      </a>
+    </div>
+  </section>
+</Base>
