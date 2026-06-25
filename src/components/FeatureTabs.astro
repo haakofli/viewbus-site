@@ -10,7 +10,15 @@ const features = [
     id: "messages",
     label: "Messages",
     title: "Browse and act on messages",
-    body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Edit a body before resending, compose new messages, or drain a queue with a confirmed bulk action — purge, send-all-to-DL, or empty an entire DLQ.",
+    body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Edit a body before resending, or compose new messages from scratch.",
+    wide: true,
+  },
+  {
+    id: "operations",
+    label: "Operations",
+    title: "Run queue operations in bulk",
+    body: "Purge, dead-letter, resend, or delete across a whole queue or DLQ from one place. Preview and filter the batch first, then watch each job run live — progress, an ETA, and a history of every operation that's run.",
+    isNew: true,
     wide: true,
   },
   {
@@ -18,7 +26,6 @@ const features = [
     label: "Monitoring",
     title: "Set up automatic monitoring and alerting",
     body: "Pick exactly which queues, topics, and subscriptions to watch, and which ones should alert. Runs in the background at a low cost to your machine.",
-    isNew: true,
     wide: true,
   },
   {
@@ -57,6 +64,7 @@ const mcpTools = [
 const visualMaxWidth: Record<string, string> = {
   browse: "max-w-[280px]",
   messages: "max-w-[720px]",
+  operations: "max-w-[720px]",
   monitoring: "max-w-[720px]",
   spotlight: "max-w-[480px]",
   mcp: "max-w-[480px]",
