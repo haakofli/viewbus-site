@@ -1,0 +1,614 @@
+---
+import Base from "../layouts/Base.astro";
+import { Code } from "astro:components";
+import CodeTabs from "../components/CodeTabs.astro";
+import shRaw from "../examples/local-api/snippets.sh?raw";
+import tsRaw from "../examples/local-api/snippets.ts?raw";
+import pyRaw from "../examples/local-api/snippets.py?raw";
+import csRaw from "../examples/local-api/snippets.cs?raw";
+import rsRaw from "../examples/local-api/snippets.rs?raw";
+
+const title = "Build viewbus extensions — the local API";
+const description =
+  "Build your own extensions on viewbus. While the app runs it serves a small HTTP API on 127.0.0.1 — search the resources it has indexed and drive the app from your own tools. Local-only, bearer-token auth. Examples in cURL, TypeScript, Python, C#, and Rust.";
+const path = "/developers";
+const CODE = "github-dark";
+
+// Snippet files hold four parts (connect · status · search · focus) split by a
+// marker line, kept verbatim via ?raw. The tabbed example joins them into one
+// full flow; each endpoint reuses the matching single-call part per language.
+const cut = (raw: string, marker: string) => raw.split(marker).map((s) => s.trim());
+const raw: Record<string, string[]> = {
+  sh: cut(shRaw, "#---"),
+  ts: cut(tsRaw, "//---"),
+  py: cut(pyRaw, "#---"),
+  cs: cut(csRaw, "//---"),
+  rs: cut(rsRaw, "//---"),
+};
+const meta = [
+  { id: "sh", label: "cURL", lang: "bash" },
+  { id: "ts", label: "TypeScript", lang: "typescript" },
+  { id: "py", label: "Python", lang: "python" },
+  { id: "cs", label: "C#", lang: "csharp" },
+  { id: "rs", label: "Rust", lang: "rust" },
+];
+const flow = meta.map((m) => ({ ...m, code: raw[m.id].join("\n\n") }));
+const reqFor = (i: number) => meta.map((m) => ({ ...m, code: raw[m.id][i] }));
+const statusReq = reqFor(1);
+const searchReq = reqFor(2);
+const focusReq = reqFor(3);
+
+const statusJson = `{ "app": "viewbus", "apiVersion": 1, "version": "0.8.x", "hasSelection": true }`;
+const searchJson = `{
+  "results": [
+    {
+      "id": "/subscriptions/…/queues/orders-dead",
+      "displayName": "orders-dead",
+      "path": "Prod / rg-msg / ns-orders / orders-dead",
+      "resourceType": "queue",
+      "azureSubscription": "Prod",
+      "activeCount": 128,
+      "deadLetterCount": 4,
+      "lastIndexed": "2026-07-01T09:12:03Z"
+    }
+  ]
+}`;
+const focusOkJson = `{ "ok": true }`;
+const errorJson = `{ "error": { "code": "unauthorized", "message": "invalid token" } }`;
+
+const errors = [
+  ["bad_request", "400", "Missing q, malformed body"],
+  ["unauthorized", "401", "Missing or wrong bearer token"],
+  ["forbidden", "403", "Origin header present, or non-loopback Host"],
+  ["not_found", "404", "Unknown endpoint, or a focus id that doesn't exist"],
+  ["internal", "500", "Unexpected server-side error"],
+];
+
+const toc = [
+  { href: "#overview", label: "Overview" },
+  { href: "#how", label: "How it works" },
+  { href: "#endpoints", label: "Endpoints" },
+  { href: "#errors", label: "Errors" },
+];
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://viewbus.app/" },
+    { "@type": "ListItem", position: 2, name: "Developers", item: "https://viewbus.app/developers" },
+  ],
+};
+const techArticleSchema = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: "Build viewbus extensions with the local HTTP API",
+  description:
+    "Reference for the loopback HTTP API viewbus serves for external tools: discovery, authentication, and the /v1 status, search, and focus endpoints.",
+  url: "https://viewbus.app/developers",
+  author: { "@type": "Person", name: "Håkon Lia" },
+};
+---
+<Base title={title} description={description} path={path}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(techArticleSchema)} />
+  </Fragment>
+
+  <div class="api-shell">
+    <div class="api-page">
+      <!-- 1 · Build your own extensions -->
+      <header id="overview" class="pt-16 md:pt-20">
+        <h1 class="text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
+          Build your own extensions
+        </h1>
+        <p class="mt-5 text-lg text-[var(--color-muted)] leading-relaxed">
+          viewbus runs a small HTTP API on your machine while it's open. Read the resources it has
+          indexed and drive the app from your own tools — no SDK, just HTTP.
+        </p>
+
+        <div class="uses">
+          <div class="use">
+            <h2 class="use-h">Launcher commands</h2>
+            <p class="use-p">Search your queues from Raycast, Alfred, or PowerToys Run and jump straight to one.</p>
+          </div>
+          <div class="use">
+            <h2 class="use-h">Editor &amp; CLI scripts</h2>
+            <p class="use-p">Wire viewbus into a VS Code task or a shell script in a few lines.</p>
+          </div>
+          <div class="use">
+            <h2 class="use-h">Status widgets</h2>
+            <p class="use-p">Ping it from a taskbar or menu-bar script to show if viewbus is running.</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- 2 · How it works -->
+      <section id="how" class="sec">
+        <h2 class="sec-h">How it works</h2>
+        <ol class="steps">
+          <li class="step">
+            <span class="step-n">1</span>
+            <h3 class="step-h">Discover</h3>
+            <div class="step-c">
+              <p>On launch viewbus writes a discovery file with the port and a fresh token.</p>
+              <dl class="paths">
+                <div><dt>Windows</dt><dd><code class="ic">%APPDATA%\viewbus\local-api.json</code></dd></div>
+                <div><dt>macOS</dt><dd><code class="ic">~/Library/Application Support/viewbus/local-api.json</code></dd></div>
+                <div><dt>Linux</dt><dd><code class="ic">~/.local/share/viewbus/local-api.json</code></dd></div>
+              </dl>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-n">2</span>
+            <h3 class="step-h">Authenticate</h3>
+            <div class="step-c">
+              <p>Send the token as <code class="ic">Authorization: Bearer &lt;token&gt;</code>. The server binds <code class="ic">127.0.0.1</code>, requires that token, and rejects any request carrying an <code class="ic">Origin</code> header — so it's reachable only from your machine, never the network or a web page.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-n">3</span>
+            <h3 class="step-h">Call</h3>
+            <div class="step-c">
+              <p>Base URL is <code class="ic">http://127.0.0.1:&lt;port&gt;</code>. Each endpoint is listed below.</p>
+            </div>
+          </li>
+        </ol>
+
+        <details class="example">
+          <summary class="example-sum">
+            <span class="example-title">Full example</span>
+            <span class="example-langs">cURL · TypeScript · Python · C# · Rust</span>
+            <svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+          </summary>
+          <div class="example-body">
+            <CodeTabs group="flow" langs={flow} />
+          </div>
+        </details>
+      </section>
+
+      <!-- 3 · Endpoints -->
+      <section id="endpoints" class="sec">
+        <h2 class="sec-h">Endpoints</h2>
+        <div class="ops">
+          <details id="v1-status" class="op">
+            <summary class="op-row">
+              <span class="verb verb-get">GET</span>
+              <code class="op-path">/v1/status</code>
+              <a class="op-anchor" href="#v1-status" tabindex="-1" aria-label="Link to /v1/status">#</a>
+              <span class="op-why">Check the app is running and read its version.</span>
+              <svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </summary>
+            <div class="op-body">
+              <CodeTabs group="ep-status" langs={statusReq} />
+              <figure class="cb">
+                <figcaption class="cb-bar"><span class="cb-label">Response · 200</span><button type="button" class="cb-copy" data-copy aria-label="Copy code">Copy</button></figcaption>
+                <Code code={statusJson} lang="json" theme={CODE} />
+              </figure>
+              <p class="op-note"><code class="ic">hasSelection</code> is <code class="ic">true</code> only when a tenant and subscription are both selected. Search works without it.</p>
+            </div>
+          </details>
+
+          <details id="v1-search" class="op">
+            <summary class="op-row">
+              <span class="verb verb-get">GET</span>
+              <code class="op-path">/v1/search</code>
+              <a class="op-anchor" href="#v1-search" tabindex="-1" aria-label="Link to /v1/search">#</a>
+              <span class="op-why">Fuzzy-search indexed queues, topics, and subscriptions.</span>
+              <svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </summary>
+            <div class="op-body">
+              <dl class="params">
+                <div><dt>q</dt><dd>required · search term</dd></div>
+                <div><dt>limit</dt><dd>optional · default 20, max 50</dd></div>
+              </dl>
+              <CodeTabs group="ep-search" langs={searchReq} />
+              <figure class="cb">
+                <figcaption class="cb-bar"><span class="cb-label">Response · 200</span><button type="button" class="cb-copy" data-copy aria-label="Copy code">Copy</button></figcaption>
+                <Code code={searchJson} lang="json" theme={CODE} />
+              </figure>
+              <p class="op-note"><code class="ic">id</code> is opaque — pass it to <code class="ic">/v1/focus</code>, don't parse it. Counts are last-indexed, not live; check <code class="ic">lastIndexed</code>.</p>
+            </div>
+          </details>
+
+          <details id="v1-focus" class="op">
+            <summary class="op-row">
+              <span class="verb verb-post">POST</span>
+              <code class="op-path">/v1/focus</code>
+              <a class="op-anchor" href="#v1-focus" tabindex="-1" aria-label="Link to /v1/focus">#</a>
+              <span class="op-why">Bring viewbus to the front, on a specific resource.</span>
+              <svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </summary>
+            <div class="op-body">
+              <dl class="params">
+                <div><dt>id</dt><dd>required · body field — an id from /v1/search</dd></div>
+              </dl>
+              <CodeTabs group="ep-focus" langs={focusReq} />
+              <figure class="cb">
+                <figcaption class="cb-bar"><span class="cb-label">Response · 200</span><button type="button" class="cb-copy" data-copy aria-label="Copy code">Copy</button></figcaption>
+                <Code code={focusOkJson} lang="json" theme={CODE} />
+              </figure>
+              <p class="op-note">An unknown <code class="ic">id</code> returns <code class="ic">404</code>.</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Errors -->
+      <section id="errors" class="sec">
+        <h2 class="sec-h">Errors</h2>
+        <p class="sec-p">Every error uses one shape; the HTTP status matches the <code class="ic">code</code>.</p>
+        <figure class="cb">
+          <figcaption class="cb-bar"><span class="cb-label">Error</span><button type="button" class="cb-copy" data-copy aria-label="Copy code">Copy</button></figcaption>
+          <Code code={errorJson} lang="json" theme={CODE} />
+        </figure>
+        <div class="overflow-x-auto mt-5">
+          <table class="err-table">
+            <thead>
+              <tr><th scope="col">code</th><th scope="col">status</th><th scope="col">meaning</th></tr>
+            </thead>
+            <tbody>
+              {errors.map(([code, http, meaning]) => (
+                <tr><td><code class="ic">{code}</code></td><td><span class="mono">{http}</span></td><td>{meaning}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Reference footer -->
+      <section id="notes" class="sec pb-24">
+        <p class="ref-line">Enabled by default — disable with <code class="ic">localApi.enabled: false</code> in <code class="ic">settings.json</code>, then restart.</p>
+        <p class="ref-line"><code class="ic">/v1</code> is stable: fields are only added, never removed or renamed. Breaking changes ship under <code class="ic">/v2</code>.</p>
+      </section>
+    </div>
+
+    <aside class="toc" aria-label="On this page">
+      <ul>
+        {toc.map(({ href, label }) => (
+          <li><a href={href}>{label}</a></li>
+        ))}
+      </ul>
+    </aside>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const KEY = "viewbus-api-lang";
+      const groups = Array.from(document.querySelectorAll("[data-codetabs]"));
+
+      // One language choice drives every code sample on the page.
+      function applyLang(langId) {
+        let ok = false;
+        groups.forEach((g) => {
+          const tabs = Array.from(g.querySelectorAll('[role="tab"]'));
+          if (!tabs.some((t) => t.dataset.lang === langId)) return;
+          ok = true;
+          tabs.forEach((t) => {
+            const on = t.dataset.lang === langId;
+            t.setAttribute("aria-selected", on ? "true" : "false");
+            t.tabIndex = on ? 0 : -1;
+          });
+          g.querySelectorAll(".ct-panel").forEach((p) => { p.hidden = p.dataset.lang !== langId; });
+        });
+        if (ok) { try { localStorage.setItem(KEY, langId); } catch {} }
+      }
+
+      groups.forEach((g) => {
+        const tabs = Array.from(g.querySelectorAll('[role="tab"]'));
+        tabs.forEach((tab, i) => {
+          tab.addEventListener("click", () => applyLang(tab.dataset.lang));
+          tab.addEventListener("keydown", (e) => {
+            const last = tabs.length - 1;
+            let n = null;
+            if (e.key === "ArrowRight") n = i === last ? 0 : i + 1;
+            else if (e.key === "ArrowLeft") n = i === 0 ? last : i - 1;
+            else if (e.key === "Home") n = 0;
+            else if (e.key === "End") n = last;
+            if (n !== null) { e.preventDefault(); applyLang(tabs[n].dataset.lang); tabs[n].focus(); }
+          });
+        });
+      });
+
+      let saved = null;
+      try { saved = localStorage.getItem(KEY); } catch {}
+      if (saved) applyLang(saved);
+
+      // Copy the nearest visible <pre>.
+      document.querySelectorAll("[data-copy]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const scope = btn.closest(".cb");
+          if (!scope) return;
+          const pre = Array.from(scope.querySelectorAll("pre")).find((p) => p.offsetParent !== null)
+            || scope.querySelector("pre");
+          if (!pre) return;
+          try {
+            await navigator.clipboard.writeText(pre.innerText.replace(/\n$/, ""));
+            const was = btn.textContent;
+            btn.textContent = "Copied";
+            btn.classList.add("is-copied");
+            setTimeout(() => { btn.textContent = was; btn.classList.remove("is-copied"); }, 1300);
+          } catch {
+            const sel = window.getSelection();
+            const r = document.createRange();
+            r.selectNodeContents(pre);
+            sel.removeAllRanges();
+            sel.addRange(r);
+          }
+        });
+      });
+
+      // Endpoint deep links: the "#" anchor links without toggling the row.
+      document.querySelectorAll(".op-row").forEach((row) => {
+        row.addEventListener("click", (e) => {
+          if (!e.target.closest(".op-anchor")) return;
+          e.preventDefault();
+          const d = row.closest("details");
+          if (!d) return;
+          d.open = true;
+          history.pushState(null, "", "#" + d.id);
+          d.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+      const openHash = () => {
+        const el = location.hash ? document.getElementById(location.hash.slice(1)) : null;
+        if (el && el.tagName === "DETAILS") {
+          el.open = true;
+          el.scrollIntoView({ block: "start" });
+        }
+      };
+      window.addEventListener("hashchange", openHash);
+      openHash();
+
+      // Highlight the current section in the on-this-page rail.
+      const tocLinks = Array.from(document.querySelectorAll(".toc a"));
+      if (tocLinks.length && "IntersectionObserver" in window) {
+        const targets = tocLinks
+          .map((a) => document.getElementById(a.getAttribute("href").slice(1)))
+          .filter(Boolean);
+        const setActive = (id) =>
+          tocLinks.forEach((a) => a.setAttribute("aria-current", a.getAttribute("href") === "#" + id ? "true" : "false"));
+        const io = new IntersectionObserver(
+          (entries) => {
+            const vis = entries.filter((e) => e.isIntersecting)
+              .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+            if (vis[0]) setActive(vis[0].target.id);
+          },
+          { rootMargin: "-20% 0px -70% 0px", threshold: 0 },
+        );
+        targets.forEach((t) => io.observe(t));
+      }
+    })();
+  </script>
+
+  <style is:global>
+    /* Only loads on /developers. */
+    .api-shell { max-width: 48rem; margin-inline: auto; padding-inline: 1.5rem; }
+    @media (min-width: 1280px) {
+      .api-shell {
+        max-width: 62rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 11rem;
+        column-gap: 3rem;
+        align-items: start;
+      }
+    }
+
+    /* ── On-this-page rail (xl+) ── */
+    .toc { display: none; }
+    @media (min-width: 1280px) {
+      .toc { display: block; position: sticky; top: 5rem; }
+    }
+    .toc ul { display: flex; flex-direction: column; border-left: 1px solid var(--color-border); }
+    .toc a {
+      display: block; padding: 0.32rem 0 0.32rem 0.85rem;
+      margin-left: -1px;
+      font-size: 0.82rem; color: var(--color-muted);
+      border-left: 2px solid transparent;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .toc a:hover { color: var(--color-fg); }
+    .toc a[aria-current="true"] { color: var(--color-fg); border-left-color: var(--color-accent); }
+    .toc a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+    .api-page .ic {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      color: var(--color-fg);
+      background: color-mix(in oklab, var(--color-fg) 6%, transparent);
+      padding: 0.08em 0.36em;
+      border-radius: var(--radius-sm);
+    }
+    .api-page .mono { font-family: var(--font-mono); }
+
+    .api-page > header { scroll-margin-top: 4.5rem; }
+
+    /* Smooth expand/collapse for <details> (Chromium 129+ / modern engines;
+       degrades to instant open elsewhere). */
+    .api-page { interpolate-size: allow-keywords; }
+    .api-page details::details-content {
+      block-size: 0;
+      overflow: hidden;
+      transition: block-size 0.28s ease, content-visibility 0.28s;
+      transition-behavior: allow-discrete;
+    }
+    .api-page details[open]::details-content { block-size: auto; }
+    @media (prefers-reduced-motion: reduce) {
+      .api-page details::details-content { transition: none; }
+    }
+
+    /* ── Hero use-cases ── */
+    .api-page .uses { display: grid; gap: 1.5rem 2rem; margin-top: 2.5rem; }
+    @media (min-width: 640px) { .api-page .uses { grid-template-columns: repeat(3, 1fr); } }
+    .api-page .use-h { font-size: 0.95rem; font-weight: 600; }
+    .api-page .use-p { margin-top: 0.35rem; font-size: 0.875rem; line-height: 1.55; color: var(--color-muted); }
+
+    /* ── Sections ── */
+    .api-page .sec { margin-top: 4.5rem; scroll-margin-top: 4.5rem; }
+    .api-page .sec-h { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.01em; }
+    .api-page .sec-p { margin: 0.6rem 0 1.2rem; color: var(--color-muted); line-height: 1.6; }
+
+    /* ── How it works: steps ── */
+    .api-page .steps { margin: 1.5rem 0 0; display: flex; flex-direction: column; gap: 1.1rem; }
+    .api-page .step { display: grid; grid-template-columns: 1.6rem 1fr; column-gap: 0.9rem; row-gap: 0.3rem; }
+    .api-page .step-n {
+      grid-column: 1; grid-row: 1;
+      display: grid; place-items: center;
+      width: 1.6rem; height: 1.6rem;
+      font-family: var(--font-mono); font-size: 0.8rem;
+      color: var(--color-accent);
+      border: 1px solid color-mix(in oklab, var(--color-accent) 35%, transparent);
+      border-radius: 9999px;
+    }
+    .api-page .step-h { grid-column: 2; grid-row: 1; align-self: center; font-weight: 600; }
+    .api-page .step-c { grid-column: 2; color: var(--color-muted); line-height: 1.6; }
+    .api-page .step-c p { max-width: 42rem; }
+    .api-page .paths { margin-top: 0.7rem; display: flex; flex-direction: column; gap: 0.35rem; }
+    .api-page .paths > div { display: flex; gap: 0.75rem; align-items: baseline; flex-wrap: wrap; }
+    .api-page .paths dt { width: 4rem; flex-shrink: 0; font-size: 0.8rem; color: var(--color-muted); }
+    .api-page .paths dd { margin: 0; }
+
+    /* ── Collapsible full example ── */
+    .api-page .example { margin-top: 1.5rem; }
+    .api-page .example-sum {
+      display: flex; align-items: center; gap: 0.6rem;
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      cursor: pointer; list-style: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .api-page .example-sum::-webkit-details-marker { display: none; }
+    .api-page .example-sum::marker { content: ""; }
+    .api-page .example-sum:hover { background: var(--color-hover); border-color: color-mix(in oklab, var(--color-fg) 22%, transparent); }
+    .api-page .example-sum:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+    .api-page .example-title { font-size: 0.9rem; font-weight: 500; white-space: nowrap; }
+    .api-page .example-langs { font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .api-page .example-body { margin-top: 0.85rem; }
+
+    /* ── Endpoints ── */
+    .api-page .ops { margin-top: 1.25rem; border-top: 1px solid var(--color-border); }
+    .api-page .op { border-bottom: 1px solid var(--color-border); scroll-margin-top: 4.5rem; }
+    .api-page .op-row {
+      display: flex; align-items: center; gap: 0.85rem;
+      padding: 1rem 0.25rem;
+      cursor: pointer; list-style: none;
+    }
+    .api-page .op-row::-webkit-details-marker { display: none; }
+    .api-page .op-row::marker { content: ""; }
+    .api-page .op-row:hover .op-path { color: var(--color-accent); }
+    .api-page .op-row:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; border-radius: var(--radius-sm); }
+    .api-page .op-path { font-family: var(--font-mono); font-size: 0.98rem; color: var(--color-fg); font-weight: 500; transition: color 0.15s ease; }
+    .api-page .op-anchor {
+      font-family: var(--font-mono); font-size: 0.9rem; color: var(--color-muted); text-decoration: none;
+      opacity: 0; transition: opacity 0.15s ease, color 0.15s ease; margin-left: -0.4rem;
+    }
+    .api-page .op-row:hover .op-anchor, .api-page .op-anchor:focus-visible { opacity: 1; }
+    .api-page .op-anchor:hover { color: var(--color-accent); }
+    .api-page .op-why {
+      flex: 1; min-width: 0;
+      color: var(--color-muted); font-size: 0.9rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .api-page .chev { margin-left: auto; color: var(--color-muted); flex-shrink: 0; transition: transform 0.2s ease; }
+    .api-page details[open] > summary .chev { transform: rotate(90deg); }
+    .api-page .op-body { padding: 0.25rem 0.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.9rem; }
+    @media (max-width: 600px) {
+      .api-page .op-row { flex-wrap: wrap; gap: 0.5rem 0.6rem; }
+      .api-page .verb { order: 1; }
+      .api-page .op-path { order: 2; }
+      .api-page .op-anchor { display: none; }
+      .api-page .chev { order: 3; }
+      .api-page .op-why { order: 4; flex-basis: 100%; white-space: normal; overflow: visible; text-overflow: clip; font-size: 0.85rem; }
+    }
+
+    .api-page .verb {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+      padding: 0.16rem 0.44rem; border-radius: var(--radius-sm); flex-shrink: 0;
+    }
+    .api-page .verb-get { color: var(--color-info); background: color-mix(in oklab, var(--color-info) 14%, transparent); }
+    .api-page .verb-post { color: var(--color-success); background: color-mix(in oklab, var(--color-success) 14%, transparent); }
+
+    .api-page .params { display: flex; flex-direction: column; gap: 0.3rem; }
+    .api-page .params > div { display: flex; gap: 0.75rem; align-items: baseline; flex-wrap: wrap; font-size: 0.875rem; }
+    .api-page .params dt { font-family: var(--font-mono); color: var(--color-fg); }
+    .api-page .params dd { margin: 0; color: var(--color-muted); }
+    .api-page .op-note { font-size: 0.85rem; color: var(--color-muted); line-height: 1.55; }
+
+    /* ── Errors table ── */
+    .api-page .err-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .api-page .err-table th {
+      text-align: left; font-weight: 500; font-size: 0.78rem; color: var(--color-muted);
+      padding: 0 0.9rem 0.5rem 0; border-bottom: 1px solid var(--color-border);
+    }
+    .api-page .err-table td { padding: 0.6rem 0.9rem 0.6rem 0; border-bottom: 1px solid var(--color-border); color: var(--color-muted); vertical-align: top; }
+    .api-page .err-table tr:last-child td { border-bottom: 0; }
+    .api-page .err-table td:first-child, .api-page .err-table th:first-child { width: 9rem; }
+    .api-page .err-table td:nth-child(2), .api-page .err-table th:nth-child(2) { width: 3.5rem; }
+    .api-page .err-table td:nth-child(2) { color: var(--color-fg); }
+
+    /* ── Reference footer ── */
+    .api-page .ref-line { font-size: 0.85rem; color: var(--color-muted); line-height: 1.6; }
+    .api-page .ref-line + .ref-line { margin-top: 0.5rem; }
+
+    /* ── Code blocks (one style everywhere) ── */
+    .api-page .cb {
+      --cb-bg: oklch(0.18 0.012 260);
+      --cb-bar: oklch(0.22 0.012 260);
+      --cb-line: oklch(0.33 0.012 260);
+      --cb-fg: oklch(0.95 0 0);
+      --cb-muted: oklch(0.66 0.015 260);
+      border: 1px solid var(--cb-line);
+      border-radius: var(--radius);
+      background: var(--cb-bg);
+      overflow: hidden;
+    }
+    /* Dark theme: lift the panel off the near-black page so it reads as a card. */
+    html:not(.light) .api-page .cb {
+      --cb-bg: oklch(0.205 0.012 260);
+      --cb-bar: oklch(0.245 0.012 260);
+      --cb-line: oklch(0.38 0.012 260);
+    }
+    .api-page .cb-bar {
+      display: flex; align-items: center; gap: 0.25rem;
+      padding: 0.3rem 0.5rem 0.3rem 0.85rem;
+      background: var(--cb-bar);
+      border-bottom: 1px solid var(--cb-line);
+      min-height: 2.2rem;
+    }
+    .api-page .cb-label { font-family: var(--font-mono); font-size: 11px; color: var(--cb-muted); }
+    .api-page .cb-copy {
+      margin-left: auto;
+      font-family: var(--font-mono); font-size: 11px; color: var(--cb-muted);
+      background: transparent; border: none; border-radius: var(--radius-sm);
+      padding: 0.22rem 0.5rem; cursor: pointer;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+    .api-page .cb-copy:hover { color: var(--cb-fg); background: color-mix(in oklab, var(--cb-fg) 8%, transparent); }
+    .api-page .cb-copy:focus-visible { outline: 2px solid oklch(0.72 0.14 240); outline-offset: 1px; }
+    .api-page .cb-copy.is-copied { color: oklch(0.78 0.17 150); }
+
+    /* Language tabs */
+    .api-page .ct-tabs { display: flex; gap: 0.15rem; overflow-x: auto; scrollbar-width: none; }
+    .api-page .ct-tabs::-webkit-scrollbar { display: none; }
+    .api-page .ct-tab {
+      font-size: 12px; color: var(--cb-muted);
+      background: transparent; border: none; border-radius: var(--radius-sm);
+      padding: 0.26rem 0.6rem; white-space: nowrap; cursor: pointer;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+    .api-page .ct-tab:hover { color: var(--cb-fg); }
+    .api-page .ct-tab[aria-selected="true"] { color: var(--cb-fg); background: color-mix(in oklab, var(--cb-fg) 12%, transparent); }
+    .api-page .ct-tab:focus-visible { outline: 2px solid oklch(0.72 0.14 240); outline-offset: 1px; }
+
+    /* Shiki <pre> */
+    .api-page .cb pre.astro-code {
+      background: transparent !important;
+      margin: 0; padding: 0.95rem 1.1rem;
+      overflow-x: auto; font-size: 13px; line-height: 1.7; border-radius: 0;
+    }
+    .api-page .cb pre.astro-code code { font-family: var(--font-mono); }
+    .api-page .cb pre.astro-code:focus-visible { outline: 2px solid oklch(0.72 0.14 240); outline-offset: -2px; }
+  </style>
+</Base>

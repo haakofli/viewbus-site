@@ -1,0 +1,47 @@
+---
+import { Code } from "astro:components";
+
+interface Lang {
+  id: string;
+  label: string;
+  lang: string;
+  code: string;
+}
+interface Props {
+  langs: Lang[];
+  group: string;
+}
+const { langs, group } = Astro.props;
+const CODE = "github-dark";
+---
+<figure class="cb" data-codetabs>
+  <figcaption class="cb-bar">
+    <div class="ct-tabs" role="tablist" aria-label="Language">
+      {langs.map((l, i) => (
+        <button
+          type="button"
+          role="tab"
+          data-lang={l.id}
+          id={`ct-${group}-${l.id}`}
+          aria-controls={`ctp-${group}-${l.id}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? 0 : -1}
+          class="ct-tab"
+        >{l.label}</button>
+      ))}
+    </div>
+    <button type="button" class="cb-copy" data-copy aria-label="Copy code">Copy</button>
+  </figcaption>
+  {langs.map((l, i) => (
+    <div
+      class="ct-panel"
+      data-lang={l.id}
+      id={`ctp-${group}-${l.id}`}
+      role="tabpanel"
+      aria-labelledby={`ct-${group}-${l.id}`}
+      hidden={i !== 0}
+    >
+      <Code code={l.code} lang={l.lang} theme={CODE} />
+    </div>
+  ))}
+</figure>
