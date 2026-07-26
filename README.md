@@ -75,6 +75,10 @@ Full flow, secrets, and the locked installer-filename contract:
 - **Screenshots need intrinsic `width`/`height`.** `FeatureTabs.astro` keeps a
   `visualSize` map; without it a slide collapses to zero height until the PNG
   lands, and autoplay can park on a blank card.
+- **`apple-touch-icon` has to be a PNG.** iOS ignores an SVG here and puts a
+  generated letter tile on the home screen instead. `apple-touch-icon.png` is
+  the `favicon.svg` mark on the brand dark (`#0b0d10`) at 180×180 — iOS
+  composites transparency onto black, so the background is baked in.
 
 ## Related
 
