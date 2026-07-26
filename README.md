@@ -43,18 +43,21 @@ Full flow, secrets, and the locked installer-filename contract:
 ## Structure
 
 - `src/pages/` — Astro pages: `index`, `why-viewbus`, `download`, `mcp-server`,
-  `developers`, `service-bus-explorer-alternative`, `changelog`, `support`,
-  `privacy`, `terms`, `404`
+  `developers`, `service-bus-explorer-alternative`, `changelog/` (index + a
+  page per version — the in-app update toast links `/changelog/<version>`),
+  `rss.xml` (changelog feed), `support`, `privacy`, `terms`, `404`
 - `src/content/changelog/` — Markdown per release (content collection)
 - `src/content.config.ts` — Content Layer collection definitions
 - `src/layouts/Base.astro` — shared `<head>` with SEO + OG + JSON-LD slot
 - `src/components/` — Nav, Footer, FeatureTabs, CodeTabs, marks
 - `src/styles/global.css` — tokens, both themes, carousel, shared code panels
+- `src/assets/screenshots/` — hero + one per feature tab, optimized to
+  responsive WebP at build by `astro:assets` (see below)
 - `public/latest.json` — the update feed
 - `public/llms.txt` / `public/llms-full.txt` — agent-oriented product summaries
 - `public/robots.txt` — allowlists major LLM crawlers
 - `public/og.png` — Open Graph card
-- `public/screenshots/` — hero + one per feature tab (see below)
+- `public/.well-known/security.txt` — security contact (expiry date inside)
 - `public/CNAME` — custom domain for GitHub Pages
 - `.github/workflows/deploy.yml` — Pages deploy on push to `main`
 
@@ -72,9 +75,17 @@ Full flow, secrets, and the locked installer-filename contract:
   `pointer: coarse` + `hover: none`, not from a viewport breakpoint — a narrow
   window on a laptop must still get real download buttons. Mark elements with
   `data-handheld-only` / `data-desktop-only` to swap them.
-- **Screenshots need intrinsic `width`/`height`.** `FeatureTabs.astro` keeps a
-  `visualSize` map; without it a slide collapses to zero height until the PNG
-  lands, and autoplay can park on a blank card.
+- **Screenshots live in `src/assets/screenshots/`, not `public/`.** They're
+  rendered through `astro:assets` `<Image>`, which generates responsive WebP
+  variants at build (663 kB hero PNG → 50 kB at 1024w) and reads intrinsic
+  `width`/`height` from the file, so slides never collapse while loading.
+  Re-capturing a screenshot = overwrite the PNG, same filename, done. One
+  exception: `og-card.html` references the hero PNG by relative file path,
+  because it's rendered outside the build.
+- **Scroll-reveal never hides content from crawlers.** `.reveal` elements are
+  visible by default; an inline head script adds `html.js-reveal` only when
+  IntersectionObserver exists, and only then does CSS hide them for the
+  entrance animation.
 - **`apple-touch-icon` has to be a PNG.** iOS ignores an SVG here and puts a
   generated letter tile on the home screen instead. `apple-touch-icon.png` is
   the `favicon.svg` mark on the brand dark (`#0b0d10`) at 180×180 — iOS
