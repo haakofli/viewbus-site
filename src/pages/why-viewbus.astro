@@ -24,11 +24,11 @@ const techArticleSchema = {
   author: { "@type": "Person", name: "Håkon Lia" },
 };
 
-// One decision per row, one consequence, and the cost where there is one.
+// One decision per row, one consequence. Keep it to two sentences.
 const groups: {
   title: string;
   lede: string;
-  rows: { h: string; p: string; note?: string }[];
+  rows: { h: string; p: string }[];
 }[] = [
   {
     title: "Speed",
@@ -37,7 +37,6 @@ const groups: {
       {
         h: "Local SQLite index",
         p: "Namespaces, queues, topics and subscriptions are indexed to disk on first sign-in. Browsing is a local read, so the tree stays instant across thousands of resources.",
-        note: "Sidebar counts come from the last index. A refresh fires when attention lands on a namespace, above a configurable staleness threshold. Nothing polls.",
       },
       {
         h: "Rust on the hot paths",
@@ -63,8 +62,7 @@ const groups: {
       },
       {
         h: "Bulk work runs as a job",
-        p: "Purge, dead-letter, resend and delete preview the matched set before anything happens, then run with progress, an ETA and cancel. Throttling backs off instead of failing the run.",
-        note: "Every run is kept in a per-resource history, so a destructive operation is always attributable.",
+        p: "Purge, dead-letter, resend and delete preview the matched set before anything happens, then run with progress, an ETA and cancel. Throttling backs off instead of failing, and every run lands in a per-resource history.",
       },
       {
         h: "Credentials stay in the OS",
@@ -83,7 +81,6 @@ const groups: {
       {
         h: "Body search across a namespace",
         p: "Search message contents across every queue, topic and dead-letter queue at once, rather than opening entities one at a time.",
-        note: "It reads through messages to do it, so a large namespace takes time.",
       },
       {
         h: "Diff and resend",
@@ -120,7 +117,7 @@ const next = [
     </h1>
     <p class="mt-5 max-w-2xl text-lg text-[var(--color-muted)] leading-relaxed">
       A desktop client for Azure Service Bus, built on a local index and non-destructive reads.
-      Here's what that buys, and where it costs.
+      Here's what that means in practice.
     </p>
 
     {groups.map((group) => (
@@ -133,10 +130,7 @@ const next = [
           {group.rows.map((row) => (
             <div class="why-row">
               <dt class="why-term">{row.h}</dt>
-              <dd class="why-def">
-                <p>{row.p}</p>
-                {row.note && <p class="why-note">{row.note}</p>}
-              </dd>
+              <dd class="why-def">{row.p}</dd>
             </div>
           ))}
         </dl>
@@ -202,20 +196,11 @@ const next = [
       line-height: 1.4;
       text-wrap: balance;
     }
-    .why-def { margin: 0; }
-    .why-def > p {
+    .why-def {
+      margin: 0;
       font-size: 0.9375rem;
       line-height: 1.6;
       color: var(--color-muted);
-    }
-
-    /* Trade-offs read as an aside, not as more body copy. */
-    .why-note {
-      margin-top: 0.7rem;
-      padding-left: 0.85rem;
-      border-left: 2px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
-      font-size: 0.8125rem !important;
-      line-height: 1.55 !important;
     }
   </style>
 </Base>
