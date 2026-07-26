@@ -42,9 +42,9 @@ Full flow, secrets, and the locked installer-filename contract:
 
 ## Structure
 
-- `src/pages/` — Astro pages: `index`, `download`, `mcp-server`, `developers`,
-  `service-bus-explorer-alternative`, `changelog`, `support`, `privacy`,
-  `terms`, `404`
+- `src/pages/` — Astro pages: `index`, `why-viewbus`, `download`, `mcp-server`,
+  `developers`, `service-bus-explorer-alternative`, `changelog`, `support`,
+  `privacy`, `terms`, `404`
 - `src/content/changelog/` — Markdown per release (content collection)
 - `src/content.config.ts` — Content Layer collection definitions
 - `src/layouts/Base.astro` — shared `<head>` with SEO + OG + JSON-LD slot
@@ -53,7 +53,6 @@ Full flow, secrets, and the locked installer-filename contract:
 - `public/latest.json` — the update feed
 - `public/llms.txt` / `public/llms-full.txt` — agent-oriented product summaries
 - `public/robots.txt` — allowlists major LLM crawlers
-- `public/.well-known/security.txt` — vulnerability-reporting contact
 - `public/og.png` — Open Graph card
 - `public/screenshots/` — hero + one per feature tab (see below)
 - `public/CNAME` — custom domain for GitHub Pages

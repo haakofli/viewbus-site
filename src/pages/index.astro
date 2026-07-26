@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import FeatureTabs from "../components/FeatureTabs.astro";
+import Faq from "../components/Faq.astro";
 import { latest } from "../lib/latest";
 
 const title = "viewbus — A modern Service Bus Explorer alternative";
@@ -385,26 +386,24 @@ const yes = "M20 6 9 17l-5-5";
     </div>
 
     <!-- Narrow: a table this wide would hide the two columns you're comparing
-         against, so each row becomes its own card. -->
-    <ul class="reveal sm:hidden flex flex-col gap-3">
+         against, so each row unrolls into a labelled list. Kept borderless —
+         nesting tinted boxes inside cards reads as clutter at this width. -->
+    <ul class="reveal sm:hidden border-t border-[var(--color-border)]">
       {comparison.map((row) => (
-        <li class="rounded-[var(--radius)] border border-[var(--color-border)] p-4">
-          <p class="text-sm font-medium text-[var(--color-fg)]">{row.feature}</p>
-          <dl class="mt-3 flex flex-col gap-1.5 text-sm">
+        <li class="border-b border-[var(--color-border)] py-5">
+          <p class="font-medium leading-snug text-[var(--color-fg)]">{row.feature}</p>
+          <dl class="mt-3 flex flex-col gap-2 text-sm">
             {[
               { label: "viewbus", value: row.viewbus, own: true },
               { label: "Service Bus Explorer", value: row.sbe, own: false },
               { label: "Azure Portal", value: row.portal, own: false },
             ].map(({ label, value, own }) => (
-              <div class:list={[
-                "flex items-center justify-between gap-3 rounded-[var(--radius-sm)] px-2 py-1",
-                own && "bg-[color-mix(in_oklab,var(--color-accent)_8%,transparent)]",
-              ]}>
+              <div class="flex items-baseline justify-between gap-4">
                 <dt class:list={[own ? "font-medium text-[var(--color-fg)]" : "text-[var(--color-muted)]"]}>{label}</dt>
-                <dd class:list={["shrink-0", value === false && "text-[var(--color-muted-dim)]"]}>
+                <dd class:list={["shrink-0 text-right", value === false && "text-[var(--color-muted-dim)]"]}>
                   {value === true ? (
-                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--color-success)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block" role="img" aria-label="Yes"><path d={yes} /></svg>
-                  ) : value === false ? <span aria-label="No">—</span> : <span class="text-xs text-[var(--color-muted)]">{value}</span>}
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--color-success)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" class="inline-block translate-y-0.5" role="img" aria-label="Yes"><path d={yes} /></svg>
+                  ) : value === false ? <span aria-label="No">—</span> : <span class={own ? "font-medium text-[var(--color-fg)]" : "text-[var(--color-muted)]"}>{value}</span>}
                 </dd>
               </div>
             ))}
@@ -413,9 +412,12 @@ const yes = "M20 6 9 17l-5-5";
       ))}
     </ul>
 
-    <p class="reveal mt-8 text-center text-sm">
+    <p class="reveal mt-10 flex flex-col items-center justify-center gap-x-8 gap-y-2 text-center text-sm sm:flex-row">
+      <a href="/why-viewbus/" class="text-[var(--color-accent)] hover:underline">
+        Why viewbus works this way →
+      </a>
       <a href="/service-bus-explorer-alternative/" class="text-[var(--color-accent)] hover:underline">
-        The longer story: viewbus as a Service Bus Explorer alternative →
+        Coming from Service Bus Explorer? →
       </a>
     </p>
   </section>
@@ -527,14 +529,7 @@ const yes = "M20 6 9 17l-5-5";
     <h2 class="reveal text-3xl md:text-4xl font-bold mb-10 md:mb-12 tracking-tight text-center">
       Common questions
     </h2>
-    <dl class="reveal flex flex-col">
-      {faqs.map((f) => (
-        <div class="border-b border-[var(--color-border)] py-6 first:pt-0">
-          <dt class="font-semibold leading-snug">{f.q}</dt>
-          <dd class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">{f.a}</dd>
-        </div>
-      ))}
-    </dl>
+    <Faq items={faqs} class="reveal" />
     <p class="reveal mt-8 text-center text-sm text-[var(--color-muted)]">
       Something else? <a href="/support/" class="text-[var(--color-accent)] hover:underline">Get in touch →</a>
     </p>

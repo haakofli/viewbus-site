@@ -9,8 +9,7 @@ const { path = "/" } = Astro.props;
 
 const links = [
   { href: "/#features", label: "Features" },
-  { href: "/service-bus-explorer-alternative/", label: "vs Service Bus Explorer" },
-  { href: "/mcp-server/", label: "MCP" },
+  { href: "/why-viewbus/", label: "Why viewbus" },
   { href: "/developers/", label: "Developers" },
   { href: "/changelog/", label: "Changelog" },
 ];
@@ -28,7 +27,7 @@ const isActive = (href: string) => href.startsWith("/") && !href.includes("#") &
       <Wordmark size="sm" />
     </a>
 
-    <ul class="hidden lg:flex items-center justify-center gap-6 text-sm text-[var(--color-muted)]">
+    <ul class="hidden lg:flex items-center justify-center gap-7 text-sm text-[var(--color-muted)]">
       {links.map(({ href, label }) => (
         <li>
           <a
@@ -55,6 +54,22 @@ const isActive = (href: string) => href.startsWith("/") && !href.includes("#") &
           <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
         </svg>
       </button>
+
+      <a
+        href={coffeeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hidden lg:inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[var(--color-muted)] hover:text-[var(--color-fg)] text-xs font-medium border border-[var(--color-border)] hover:border-[color-mix(in_oklab,var(--color-fg)_25%,transparent)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+          <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+          <line x1="6" y1="2" x2="6" y2="4" />
+          <line x1="10" y1="2" x2="10" y2="4" />
+          <line x1="14" y1="2" x2="14" y2="4" />
+        </svg>
+        <span>Buy me a coffee</span>
+      </a>
 
       <a
         href="/download/"
@@ -103,6 +118,13 @@ const isActive = (href: string) => href.startsWith("/") && !href.includes("#") &
           </a>
         </li>
       ))}
+      <li>
+        <a
+          href="/mcp-server/"
+          data-nav-link
+          class="flex min-h-11 items-center text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)]"
+        >MCP server</a>
+      </li>
       <li>
         <a
           href="/support/"
@@ -187,9 +209,15 @@ const isActive = (href: string) => href.startsWith("/") && !href.includes("#") &
   </script>
 
   <script is:inline>
+    // Theme follows the OS until the visitor overrides it here; the override
+    // then sticks. Base.astro applies the same rule before first paint.
     (() => {
       const KEY = "viewbus-site-theme";
       const root = document.documentElement;
+      const system = window.matchMedia("(prefers-color-scheme: dark)");
+
+      const read = () => { try { return localStorage.getItem(KEY); } catch { return null; } };
+
       const sync = () => {
         const dark = !root.classList.contains("light");
         document.querySelectorAll("[data-theme-toggle]").forEach((btn) => {
@@ -200,14 +228,27 @@ const isActive = (href: string) => href.startsWith("/") && !href.includes("#") &
           moon && moon.classList.toggle("hidden", dark);
         });
       };
+
       document.querySelectorAll("[data-theme-toggle]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const nowDark = root.classList.contains("light");
-          root.classList.toggle("light", !nowDark);
-          try { localStorage.setItem(KEY, nowDark ? "dark" : "light"); } catch {}
+          const goingDark = root.classList.contains("light");
+          root.classList.toggle("light", !goingDark);
+          try {
+            // Choosing the theme the OS already asks for goes back to
+            // following the OS, rather than pinning it forever.
+            if (system.matches === goingDark) localStorage.removeItem(KEY);
+            else localStorage.setItem(KEY, goingDark ? "dark" : "light");
+          } catch {}
           sync();
         });
       });
+
+      system.addEventListener("change", (e) => {
+        if (read()) return; // an explicit choice wins over the OS
+        root.classList.toggle("light", !e.matches);
+        sync();
+      });
+
       sync();
     })();
   </script>

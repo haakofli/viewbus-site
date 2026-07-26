@@ -213,8 +213,7 @@ No analytics SDK, no crash reporter, no A/B framework, no affiliate tracking. If
 There is no support email. All routes reach the author directly:
 
 - **Bugs and feature requests:** https://github.com/haakofli/viewbus-site/issues — feature requests are ranked by 👍 reactions and the top ones appear on the home page.
-- **Security issues or anything private:** GitHub private vulnerability reporting at https://github.com/haakofli/viewbus-site/security/advisories/new. Also listed in https://viewbus.app/.well-known/security.txt
-- **In-app:** Settings → Send feedback, which needs no GitHub account and can optionally attach the local log file.
+- **In-app:** Settings → Send feedback, which needs no GitHub account and can optionally attach the local log file. This is also the route for security issues or anything else that shouldn't be public.
 
 Data controller for GDPR purposes is Håkon Lia (Norway). viewbus operates no servers, no database, and no account system, so no personal data is held; the supervisory authority is Datatilsynet.
 
@@ -245,6 +244,6 @@ viewbus ships often. The current version is at https://viewbus.app/latest.json, 
 - Terms: https://viewbus.app/terms/
 - Update feed (JSON): https://viewbus.app/latest.json
 - Announcements feed (JSON): https://viewbus.app/announcements.json
-- Security contact: https://viewbus.app/.well-known/security.txt
+- Why viewbus (how it works under the hood): https://viewbus.app/why-viewbus/
 - Short summary for AI agents: https://viewbus.app/llms.txt
 - Long-form reference for AI agents (this file): https://viewbus.app/llms-full.txt

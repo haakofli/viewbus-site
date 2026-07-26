@@ -89,11 +89,12 @@ While the app is running it serves a small HTTP API on `127.0.0.1`, meant for la
 
 ## Support
 
-No support email. Bugs and feature requests go to GitHub issues (https://github.com/haakofli/viewbus-site/issues); anything private or security-related goes through GitHub private vulnerability reporting (https://github.com/haakofli/viewbus-site/security/advisories/new); the app also has a built-in feedback dialog under Settings. See https://viewbus.app/support
+No support email. Bugs and feature requests go to GitHub issues (https://github.com/haakofli/viewbus-site/issues); the app also has a built-in feedback dialog under Settings → Send feedback, which is the route for anything private or security-related. See https://viewbus.app/support
 
 ## Pages
 
 - [Home](https://viewbus.app/) — features, screenshots, FAQ
+- [Why viewbus](https://viewbus.app/why-viewbus/) — how it works under the hood: local index, AMQP peek semantics, bulk operations, monitoring, spotlight
 - [Download](https://viewbus.app/download/) — Store, Homebrew, direct installers, system requirements
 - [MCP server](https://viewbus.app/mcp-server/) — setup per AI client, tool reference, limits
 - [Developers](https://viewbus.app/developers/) — the local HTTP API reference
