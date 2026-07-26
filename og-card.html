@@ -83,9 +83,10 @@
         text-transform: uppercase;
         color: var(--muted);
       }
-      h1 { margin-top: 18px; font-size: 66px; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; }
+      h1 { margin-top: 18px; font-size: 62px; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
       .sub { margin-top: 26px; font-size: 27px; line-height: 1.4; color: var(--muted); max-width: 560px; }
-      .sub .em { color: var(--fg); font-weight: 500; }
+      /* nowrap so compounds like "MCP-ready" never break across lines. */
+      .sub .em { color: var(--fg); font-weight: 500; white-space: nowrap; }
       .url { margin-top: auto; font-family: var(--font-mono); font-size: 18px; font-weight: 500; color: var(--accent); }
 
       .shot {
@@ -121,9 +122,9 @@
         </div>
 
         <p class="eyebrow">Azure Service Bus · Mac &amp; Windows</p>
-        <h1>The local-first Service&nbsp;Bus Explorer</h1>
+        <h1>The fastest way to debug Azure Service&nbsp;Bus</h1>
         <p class="sub">
-          Search, resend, and <span class="em">debug</span> Azure Service Bus —
+          Search, edit, and resend messages in <span class="em">seconds</span> —
           free, native, and <span class="em">MCP-ready</span>.
         </p>
 

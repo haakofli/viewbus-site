@@ -155,17 +155,19 @@ const softwareApplicationSchema = {
     "availability": "https://schema.org/InStock"
   },
   "url": "https://viewbus.app/",
-  "downloadUrl": "https://viewbus.app/download/",
-  "installUrl": "https://viewbus.app/latest.json",
-  "releaseNotes": "https://viewbus.app/changelog/",
-  "screenshot": "https://viewbus.app/og.png",
+  "downloadUrl": windowsInstaller,
+  "installUrl": "https://viewbus.app/download/",
+  "releaseNotes": `https://viewbus.app/changelog/${latest.version}/`,
+  "screenshot": new URL(heroShot.src, "https://viewbus.app").toString(),
   "softwareVersion": latest.version,
   "datePublished": latest.publishedAt.slice(0, 10),
   "inLanguage": "en",
   "isAccessibleForFree": true,
   "license": "https://viewbus.app/terms/",
   "sameAs": [
-    "https://github.com/haakofli/viewbus-site"
+    "https://github.com/haakofli/viewbus-site",
+    "https://github.com/haakofli/homebrew-viewbus",
+    "https://apps.microsoft.com/detail/9p0q5zmlv15k"
   ],
   "author": {
     "@type": "Person",
@@ -251,7 +253,7 @@ const yes = "M20 6 9 17l-5-5";
   <section class="relative overflow-hidden">
     <div class="max-w-6xl mx-auto px-6 pt-12 md:pt-20 pb-16 md:pb-24 text-center">
       <h1 class="text-5xl sm:text-6xl md:text-7xl font-semibold tracking-tight leading-[0.95] text-[var(--color-fg)]">
-        The fastest way to debug your Azure Service&nbsp;Buses
+        The fastest way to debug your Azure Service&nbsp;Bus
       </h1>
 
       <p class="mt-6 max-w-2xl mx-auto text-base md:text-lg text-[var(--color-muted)] leading-relaxed">
