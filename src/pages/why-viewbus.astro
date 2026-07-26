@@ -2,9 +2,9 @@
 import Base from "../layouts/Base.astro";
 import Kbd from "../components/Kbd.astro";
 
-const title = "Why viewbus — what's actually going on under the hood";
+const title = "Why viewbus — how it works, and what it trades away";
 const description =
-  "The design decisions behind viewbus: a local SQLite index, non-destructive AMQP peeks, bulk operations that survive throttling, and cheap background monitoring.";
+  "The decisions behind viewbus: a local SQLite index, peeks that don't consume messages, bulk operations that handle throttling, and cheap background monitoring.";
 const path = "/why-viewbus";
 
 const breadcrumbSchema = {
@@ -19,19 +19,17 @@ const breadcrumbSchema = {
 const techArticleSchema = {
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  headline: "Why viewbus — the design decisions behind the app",
+  headline: "Why viewbus — how it works, and what it trades away",
   description,
   url: "https://viewbus.app/why-viewbus/",
   author: { "@type": "Person", name: "Håkon Lia" },
 };
 
-// Short, checkable claims. Each one is something a sceptical reader could
-// verify by watching the app, not marketing adjectives.
 const receipts = [
-  ["Local index", "SQLite on your machine, not a live call per click"],
-  ["Peeks are non-destructive", "no dequeue, no delivery-count change"],
-  ["Secrets in the OS keychain", "never in the index, never in logs"],
-  ["No telemetry", "four outbound hosts, all of them yours or Microsoft's"],
+  ["Browsing is a disk read", "the tree comes from SQLite on your machine"],
+  ["Peeks don't consume", "no dequeue, no delivery-count bump"],
+  ["Secrets go in the OS keychain", "not the index, not the logs"],
+  ["No telemetry", "nothing about you is sent anywhere"],
 ];
 ---
 <Base title={title} description={description} path={path}>
@@ -45,12 +43,12 @@ const receipts = [
       Why viewbus
     </h1>
     <p class="mt-5 text-lg text-[var(--color-muted)] leading-relaxed">
-      Most Service Bus tooling makes you wait — for a portal blade to load, for a tree to expand, for
-      a peek to come back. viewbus is built around the opposite assumption: that you already know what
-      you're looking for, and the tool's job is to get out of the way.
+      viewbus exists because I kept losing time in the Azure Portal. Never a lot at once — half a
+      minute waiting for a blade, another expanding a tree, then finding out the queue I opened wasn't
+      the one I wanted. It adds up when something is on fire.
     </p>
     <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-      Here's what that actually means in the code, rather than on a feature list.
+      So the app makes a few specific bets. This page is about what they are, and what they cost.
     </p>
 
     <ul class="mt-8 grid gap-x-8 gap-y-4 sm:grid-cols-2">
@@ -66,148 +64,146 @@ const receipts = [
     </ul>
 
     <section class="mt-16">
-      <h2 class="text-2xl font-semibold tracking-tight">It reads an index, not the cloud</h2>
+      <h2 class="text-2xl font-semibold tracking-tight">Browsing reads a local index</h2>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        The first time you sign in, viewbus walks your subscriptions and writes every namespace, queue,
-        topic, and subscription into a local SQLite database. After that, browsing the tree is a disk
-        read. Expanding a namespace on a tenant with thousands of resources is instant, because nothing
-        is being fetched — the answer is already on your machine.
+        When you sign in, viewbus walks your subscriptions once and writes every namespace, queue,
+        topic, and subscription into a SQLite file on your machine. Everything after that — expanding
+        the tree, searching resource names, spotlight — reads from that file. It's why navigation feels
+        instant on a tenant with thousands of resources.
       </p>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        The index refreshes when your attention lands somewhere: you click a namespace, you jump to a
-        resource from spotlight, you run an operation, or you come back to the window after a while.
-        There's no background polling loop burning API quota while you're in a meeting, and no
-        five-minute-old cache silently lying to you about a queue you're actively looking at.
+        The cost is obvious once you say it out loud: what you're looking at is a snapshot, not a live
+        feed. The message counts next to a queue in the sidebar are from the last time that namespace
+        was indexed, and they can be several minutes behind. viewbus re-indexes a namespace when your
+        attention lands on it — you click it, you jump to it from spotlight, you run an operation, you
+        come back to the window after a while — but it skips the refresh if that namespace was already
+        indexed recently. The threshold defaults to 15 minutes and is a setting you can change, or set
+        to zero to turn the whole thing off.
       </p>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        That's also what makes search worth using. Fuzzy matching runs in Rust against the local
-        index, so it returns as fast as you type — across every resource, not just the branch you
-        happen to have open.
-      </p>
-    </section>
-
-    <section class="mt-14">
-      <h2 class="text-2xl font-semibold tracking-tight">It speaks AMQP, and it respects the broker</h2>
-      <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        Reading messages is where a Service Bus tool can quietly do damage, so this is the part worth
-        being precise about. viewbus browses messages over AMQP using peek semantics: messages are read
-        without being received. Nothing is dequeued, no delivery count is incremented, and no message
-        gets one step closer to the dead-letter queue because you looked at it. On session-enabled
-        entities it takes a brief session lock while reading and releases it — the same thing the SDK
-        would do, done deliberately.
-      </p>
-      <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        Because peeking is safe, the interface can be generous with it. You can page through a
-        dead-letter queue, filter by session, message ID, correlation ID, subject, or dead-letter
-        reason, and search inside message bodies — across every queue, topic, and DLQ in a namespace at
-        once. That last one is the thing neither the classic Service Bus Explorer nor the Azure Portal
-        can do, and it's the difference between finding a stuck order in ten seconds and opening
-        fourteen resources by hand.
-      </p>
-      <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        Namespaces you reach by connection string work the same way. They're discovered through the
-        Service Bus admin API with a SAS token, indexed into the same SQLite tables as
-        Azure-discovered ones, and every downstream feature — peek, resend, spotlight, MCP — treats
-        them identically. The only difference you'll notice is where they appear in the sidebar.
+        I went this way on purpose rather than polling on a timer, because polling burns Azure requests
+        all day for numbers nobody is reading. If you want a number you can trust right now, open the
+        resource: the messages themselves are always read live from the broker.
       </p>
     </section>
 
     <section class="mt-14">
-      <h2 class="text-2xl font-semibold tracking-tight">Fixing a message is an edit, not a rewrite</h2>
+      <h2 class="text-2xl font-semibold tracking-tight">Reading messages doesn't consume them</h2>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        When something dead-letters because of one bad field, the fix shouldn't involve reconstructing
-        the message by hand. Open it, edit the body and properties in a side-by-side diff editor, and
-        resend — you see exactly what changed before anything goes back on the bus. You can also
-        compose new messages outright, with full control over properties, content type, and scheduling.
+        This is the part I'd want to be sure about if I were installing someone else's tool against a
+        production namespace. viewbus reads messages over AMQP using peek, so nothing is received and
+        nothing is dequeued. Delivery counts don't move, and no message gets closer to dead-lettering
+        because you looked at it. On session-enabled entities it takes a session lock while it reads and
+        releases it again.
+      </p>
+      <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
+        Since peeking is safe, the UI leans on it. You can page through a dead-letter queue, filter by
+        session, message ID, correlation ID, subject or dead-letter reason, and search inside message
+        bodies across a whole namespace rather than one entity at a time. That last one is the thing I
+        wanted most and couldn't get anywhere else. It isn't free — searching bodies means actually
+        reading through messages, so on a large namespace it takes a while.
+      </p>
+      <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
+        Namespaces you add with a connection string behave the same as ones discovered through your
+        Azure account. They're indexed into the same tables and every feature treats them identically;
+        the only difference you'll notice is where they sit in the sidebar.
       </p>
     </section>
 
     <section class="mt-14">
-      <h2 class="text-2xl font-semibold tracking-tight">Bulk operations that survive contact with reality</h2>
+      <h2 class="text-2xl font-semibold tracking-tight">Fixing a message is an edit</h2>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        Draining a dead-letter queue of forty thousand messages is not the same problem as draining one
-        of forty. Service Bus will throttle you, connections drop, and a naive loop either dies halfway
-        or hammers the namespace until it does.
+        When something dead-letters over one bad field, you shouldn't have to rebuild the message by
+        hand. Open it, change the body or properties in a side-by-side diff, and resend. You see what
+        changed before anything goes back on the bus. Composing new messages works too, with control
+        over properties, content type, and scheduling.
+      </p>
+    </section>
+
+    <section class="mt-14">
+      <h2 class="text-2xl font-semibold tracking-tight">Bulk work runs as a job</h2>
+      <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
+        Draining forty thousand dead letters is a different problem from draining forty. Service Bus
+        will throttle you partway through, and a naive loop either gives up or keeps hammering.
       </p>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        So bulk work in viewbus runs as a job. You preview the batch the filter matches before anything
-        happens, then watch it run with live progress and an ETA, and you can cancel mid-flight.
-        Throttling responses are handled with backoff rather than treated as failure. Every run —
-        purge, move-to-dead-letter, bulk resend, bulk delete — is recorded in a per-resource history,
-        so "what happened to those messages" has an answer.
+        So purge, move-to-dead-letter, bulk resend, and bulk delete all run as jobs. You see which
+        messages the filter matched before anything happens, then progress and an estimate while it
+        runs, and you can cancel. Throttling backs off instead of failing the run. Each resource keeps a
+        history of what's been run against it, which has saved me more than once when I couldn't
+        remember whether I'd already emptied something.
       </p>
     </section>
 
     <section class="mt-14">
       <h2 class="text-2xl font-semibold tracking-tight">Monitoring you can leave running</h2>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        Dead-letter counts get sampled in the background on a cadence you choose. You group the queues,
-        topics, and subscriptions you care about into named sets, give each set a threshold — "tell me
-        if any production DLQ goes over 25" — and get a native notification the moment one trips.
-        Anything that turns out to be noise can be muted for an hour or a day; the mute expires by
-        itself, and if the problem is still there, you hear about it again.
+        viewbus samples dead-letter counts in the background on a cadence you pick. Group the queues,
+        topics, and subscriptions you care about into named sets, give each set a threshold — tell me if
+        any production DLQ goes over 25 — and you get a notification when one trips. Anything that turns
+        out to be noise can be muted for an hour or a day, and the mute expires on its own so a real
+        problem doesn't stay hidden.
       </p>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        It's deliberately cheap. Sampling counts is a metadata call, not a message read, and it runs
-        from the app you already have open rather than from infrastructure you'd have to pay for.
+        It's cheap because it's only reading counts, and it runs from the app you already have open
+        rather than from something you'd have to host.
       </p>
     </section>
 
     <section class="mt-14">
-      <h2 class="text-2xl font-semibold tracking-tight">Spotlight, because tree-clicking is slow</h2>
+      <h2 class="text-2xl font-semibold tracking-tight">Spotlight, because clicking through a tree is slow</h2>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
         <Kbd>Ctrl</Kbd> <Kbd>I</Kbd> anywhere on your machine opens a fuzzy search over every indexed
-        resource. Type three characters of a queue name, hit Enter, and viewbus comes to the front on
-        that resource. It works when the app is closed to the tray, so it behaves like an OS-level
-        launcher for your Service Bus topology rather than a feature you have to go find. The hotkey is
-        rebindable, and the rest of the app is keyboard-driven too.
+        resource. Type a few characters of a queue name, press Enter, and viewbus comes to the front on
+        it. It works with the app closed to the tray, so in practice it's a launcher for your Service
+        Bus topology rather than a feature you have to go and find. The hotkey is rebindable.
       </p>
     </section>
 
     <section class="mt-14">
       <h2 class="text-2xl font-semibold tracking-tight">Two ways to automate it</h2>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        A <a href="/mcp-server/" class="text-[var(--color-accent)] hover:underline">Model Context Protocol server</a>
-        ships inside the app, so Claude, Cursor, or Codex can answer questions like "how many dead
-        letters piled up on the orders topic between 11 and 3, and what do they have in common". It's
-        read-only against your bus, holds no credentials of its own, and applies filters inside viewbus
-        so message bytes don't get dumped into a model's context unless you ask for a specific body.
+        There's an <a href="/mcp-server/" class="text-[var(--color-accent)] hover:underline">MCP server</a>
+        built in, so Claude, Cursor, or Codex can answer things like "how many dead letters landed on the
+        orders topic between 11 and 3, and what do they have in common". It's read-only against your bus
+        and holds no credentials of its own. Filters run inside viewbus, so message bodies don't end up
+        in a model's context unless you ask for a specific one.
       </p>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        For everything that isn't an AI, there's a
+        For everything that isn't an AI there's a
         <a href="/developers/" class="text-[var(--color-accent)] hover:underline">local HTTP API</a> on
-        <code class="ic">127.0.0.1</code>: check status, search the index, focus a resource. It's what
-        you'd wire a Raycast or PowerToys Run command into, or a VS Code task, or a shell script. Both
-        surfaces are local-only — no listener on your network, nothing routed through a server of ours.
+        <code class="ic">127.0.0.1</code>: check status, search the index, focus a resource. It's meant
+        for a Raycast or PowerToys Run command, a VS Code task, or a shell script. Both are local only —
+        nothing binds to your network, and nothing routes through a server of mine.
       </p>
     </section>
 
     <section class="mt-14">
-      <h2 class="text-2xl font-semibold tracking-tight">Nothing about you leaves</h2>
+      <h2 class="text-2xl font-semibold tracking-tight">There's no backend to trust</h2>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        There's no backend, so there's nothing to trust us with. Sign-in is an OAuth flow straight to
-        Microsoft; tokens and connection strings live in the Windows Credential Manager or the macOS
-        Keychain, never in the index and never in a log file. The app's content security policy allows
-        exactly four destinations: Microsoft's login and management endpoints, your own
-        <code class="ic">*.servicebus.windows.net</code> namespaces, and two static JSON files on this
-        domain for update and announcement checks. Open the network inspector and count them.
+        Sign-in is an OAuth flow straight to Microsoft. Tokens and connection strings go in the Windows
+        Credential Manager or the macOS Keychain, never into the index and never into a log file. The
+        app's content security policy limits outbound traffic to Microsoft's login and management
+        endpoints, your own <code class="ic">*.servicebus.windows.net</code> namespaces, and two static
+        JSON files on this domain that it reads at startup to check for updates and notices.
       </p>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        The full breakdown — every file written, every host contacted — is on the
-        <a href="/privacy/" class="text-[var(--color-accent)] hover:underline">privacy page</a>.
+        You don't have to take my word for it — open the network inspector and watch. The
+        <a href="/privacy/" class="text-[var(--color-accent)] hover:underline">privacy page</a> lists
+        every file the app writes and every host it talks to.
       </p>
     </section>
 
     <section class="mt-14">
-      <h2 class="text-2xl font-semibold tracking-tight">It's a native app, and it's free</h2>
+      <h2 class="text-2xl font-semibold tracking-tight">It's native, and it's free</h2>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        viewbus is Rust and a system webview via Tauri, not a bundled browser. It starts fast, the
-        installer is small, and the heavy lifting — indexing, fuzzy search, AMQP, bulk jobs — happens in
-        compiled code rather than in JavaScript. It runs natively on Windows and on Apple Silicon.
+        viewbus is Rust with a system webview via Tauri, not a bundled browser. The work that matters —
+        indexing, fuzzy search, AMQP, bulk jobs — happens in compiled code. It runs natively on Windows
+        and on Apple Silicon.
       </p>
       <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
-        There's no paid tier, no seat count, and no account. It's a tool one developer wanted to exist;
-        if it saves you an afternoon,
+        There's no paid tier, no seat count, and no account, because it's a tool I wanted to exist and
+        keeping it free is easier than the alternative. If it saves you an afternoon,
         <a href="https://buymeacoffee.com/hakonlia" target="_blank" rel="noopener noreferrer" class="text-[var(--color-accent)] hover:underline">a coffee</a>
         is welcome and never expected.
       </p>

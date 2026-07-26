@@ -123,7 +123,7 @@ const faqs = [
   },
   {
     q: "Does viewbus send my messages anywhere?",
-    a: "No. There is no backend, no telemetry, and no account. Your machine talks directly to Microsoft: login.microsoftonline.com, management.azure.com, and your own *.servicebus.windows.net endpoints. The only viewbus-operated request is a static update check.",
+    a: "No. There is no backend, no telemetry, and no account. Your machine talks directly to Microsoft: login.microsoftonline.com, management.azure.com, and your own *.servicebus.windows.net endpoints. The only requests to viewbus.app are two static JSON files the app reads at startup, one for updates and one for notices.",
   },
   {
     q: "Can I use viewbus with Claude, ChatGPT, or Cursor?",
@@ -517,6 +517,7 @@ const yes = "M20 6 9 17l-5-5";
           <div class="flex items-center gap-2"><span class="shrink-0 text-[var(--color-success)]">→</span><span class="truncate">management.azure.com</span><span class="ml-auto shrink-0 text-[var(--color-muted)]">your subscriptions</span></div>
           <div class="flex items-center gap-2"><span class="shrink-0 text-[var(--color-success)]">→</span><span class="truncate">*.servicebus.windows.net</span><span class="ml-auto shrink-0 text-[var(--color-muted)]">your messages</span></div>
           <div class="flex items-center gap-2"><span class="shrink-0 text-[var(--color-success)]">→</span><span class="truncate">viewbus.app/latest.json</span><span class="ml-auto shrink-0 text-[var(--color-muted)]">update check</span></div>
+          <div class="flex items-center gap-2"><span class="shrink-0 text-[var(--color-success)]">→</span><span class="truncate">viewbus.app/announcements.json</span><span class="ml-auto shrink-0 text-[var(--color-muted)]">notices</span></div>
           <div class="h-2"></div>
           <div class="text-[var(--color-muted)]">✓ no telemetry · no analytics · no account</div>
           <div class="text-[var(--color-muted)]">✓ nothing about you is ever uploaded</div>
