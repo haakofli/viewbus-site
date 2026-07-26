@@ -3,9 +3,18 @@ import Base from "../layouts/Base.astro";
 
 const title = "Page not found — viewbus";
 const description = "That page doesn't exist.";
+
+const elsewhere = [
+  { href: "/download/", label: "Download", note: "Windows and macOS" },
+  { href: "/mcp-server/", label: "MCP server", note: "Wire viewbus into your AI assistant" },
+  { href: "/developers/", label: "Local API", note: "Build your own extensions" },
+  { href: "/changelog/", label: "Changelog", note: "What shipped, and when" },
+  { href: "/support/", label: "Support", note: "Report a bug or ask a question" },
+  { href: "/privacy/", label: "Privacy", note: "What stays on your machine" },
+];
 ---
-<Base title={title} description={description} path="/404">
-  <section class="max-w-2xl mx-auto px-6 py-32 text-center">
+<Base title={title} description={description} path="/404" noindex>
+  <section class="max-w-2xl mx-auto px-6 py-24 text-center">
     <p class="font-mono text-sm uppercase tracking-[0.22em] text-[var(--color-muted)] mb-4">404</p>
     <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">Page not found</h1>
     <p class="text-[var(--color-muted)] leading-relaxed mb-8">
@@ -19,11 +28,22 @@ const description = "That page doesn't exist.";
         Back home
       </a>
       <a
-        href="/changelog"
+        href="/download/"
         class="inline-flex items-center justify-center rounded-full h-11 px-6 text-sm font-medium border border-[var(--color-border)] hover:bg-[var(--color-hover)] transition-colors"
       >
-        Changelog
+        Download viewbus
       </a>
     </div>
+
+    <ul class="mt-14 grid gap-x-8 gap-y-5 text-left sm:grid-cols-2">
+      {elsewhere.map(({ href, label, note }) => (
+        <li>
+          <a href={href} class="group block">
+            <span class="font-medium transition-colors group-hover:text-[var(--color-accent)]">{label}</span>
+            <span class="block text-sm text-[var(--color-muted)]">{note}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
   </section>
 </Base>

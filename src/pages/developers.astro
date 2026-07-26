@@ -10,7 +10,7 @@ import rsRaw from "../examples/local-api/snippets.rs?raw";
 
 const title = "Build viewbus extensions — the local API";
 const description =
-  "Build your own extensions on viewbus. While the app runs it serves a small HTTP API on 127.0.0.1 — search the resources it has indexed and drive the app from your own tools. Local-only, bearer-token auth. Examples in cURL, TypeScript, Python, C#, and Rust.";
+  "viewbus serves a small HTTP API on 127.0.0.1 while it runs. Search your indexed queues and drive the app from your own tools — no SDK, just HTTP.";
 const path = "/developers";
 const CODE = "github-dark";
 
@@ -107,20 +107,28 @@ const techArticleSchema = {
           indexed and drive the app from your own tools — no SDK, just HTTP.
         </p>
 
+        <!-- Card labels, not document sections — headings here would compete
+             with the real h2s below in the page outline. -->
         <div class="uses">
           <div class="use">
-            <h2 class="use-h">Launcher commands</h2>
+            <p class="use-h">Launcher commands</p>
             <p class="use-p">Search your queues from Raycast, Alfred, or PowerToys Run and jump straight to one.</p>
           </div>
           <div class="use">
-            <h2 class="use-h">Editor &amp; CLI scripts</h2>
+            <p class="use-h">Editor &amp; CLI scripts</p>
             <p class="use-p">Wire viewbus into a VS Code task or a shell script in a few lines.</p>
           </div>
           <div class="use">
-            <h2 class="use-h">Status widgets</h2>
+            <p class="use-h">Status widgets</p>
             <p class="use-p">Ping it from a taskbar or menu-bar script to show if viewbus is running.</p>
           </div>
         </div>
+
+        <p class="mt-6 text-sm text-[var(--color-muted)] leading-relaxed">
+          Looking to give an AI assistant access instead? That's the
+          <a href="/mcp-server/" class="text-[var(--color-accent)] hover:underline">built-in MCP server</a>,
+          which is a separate interface from this one.
+        </p>
       </header>
 
       <!-- 2 · How it works -->
@@ -411,14 +419,8 @@ const techArticleSchema = {
     .toc a[aria-current="true"] { color: var(--color-fg); border-left-color: var(--color-accent); }
     .toc a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: var(--radius-sm); }
 
-    .api-page .ic {
-      font-family: var(--font-mono);
-      font-size: 0.85em;
-      color: var(--color-fg);
-      background: color-mix(in oklab, var(--color-fg) 6%, transparent);
-      padding: 0.08em 0.36em;
-      border-radius: var(--radius-sm);
-    }
+    /* .ic and the .cb / .ct-* code-panel styles are shared with /mcp-server,
+       so they live in global.css. */
     .api-page .mono { font-family: var(--font-mono); }
 
     .api-page > header { scroll-margin-top: 4.5rem; }
@@ -552,63 +554,5 @@ const techArticleSchema = {
     .api-page .ref-line { font-size: 0.85rem; color: var(--color-muted); line-height: 1.6; }
     .api-page .ref-line + .ref-line { margin-top: 0.5rem; }
 
-    /* ── Code blocks (one style everywhere) ── */
-    .api-page .cb {
-      --cb-bg: oklch(0.18 0.012 260);
-      --cb-bar: oklch(0.22 0.012 260);
-      --cb-line: oklch(0.33 0.012 260);
-      --cb-fg: oklch(0.95 0 0);
-      --cb-muted: oklch(0.66 0.015 260);
-      border: 1px solid var(--cb-line);
-      border-radius: var(--radius);
-      background: var(--cb-bg);
-      overflow: hidden;
-    }
-    /* Dark theme: lift the panel off the near-black page so it reads as a card. */
-    html:not(.light) .api-page .cb {
-      --cb-bg: oklch(0.205 0.012 260);
-      --cb-bar: oklch(0.245 0.012 260);
-      --cb-line: oklch(0.38 0.012 260);
-    }
-    .api-page .cb-bar {
-      display: flex; align-items: center; gap: 0.25rem;
-      padding: 0.3rem 0.5rem 0.3rem 0.85rem;
-      background: var(--cb-bar);
-      border-bottom: 1px solid var(--cb-line);
-      min-height: 2.2rem;
-    }
-    .api-page .cb-label { font-family: var(--font-mono); font-size: 11px; color: var(--cb-muted); }
-    .api-page .cb-copy {
-      margin-left: auto;
-      font-family: var(--font-mono); font-size: 11px; color: var(--cb-muted);
-      background: transparent; border: none; border-radius: var(--radius-sm);
-      padding: 0.22rem 0.5rem; cursor: pointer;
-      transition: color 0.15s ease, background 0.15s ease;
-    }
-    .api-page .cb-copy:hover { color: var(--cb-fg); background: color-mix(in oklab, var(--cb-fg) 8%, transparent); }
-    .api-page .cb-copy:focus-visible { outline: 2px solid oklch(0.72 0.14 240); outline-offset: 1px; }
-    .api-page .cb-copy.is-copied { color: oklch(0.78 0.17 150); }
-
-    /* Language tabs */
-    .api-page .ct-tabs { display: flex; gap: 0.15rem; overflow-x: auto; scrollbar-width: none; }
-    .api-page .ct-tabs::-webkit-scrollbar { display: none; }
-    .api-page .ct-tab {
-      font-size: 12px; color: var(--cb-muted);
-      background: transparent; border: none; border-radius: var(--radius-sm);
-      padding: 0.26rem 0.6rem; white-space: nowrap; cursor: pointer;
-      transition: color 0.15s ease, background 0.15s ease;
-    }
-    .api-page .ct-tab:hover { color: var(--cb-fg); }
-    .api-page .ct-tab[aria-selected="true"] { color: var(--cb-fg); background: color-mix(in oklab, var(--cb-fg) 12%, transparent); }
-    .api-page .ct-tab:focus-visible { outline: 2px solid oklch(0.72 0.14 240); outline-offset: 1px; }
-
-    /* Shiki <pre> */
-    .api-page .cb pre.astro-code {
-      background: transparent !important;
-      margin: 0; padding: 0.95rem 1.1rem;
-      overflow-x: auto; font-size: 13px; line-height: 1.7; border-radius: 0;
-    }
-    .api-page .cb pre.astro-code code { font-family: var(--font-mono); }
-    .api-page .cb pre.astro-code:focus-visible { outline: 2px solid oklch(0.72 0.14 240); outline-offset: -2px; }
   </style>
 </Base>

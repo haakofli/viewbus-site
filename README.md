@@ -42,17 +42,40 @@ Full flow, secrets, and the locked installer-filename contract:
 
 ## Structure
 
-- `src/pages/` — Astro pages (`index`, `privacy`, `changelog`)
+- `src/pages/` — Astro pages: `index`, `download`, `mcp-server`, `developers`,
+  `service-bus-explorer-alternative`, `changelog`, `support`, `privacy`,
+  `terms`, `404`
 - `src/content/changelog/` — Markdown per release (content collection)
 - `src/content.config.ts` — Content Layer collection definitions
 - `src/layouts/Base.astro` — shared `<head>` with SEO + OG + JSON-LD slot
-- `src/components/` — Nav, Footer
+- `src/components/` — Nav, Footer, FeatureTabs, CodeTabs, marks
+- `src/styles/global.css` — tokens, both themes, carousel, shared code panels
 - `public/latest.json` — the update feed
-- `public/llms.txt` — agent-oriented product summary
+- `public/llms.txt` / `public/llms-full.txt` — agent-oriented product summaries
 - `public/robots.txt` — allowlists major LLM crawlers
-- `public/og.png` — Open Graph card (placeholder — needs design polish)
+- `public/.well-known/security.txt` — vulnerability-reporting contact
+- `public/og.png` — Open Graph card
+- `public/screenshots/` — hero + one per feature tab (see below)
 - `public/CNAME` — custom domain for GitHub Pages
 - `.github/workflows/deploy.yml` — Pages deploy on push to `main`
+
+## Conventions worth knowing
+
+- **Canonicals and internal links carry a trailing slash.** GitHub Pages serves
+  directory-style URLs, so `/privacy` 301s to `/privacy/`. `Base.astro`
+  normalizes the `path` prop; write internal `href`s with the slash too, or
+  every click pays for a redirect.
+- **Meta descriptions stay under ~160 characters.** Longer copy belongs in the
+  JSON-LD `description`, not the `<meta>` tag.
+- **The brand is lowercase `viewbus`** in all user-facing copy. `ViewBus` only
+  survives where it's a literal filename (`ViewBus.app`, the NSIS installer).
+- **`html.handheld`** is set before first paint in `Base.astro` from
+  `pointer: coarse` + `hover: none`, not from a viewport breakpoint — a narrow
+  window on a laptop must still get real download buttons. Mark elements with
+  `data-handheld-only` / `data-desktop-only` to swap them.
+- **Screenshots need intrinsic `width`/`height`.** `FeatureTabs.astro` keeps a
+  `visualSize` map; without it a slide collapses to zero height until the PNG
+  lands, and autoplay can park on a blank card.
 
 ## Related
 

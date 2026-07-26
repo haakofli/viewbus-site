@@ -8,11 +8,15 @@ export interface Props {
   description: string;
   path: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
-const { title, description, path, ogImage = "/og.png" } = Astro.props;
+const { title, description, path, ogImage = "/og.png", noindex = false } = Astro.props;
 const site = "https://viewbus.app";
-const canonical = new URL(path, site).toString();
+// GitHub Pages serves directory-style URLs, so `/privacy` 301s to `/privacy/`.
+// Canonicals and og:url must name the URL that actually answers 200.
+const normalized = path === "/" ? "/" : `${path.replace(/\/+$/, "")}/`;
+const canonical = new URL(normalized, site).toString();
 const ogImageUrl = new URL(ogImage, site).toString();
 ---
 <!doctype html>
@@ -24,13 +28,14 @@ const ogImageUrl = new URL(ogImage, site).toString();
     <meta name="theme-color" content="#f7eddc" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)" />
     <meta name="author" content="Håkon Lia" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    {noindex
+      ? <meta name="robots" content="noindex, follow" />
+      : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg?v=2" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.svg?v=2" />
-    <link rel="preconnect" href="https://github.com" crossorigin />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="viewbus" />
@@ -51,12 +56,31 @@ const ogImageUrl = new URL(ogImage, site).toString();
     <meta name="twitter:image:alt" content="viewbus — Azure Service Bus desktop manager for Windows and macOS" />
 
     <script is:inline>
-      // Cream is the brand. Only honor an explicit "dark" preference.
+      // Cream is the brand. Only honor an explicit "dark" preference — the nav
+      // toggle is the one thing that writes it.
       const pref = localStorage.getItem("viewbus-site-theme");
       if (pref !== "dark") {
         document.documentElement.classList.add("light");
       }
+
+      // viewbus is a desktop app, so a phone can't install it. Decide before
+      // first paint which copy to show. Capability-based, not viewport width:
+      // a narrow window on a laptop still gets the real download buttons.
+      if (
+        navigator.userAgentData?.mobile === true ||
+        (matchMedia("(pointer: coarse)").matches && matchMedia("(hover: none)").matches)
+      ) {
+        document.documentElement.classList.add("handheld");
+      }
     </script>
+
+    <noscript>
+      <!-- .reveal starts at opacity:0 and is unhidden by an IntersectionObserver.
+           Without JS that would hide half the page, so opt out entirely. -->
+      <style>
+        .reveal { opacity: 1 !important; transform: none !important; }
+      </style>
+    </noscript>
 
     <slot name="head" />
   </head>
@@ -67,7 +91,7 @@ const ogImageUrl = new URL(ogImage, site).toString();
     >
       Skip to content
     </a>
-    <Nav />
+    <Nav path={normalized} />
     <main id="main" class="flex-1">
       <slot />
     </main>

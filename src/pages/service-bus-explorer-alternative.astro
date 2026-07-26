@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 import { latest } from "../lib/latest";
 
 const title = "Service Bus Explorer alternative — viewbus";
-const description = "viewbus is a modern Service Bus Explorer alternative for Windows and macOS. It picks up where the original left off — local-first, OAuth-aware, with a built-in MCP server for AI assistants.";
+const description = "A modern Service Bus Explorer alternative for Windows and macOS. Local-first, OAuth-aware, with cross-resource search and a built-in MCP server.";
 const path = "/service-bus-explorer-alternative";
 
 const breadcrumbSchema = {
@@ -74,18 +74,18 @@ const faqSchema = {
       <li>Native macOS build for Apple Silicon. Same app, same shortcuts.</li>
       <li>Search message bodies across every queue, topic, and dead-letter queue at once — trace a stuck order by its ID without opening each resource by hand. Neither the original nor the Portal can do that.</li>
       <li>Background dead-letter alerts: pick the queues and subscriptions to watch, set thresholds, and viewbus notifies you when a backlog builds — before it becomes an incident.</li>
-      <li>An MCP server is built in. Claude, ChatGPT, Cursor, or any MCP-aware assistant can list namespaces, search resources, count messages, and peek bodies — over local stdio, no cloud round-trip.</li>
+      <li>An <a href="/mcp-server/" class="text-[var(--color-accent)] hover:underline">MCP server is built in</a>. Claude, ChatGPT, Cursor, or any MCP-aware assistant can list namespaces, search resources, count messages, and peek bodies — over local stdio, no cloud round-trip.</li>
     </ul>
 
     <div class="flex flex-col sm:flex-row gap-3 pt-8 border-t border-[var(--color-border)]">
       <a
-        href="/"
+        href="/download/"
         class="inline-flex items-center justify-center gap-2 whitespace-nowrap bg-[var(--color-fg)] text-[var(--color-bg)] hover:bg-[var(--color-fg)]/90 rounded-full h-11 px-6 text-sm font-medium transition-colors"
       >
         Get viewbus
       </a>
       <a
-        href="/changelog"
+        href="/changelog/"
         class="inline-flex items-center justify-center gap-2 whitespace-nowrap border border-[var(--color-border)] hover:bg-[var(--color-hover)] rounded-full h-11 px-6 text-sm font-medium transition-colors"
       >
         Changelog
