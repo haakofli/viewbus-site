@@ -114,8 +114,8 @@ const visuals: Record<string, { src: ImageMetadata; widths: number[]; sizes: str
       {features.map((f, i) => (
         <article
           class="ft-slide"
-          role="group"
-          aria-roledescription="slide"
+          id={`ft-slide-${f.id}`}
+          role="tabpanel"
           aria-label={`${i + 1} of ${features.length}: ${f.title}`}
           data-index={i}
         >
@@ -199,6 +199,7 @@ const visuals: Record<string, { src: ImageMetadata; widths: number[]; sizes: str
             type="button"
             role="tab"
             aria-label={f.title}
+            aria-controls={`ft-slide-${f.id}`}
             aria-selected={i === 0 ? "true" : "false"}
             tabindex={i === 0 ? 0 : -1}
             data-dot
