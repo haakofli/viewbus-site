@@ -1,0 +1,7 @@
+# How to report a security issue in viewbus or viewbus.app.
+# The support page lists every route; anything sensitive should go through
+# the in-app feedback dialog (Settings -> Send feedback), which is private.
+Contact: https://viewbus.app/support/
+Expires: 2027-07-31T00:00:00.000Z
+Preferred-Languages: en, no
+Canonical: https://viewbus.app/.well-known/security.txt
