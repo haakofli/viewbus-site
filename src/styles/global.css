@@ -7,7 +7,9 @@
   --color-bg: oklch(0.145 0 0);
   --color-fg: oklch(0.985 0 0);
   --color-muted: oklch(0.708 0 0);
-  --color-muted-dim: color-mix(in oklch, oklch(0.708 0 0) 60%, transparent);
+  /* Reads as "not supported" in the comparison table — that's content, not
+     decoration, so it has to clear 4.5:1 rather than just look recessed. */
+  --color-muted-dim: color-mix(in oklch, oklch(0.708 0 0) 88%, transparent);
   --color-border: oklch(1 0 0 / 10%);
   --color-chrome: oklch(0.205 0 0);
   --color-hover: color-mix(in oklch, oklch(0.985 0 0) 8%, transparent);
@@ -31,7 +33,7 @@
   --color-bg: #f7eddc;
   --color-fg: oklch(0.22 0.06 40);
   --color-muted: oklch(0.46 0.05 40);
-  --color-muted-dim: color-mix(in oklch, oklch(0.46 0.05 40) 60%, transparent);
+  --color-muted-dim: color-mix(in oklch, oklch(0.46 0.05 40) 90%, transparent);
   --color-border: color-mix(in oklch, oklch(0.22 0.06 40) 14%, transparent);
   --color-chrome: oklch(0.985 0.012 80);
   --color-hover: color-mix(in oklch, oklch(0.22 0.06 40) 5%, transparent);
@@ -55,6 +57,32 @@ html {
   color: var(--color-fg);
   scroll-behavior: smooth;
   scroll-padding-top: 3.5rem; /* Account for the sticky nav */
+  /* Reserve the scrollbar track always, so short pages (404) don't sit 8px
+     off from long ones and shift the layout on every navigation. */
+  scrollbar-gutter: stable;
+}
+
+/* Handheld vs desktop CTA swap. The class lands on <html> from an inline head
+   script, so the right pair is painted first time — no flash of a Download
+   button on a phone that can't run the app. Both sets stay in the DOM so
+   crawlers still see the real installer links. */
+html:not(.handheld) [data-handheld-only] { display: none !important; }
+html.handheld [data-desktop-only] { display: none !important; }
+
+/* Drawer open: freeze the page behind it. */
+html.nav-locked body {
+  overflow: hidden;
+}
+
+/* The bar is translucent so dark screenshots blur through it; while the mobile
+   drawer is open that reads as an unfinished header, so go fully opaque. */
+#site-nav.nav-open {
+  background: var(--color-bg);
+  backdrop-filter: none;
+}
+
+#site-nav.is-stuck {
+  border-bottom-color: var(--color-border);
 }
 
 body {
@@ -67,139 +95,25 @@ code, pre, kbd, .mono {
   font-family: var(--font-mono);
 }
 
-.reveal {
+/* Scroll-reveal. Hidden ONLY under html.js-reveal, which an inline head
+   script sets when IntersectionObserver exists — so crawlers, no-JS visitors,
+   and old engines always get visible content, no noscript fallback needed. */
+html.js-reveal .reveal {
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 400ms ease-out, transform 400ms ease-out;
   will-change: opacity, transform;
 }
-.reveal.is-visible {
+html.js-reveal .reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
+  html.js-reveal .reveal {
     opacity: 1;
     transform: none;
     transition: none;
   }
-}
-
-@keyframes vb-wiggle {
-  0%, 100% { transform: translateX(0) rotate(0); }
-  15% { transform: translateX(-6px) rotate(-2deg); }
-  30% { transform: translateX(6px) rotate(2deg); }
-  50% { transform: translateX(-4px) rotate(-1deg); }
-  70% { transform: translateX(3px) rotate(1deg); }
-  85% { transform: translateX(-1px) rotate(0); }
-}
-@keyframes vb-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-@keyframes vb-bounce {
-  0%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-10px); }
-  55% { transform: translateY(0); }
-  75% { transform: translateY(-3px); }
-  90% { transform: translateY(0); }
-}
-@keyframes vb-wobble {
-  0%, 100% { transform: rotate(0); }
-  15% { transform: rotate(-5deg); }
-  30% { transform: rotate(4deg); }
-  45% { transform: rotate(-3deg); }
-  60% { transform: rotate(2deg); }
-  75% { transform: rotate(-1deg); }
-}
-@keyframes vb-flash {
-  0%, 100% { box-shadow: 0 0 0 0 transparent; }
-  40% { box-shadow: 0 0 0 6px color-mix(in oklch, var(--color-accent) 45%, transparent); }
-}
-@keyframes vb-nudge {
-  0%, 100% { transform: translateX(0); }
-  40% { transform: translateX(8px); }
-  70% { transform: translateX(-3px); }
-}
-@keyframes vb-shimmer {
-  0%, 100% { filter: brightness(1) saturate(1); }
-  50% { filter: brightness(1.2) saturate(1.4); }
-}
-
-@keyframes vb-glow-accent {
-  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
-  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-accent) 45%, transparent); }
-}
-@keyframes vb-glow-info {
-  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
-  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-info) 45%, transparent); }
-}
-@keyframes vb-glow-success {
-  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
-  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-success) 45%, transparent); }
-}
-@keyframes vb-glow-danger {
-  0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
-  50% { box-shadow: inset 0 0 20px 4px color-mix(in oklch, var(--color-danger) 45%, transparent); }
-}
-@keyframes vb-squish {
-  0%, 100% { transform: scale(1, 1); }
-  30% { transform: scale(1.15, 0.85); }
-  60% { transform: scale(0.92, 1.08); }
-}
-@keyframes vb-heartbeat {
-  0%, 100% { transform: scale(1); }
-  15% { transform: scale(1.1); }
-  30% { transform: scale(1); }
-  45% { transform: scale(1.1); }
-  60% { transform: scale(1); }
-}
-@keyframes vb-rainbow {
-  0%, 100% { filter: hue-rotate(0) saturate(1); }
-  50% { filter: hue-rotate(220deg) saturate(1.6); }
-}
-@keyframes vb-sweep {
-  to { transform: translateX(100%); }
-}
-@keyframes vb-shake-v {
-  0%, 100% { transform: translateY(0); }
-  15% { transform: translateY(-4px); }
-  30% { transform: translateY(4px); }
-  50% { transform: translateY(-3px); }
-  70% { transform: translateY(2px); }
-  85% { transform: translateY(-1px); }
-}
-
-.wiggle       { animation: vb-wiggle       550ms ease-in-out; }
-.pulse        { animation: vb-pulse        450ms ease-in-out; }
-.bounce       { animation: vb-bounce       700ms cubic-bezier(.68, -.55, .27, 1.55); }
-.wobble       { animation: vb-wobble       600ms ease-in-out; }
-.flash        { animation: vb-flash        600ms ease-out; }
-.nudge        { animation: vb-nudge        450ms ease-out; }
-.shimmer      { animation: vb-shimmer      500ms ease-in-out; }
-.glow-accent  { animation: vb-glow-accent  600ms ease-in-out; }
-.glow-info    { animation: vb-glow-info    600ms ease-in-out; }
-.glow-success { animation: vb-glow-success 600ms ease-in-out; }
-.glow-danger  { animation: vb-glow-danger  600ms ease-in-out; }
-.squish       { animation: vb-squish       500ms ease-in-out; }
-.heartbeat    { animation: vb-heartbeat    700ms ease-in-out; }
-.rainbow      { animation: vb-rainbow      600ms ease-in-out; }
-.shake-v      { animation: vb-shake-v      500ms ease-in-out; }
-
-/* Sweep: translucent gradient streaks across the button via a pseudo-element. */
-.sweep {
-  position: relative;
-  overflow: hidden;
-}
-.sweep::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(100deg, transparent 30%, color-mix(in oklch, var(--color-accent) 40%, transparent) 50%, transparent 70%);
-  transform: translateX(-100%);
-  animation: vb-sweep 700ms ease-out;
-  pointer-events: none;
 }
 
 /* Multi-layer "lifted" shadow — tight close shadow for grounding, plus a
@@ -295,30 +209,61 @@ code, pre, kbd, .mono {
 
 .ft-dots {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 2rem;
+  gap: 0.125rem;
+  margin-top: 1.5rem;
 }
+/* The visible dot is 8px, but the button itself is a 44px-tall tap target —
+   on touch the dots are the only carousel control, since .ft-nav is hidden. */
 .ft-dot {
-  width: 8px;
-  height: 8px;
+  width: 22px;
+  height: 44px;
   padding: 0;
   border: none;
+  background: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: width 250ms ease;
+}
+.ft-dot::before {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 8px;
   border-radius: 9999px;
   background: color-mix(in oklab, var(--color-fg) 25%, transparent);
-  cursor: pointer;
   transition: background 200ms ease, width 250ms ease;
 }
-.ft-dot:hover { background: color-mix(in oklab, var(--color-fg) 45%, transparent); }
-.ft-dot[aria-selected="true"] {
+.ft-dot:hover::before { background: color-mix(in oklab, var(--color-fg) 45%, transparent); }
+.ft-dot[aria-selected="true"] { width: 42px; }
+.ft-dot[aria-selected="true"]::before {
   width: 28px;
   background: var(--color-fg);
 }
-.ft-dot:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.ft-dot:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -6px; border-radius: var(--radius-sm); }
+
+/* Pause/play for the autoplay — WCAG 2.2.2 needs a mechanism to stop
+   auto-updating content, and hover-pause doesn't exist on touch. */
+.ft-play {
+  width: 44px;
+  height: 44px;
+  margin-left: 0.25rem;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: none;
+  color: color-mix(in oklab, var(--color-fg) 45%, transparent);
+  cursor: pointer;
+  transition: color 200ms ease;
+}
+.ft-play:hover { color: var(--color-fg); }
+.ft-play:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -6px; border-radius: var(--radius-sm); }
 
 @media (prefers-reduced-motion: reduce) {
   .ft-track { scroll-behavior: auto; }
-  .ft-dot, .ft-nav { transition: none; }
+  .ft-dot, .ft-dot::before, .ft-nav, .ft-play { transition: none; }
 }
 
 /* Dark visual card — locks tokens to a dark palette so embedded markup
@@ -335,15 +280,108 @@ code, pre, kbd, .mono {
   --color-accent: oklch(0.75 0.18 22);
 }
 
+/* ── Code blocks (shared by /developers and /mcp-server) ──
+   One dark panel style everywhere, so a snippet looks the same whichever page
+   it's on and whichever site theme is active. */
+.cb {
+  --cb-bg: oklch(0.18 0.012 260);
+  --cb-bar: oklch(0.22 0.012 260);
+  --cb-line: oklch(0.33 0.012 260);
+  --cb-fg: oklch(0.95 0 0);
+  --cb-muted: oklch(0.66 0.015 260);
+  border: 1px solid var(--cb-line);
+  border-radius: var(--radius);
+  background: var(--cb-bg);
+  overflow: hidden;
+}
+/* Dark theme: lift the panel off the near-black page so it reads as a card. */
+html:not(.light) .cb {
+  --cb-bg: oklch(0.205 0.012 260);
+  --cb-bar: oklch(0.245 0.012 260);
+  --cb-line: oklch(0.38 0.012 260);
+}
+.cb-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.5rem 0.3rem 0.85rem;
+  background: var(--cb-bar);
+  border-bottom: 1px solid var(--cb-line);
+  min-height: 2.2rem;
+}
+.cb-label { font-family: var(--font-mono); font-size: 11px; color: var(--cb-muted); }
+.cb-copy {
+  margin-left: auto;
+  font-family: var(--font-mono); font-size: 11px; color: var(--cb-muted);
+  background: transparent; border: none; border-radius: var(--radius-sm);
+  padding: 0.22rem 0.5rem; cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.cb-copy:hover { color: var(--cb-fg); background: color-mix(in oklab, var(--cb-fg) 8%, transparent); }
+.cb-copy:focus-visible { outline: 2px solid oklch(0.72 0.14 240); outline-offset: 1px; }
+.cb-copy.is-copied { color: oklch(0.78 0.17 150); }
+
+/* Tabs inside a code panel — language on /developers, MCP client on /mcp-server. */
+.ct-tabs { display: flex; gap: 0.15rem; overflow-x: auto; scrollbar-width: none; }
+.ct-tabs::-webkit-scrollbar { display: none; }
+.ct-tab {
+  font-size: 12px; color: var(--cb-muted);
+  background: transparent; border: none; border-radius: var(--radius-sm);
+  padding: 0.26rem 0.6rem; white-space: nowrap; cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.ct-tab:hover { color: var(--cb-fg); }
+.ct-tab[aria-selected="true"] { color: var(--cb-fg); background: color-mix(in oklab, var(--cb-fg) 12%, transparent); }
+.ct-tab:focus-visible { outline: 2px solid oklch(0.72 0.14 240); outline-offset: 1px; }
+
+/* Shiki <pre>. The horizontal scrollbar is the only hint a snippet continues
+   off-screen, so it stays visible — just restyled to suit the dark panel
+   instead of the OS default, which is a chunky light-grey bar on Windows. */
+.cb pre.astro-code {
+  background: transparent !important;
+  margin: 0; padding: 0.95rem 1.1rem;
+  overflow-x: auto; font-size: 13px; line-height: 1.7; border-radius: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cb-line) transparent;
+}
+.cb pre.astro-code::-webkit-scrollbar { height: 8px; }
+.cb pre.astro-code::-webkit-scrollbar-track { background: transparent; }
+.cb pre.astro-code::-webkit-scrollbar-thumb {
+  background: var(--cb-line);
+  border-radius: 9999px;
+}
+.cb pre.astro-code code { font-family: var(--font-mono); }
+.cb pre.astro-code:focus-visible { outline: 2px solid oklch(0.72 0.14 240); outline-offset: -2px; }
+
+/* Inline code inside body copy on the doc-style pages. */
+.ic {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--color-fg);
+  background: color-mix(in oklab, var(--color-fg) 6%, transparent);
+  padding: 0.08em 0.36em;
+  border-radius: var(--radius-sm);
+}
+
 .prose {
   line-height: 1.7;
 }
 .prose p, .prose ul, .prose ol {
   margin-bottom: 1em;
 }
+/* Markdown-rendered headings (changelog bodies). Tailwind's preflight zeroes
+   heading margins and sizes, so restore them for prose content. */
 .prose h2 {
   color: var(--color-fg);
   font-weight: 600;
+  font-size: 1.35em;
+  margin: 1.8em 0 0.6em;
+}
+.prose h3 {
+  color: var(--color-fg);
+  font-weight: 600;
+  font-size: 1.05em;
+  margin: 1.6em 0 0.5em;
 }
 .prose ul {
   list-style: disc;

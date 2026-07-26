@@ -1,4 +1,13 @@
 ---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import browseShot from "../assets/screenshots/feature-browse.png";
+import messagesShot from "../assets/screenshots/feature-messages.png";
+import operationsShot from "../assets/screenshots/feature-operations.png";
+import monitoringShot from "../assets/screenshots/feature-monitoring.png";
+import spotlightShot from "../assets/screenshots/feature-spotlight.png";
+import themesShot from "../assets/screenshots/feature-themes.png";
+
 const features = [
   {
     id: "browse",
@@ -70,6 +79,18 @@ const visualMaxWidth: Record<string, string> = {
   mcp: "max-w-[480px]",
   themes: "max-w-[560px]",
 };
+
+// astro:assets reads intrinsic width/height from the imported files, so the
+// slide never collapses while a PNG loads. `widths` stops at each file's
+// display size × 2 (retina); sharp won't upscale past the original anyway.
+const visuals: Record<string, { src: ImageMetadata; widths: number[]; sizes: string }> = {
+  browse: { src: browseShot, widths: [280, 555], sizes: "(max-width: 360px) 85vw, 280px" },
+  messages: { src: messagesShot, widths: [720, 1440], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
+  operations: { src: operationsShot, widths: [720, 1440], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
+  monitoring: { src: monitoringShot, widths: [720, 1347], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
+  spotlight: { src: spotlightShot, widths: [480, 904], sizes: "(max-width: 540px) calc(100vw - 4rem), 480px" },
+  themes: { src: themesShot, widths: [560, 1120], sizes: "(max-width: 620px) calc(100vw - 4rem), 560px" },
+};
 ---
 <section id="features" data-snap-to="features" class="max-w-6xl mx-auto px-6 py-24 md:py-32 scroll-mt-20">
   <h2 class="reveal text-3xl md:text-4xl font-bold mb-4 tracking-tight text-center">
@@ -87,12 +108,14 @@ const visualMaxWidth: Record<string, string> = {
   >
     <!-- Track. Native scroll-snap handles swipe / trackpad scroll;
          buttons and dots drive the same scrollTo programmatically. -->
-    <div class="ft-track" tabindex="0" aria-live="polite">
+    <!-- aria-live starts off so autoplay doesn't narrate a slide change every
+         6s; it flips to polite once the user drives the carousel themselves. -->
+    <div class="ft-track" tabindex="0" aria-live="off">
       {features.map((f, i) => (
         <article
           class="ft-slide"
-          role="group"
-          aria-roledescription="slide"
+          id={`ft-slide-${f.id}`}
+          role="tabpanel"
           aria-label={`${i + 1} of ${features.length}: ${f.title}`}
           data-index={i}
         >
@@ -138,10 +161,13 @@ const visualMaxWidth: Record<string, string> = {
                 </div>
               ) : (
                 <div class={`dark-card lifted w-full rounded-[var(--radius)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-bg)] ${visualMaxWidth[f.id]}`}>
-                  <img
-                    src={`/screenshots/feature-${f.id}.png`}
+                  <Image
+                    src={visuals[f.id].src}
                     alt={f.title}
-                    loading="lazy"
+                    widths={visuals[f.id].widths}
+                    sizes={visuals[f.id].sizes}
+                    loading={i < 2 ? "eager" : "lazy"}
+                    fetchpriority={i === 0 ? "high" : undefined}
                     decoding="async"
                     class="block w-full h-auto"
                   />
@@ -166,19 +192,30 @@ const visualMaxWidth: Record<string, string> = {
     </button>
 
     <!-- Dot indicators. Width grows on the active dot for a clear "you are here". -->
-    <div class="ft-dots" role="tablist" aria-label="Choose feature slide">
-      {features.map((f, i) => (
-        <button
-          type="button"
-          role="tab"
-          aria-label={f.title}
-          aria-selected={i === 0 ? "true" : "false"}
-          tabindex={i === 0 ? 0 : -1}
-          data-dot
-          data-index={i}
-          class="ft-dot"
-        ></button>
-      ))}
+    <div class="ft-dots">
+      <div class="flex items-center" role="tablist" aria-label="Choose feature slide">
+        {features.map((f, i) => (
+          <button
+            type="button"
+            role="tab"
+            aria-label={f.title}
+            aria-controls={`ft-slide-${f.id}`}
+            aria-selected={i === 0 ? "true" : "false"}
+            tabindex={i === 0 ? 0 : -1}
+            data-dot
+            data-index={i}
+            class="ft-dot"
+          ></button>
+        ))}
+      </div>
+      <button type="button" class="ft-play" data-autoplay-toggle aria-label="Pause the feature carousel">
+        <svg data-autoplay-pause width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" />
+        </svg>
+        <svg data-autoplay-play class="hidden" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M8 5.5v13a1 1 0 0 0 1.5.9l11-6.5a1 1 0 0 0 0-1.8l-11-6.5A1 1 0 0 0 8 5.5Z" />
+        </svg>
+      </button>
     </div>
   </div>
 </section>
@@ -195,11 +232,19 @@ const visualMaxWidth: Record<string, string> = {
       const next = root.querySelector(".ft-next");
       if (!track || slides.length === 0) return;
 
+      const playBtn = root.querySelector("[data-autoplay-toggle]");
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
       let current = 0;
       let autoplayTimer = null;
       let inView = false;
-      let interacted = false;
+      // Set once the user takes over (button, dot, swipe, or the explicit
+      // pause control). Autoplay never resumes on its own after that.
+      let stopped = prefersReduced;
       let scrollSettleTimer = null;
+
+      // Nothing to pause when reduced motion already suppressed autoplay.
+      if (prefersReduced && playBtn) playBtn.hidden = true;
 
       const updateDots = () => {
         dots.forEach((dot, i) => {
@@ -224,7 +269,7 @@ const visualMaxWidth: Record<string, string> = {
       };
 
       const startAutoplay = () => {
-        if (interacted || autoplayTimer !== null) return;
+        if (stopped || autoplayTimer !== null) return;
         autoplayTimer = window.setInterval(() => {
           goTo(current + 1);
         }, AUTOPLAY_MS);
@@ -238,14 +283,37 @@ const visualMaxWidth: Record<string, string> = {
       };
 
       const sync = () => {
-        if (inView && !interacted) startAutoplay();
+        if (inView && !stopped) startAutoplay();
         else stopAutoplay();
       };
 
-      const markInteracted = () => {
-        interacted = true;
-        stopAutoplay();
+      const syncPlayBtn = () => {
+        if (!playBtn) return;
+        playBtn.setAttribute(
+          "aria-label",
+          stopped ? "Play the feature carousel" : "Pause the feature carousel",
+        );
+        const pause = playBtn.querySelector("[data-autoplay-pause]");
+        const play = playBtn.querySelector("[data-autoplay-play]");
+        pause && pause.classList.toggle("hidden", stopped);
+        play && play.classList.toggle("hidden", !stopped);
       };
+
+      const markInteracted = () => {
+        stopped = true;
+        stopAutoplay();
+        // Once the user is driving, slide changes are worth announcing.
+        track.setAttribute("aria-live", "polite");
+        syncPlayBtn();
+      };
+
+      if (playBtn) {
+        playBtn.addEventListener("click", () => {
+          stopped = !stopped;
+          syncPlayBtn();
+          sync();
+        });
+      }
 
       // Prev / Next buttons
       [prev, next].forEach((btn) => {
@@ -312,7 +380,7 @@ const visualMaxWidth: Record<string, string> = {
 
       // Hover pause (resume on leave, unless user has clicked / swiped)
       root.addEventListener("mouseenter", stopAutoplay);
-      root.addEventListener("mouseleave", () => { if (!interacted) startAutoplay(); });
+      root.addEventListener("mouseleave", () => { if (!stopped) startAutoplay(); });
 
       // Pause when tab is hidden.
       document.addEventListener("visibilitychange", () => {
@@ -334,6 +402,7 @@ const visualMaxWidth: Record<string, string> = {
       }
 
       updateDots();
+      syncPlayBtn();
     });
   })();
 </script>

@@ -1,0 +1,124 @@
+---
+import Base from "../layouts/Base.astro";
+
+const title = "Terms of use — viewbus";
+const description =
+  "The licence terms for viewbus: what you may do with it, what it does not promise, and where liability stops.";
+const path = "/terms";
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://viewbus.app/" },
+    { "@type": "ListItem", position: 2, name: "Terms of use", item: "https://viewbus.app/terms/" },
+  ],
+};
+---
+<Base title={title} description={description} path={path}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+  <article class="max-w-3xl mx-auto px-6 py-20 prose">
+    <h1 class="text-4xl font-bold tracking-tight mb-4">Terms of use</h1>
+    <p class="text-[var(--color-muted)] mb-12">Last updated: 2026-07-26</p>
+
+    <p>
+      viewbus is free software in the "costs nothing" sense, not the open-source sense: the source is
+      closed, but you may use it for anything, including commercial work, without paying or signing up.
+      These terms cover the desktop app, this website, and the JSON feeds served from
+      <code>viewbus.app</code>. Installing or using viewbus means you accept them. They're written to be
+      read, not to be impressive.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">Who you're dealing with</h2>
+    <p>
+      viewbus is made and operated by <strong>Håkon Lia</strong>, an individual developer based in
+      Norway. There is no company, no support contract, and no service-level agreement. Reach me through
+      the routes on the <a href="/support/">support page</a>.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">What you may do</h2>
+    <ul>
+      <li>Install and run viewbus on as many machines as you like, personally or at work.</li>
+      <li>Use it against production systems, at your own discretion and risk.</li>
+      <li>Build tools on the documented <a href="/developers/">local HTTP API</a> and the built-in MCP server, and distribute those tools freely.</li>
+      <li>Write and share themes.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">What you may not do</h2>
+    <ul>
+      <li>Reverse-engineer, decompile, or disassemble the app, except where that right can't be excluded by law.</li>
+      <li>Redistribute modified builds, or distribute viewbus as though it were yours.</li>
+      <li>Sell viewbus, or bundle it into a paid product as a headline feature, without asking me first.</li>
+      <li>Use it to access systems you aren't authorised to access.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">Your data and your Azure resources</h2>
+    <p>
+      viewbus talks to Azure with your credentials, on your machine. You are responsible for the access
+      you grant it and for what you do with that access. Some operations are destructive by
+      design — purging a queue, emptying a dead-letter queue, bulk-deleting messages — and those actions
+      are permanent. viewbus asks for confirmation, but it will do exactly what you tell it to. Verify
+      the target resource before you confirm, and keep your own backups of anything you can't lose.
+    </p>
+    <p>
+      viewbus has no servers and stores nothing about you. The <a href="/privacy/">privacy page</a>
+      lists every file it writes and every host it contacts.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">No warranty</h2>
+    <p>
+      viewbus is provided <strong>"as is"</strong>, without warranty of any kind, express or implied,
+      including but not limited to warranties of merchantability, fitness for a particular purpose, and
+      non-infringement. I don't promise that it is free of defects, that it will suit your setup, that
+      it will keep working after an Azure API change, or that any given release will be available
+      indefinitely.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">Limitation of liability</h2>
+    <p>
+      To the fullest extent permitted by law, I am not liable for any indirect, incidental, special,
+      consequential, or exemplary damages, nor for lost profits, lost revenue, lost data, deleted
+      messages, or business interruption, arising from your use of or inability to use viewbus — even if
+      I've been told such damages are possible. Where liability cannot be excluded, it is limited to the
+      amount you paid for viewbus, which is zero.
+    </p>
+    <p>
+      Nothing here limits liability for wilful misconduct or gross negligence, or any other liability
+      that can't be limited under Norwegian law. If you're a consumer, your mandatory statutory rights
+      are unaffected.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">Third-party services</h2>
+    <p>
+      viewbus connects to Microsoft Azure using your own credentials. Your use of Azure is governed by
+      your agreement with Microsoft, not by these terms, and Azure charges — including request charges
+      generated by viewbus peeking or listing resources — are between you and Microsoft. viewbus is not
+      affiliated with, sponsored by, or endorsed by Microsoft. Distribution through the Microsoft Store
+      or Homebrew is additionally subject to those platforms' own terms.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">Updates and availability</h2>
+    <p>
+      The app checks <code>viewbus.app/latest.json</code> on startup and can install updates you accept;
+      Microsoft Store installs update through the Store. I may change, break, or discontinue any feature,
+      and I may stop publishing viewbus entirely. Copies you've already installed keep working — nothing
+      phones home for permission to run.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">Changes to these terms</h2>
+    <p>
+      If these terms change, the date at the top changes with them, and material changes will be called
+      out in the <a href="/changelog/">changelog</a>. Continuing to use viewbus after a change means you
+      accept the new version.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">Governing law</h2>
+    <p>
+      These terms are governed by the laws of Norway, without regard to conflict-of-law rules. If you're
+      a consumer resident elsewhere in the EEA, you keep the protection of the mandatory rules of your
+      own country.
+    </p>
+  </article>
+</Base>

@@ -1,0 +1,88 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection, render } from "astro:content";
+
+// The in-app update toast and latest.json's `notes` field link to
+// /changelog/<version>, so every release needs a page at that URL.
+export async function getStaticPaths() {
+  const entries = (await getCollection("changelog")).sort(
+    (a, b) =>
+      b.data.publishedAt.localeCompare(a.data.publishedAt) ||
+      b.data.version.localeCompare(a.data.version, undefined, { numeric: true }),
+  );
+  return entries.map((entry, i) => ({
+    params: { version: entry.data.version },
+    props: { entry, newer: entries[i - 1] ?? null, older: entries[i + 1] ?? null },
+  }));
+}
+
+const { entry, newer, older } = Astro.props;
+const { Content } = await render(entry);
+
+const title = `viewbus ${entry.data.version} — changelog`;
+const description = entry.data.summary;
+const path = `/changelog/${entry.data.version}`;
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://viewbus.app/" },
+    { "@type": "ListItem", position: 2, name: "Changelog", item: "https://viewbus.app/changelog/" },
+    { "@type": "ListItem", position: 3, name: `v${entry.data.version}`, item: `https://viewbus.app/changelog/${entry.data.version}/` },
+  ],
+};
+---
+<Base title={title} description={description} path={path}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+
+  <article class="max-w-3xl mx-auto px-6 py-20">
+    <p class="mb-6 text-sm">
+      <a href="/changelog/" class="text-[var(--color-accent)] hover:underline">← All releases</a>
+    </p>
+
+    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+      <h1 class="text-4xl font-bold tracking-tight tabular-nums">v{entry.data.version}</h1>
+      <time class="text-sm text-[var(--color-muted)] tabular-nums" datetime={entry.data.publishedAt}>
+        {entry.data.publishedAt}
+      </time>
+    </div>
+
+    <div class="version-body prose mt-8">
+      <Content />
+    </div>
+
+    <p class="mt-8">
+      <a
+        class="text-[var(--color-accent)] hover:underline"
+        href={`https://github.com/haakofli/viewbus-site/releases/tag/v${entry.data.version}`}
+      >
+        Download v{entry.data.version} →
+      </a>
+    </p>
+
+    <nav
+      aria-label="Other releases"
+      class="mt-12 flex flex-wrap justify-between gap-3 border-t border-[var(--color-border)] pt-6 text-sm"
+    >
+      {older ? (
+        <a href={`/changelog/${older.data.version}/`} class="text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)]">
+          ← v{older.data.version}
+        </a>
+      ) : <span />}
+      {newer && (
+        <a href={`/changelog/${newer.data.version}/`} class="text-[var(--color-muted)] transition-colors hover:text-[var(--color-fg)]">
+          v{newer.data.version} →
+        </a>
+      )}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  /* The markdown body opens with `## X.Y.Z — date`, which the page header
+     already shows — same trick as the changelog index. */
+  .version-body > :global(h2) { display: none; }
+</style>

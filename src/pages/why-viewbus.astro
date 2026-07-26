@@ -1,0 +1,206 @@
+---
+import Base from "../layouts/Base.astro";
+
+const title = "Why viewbus — how it's built";
+const description =
+  "The technical shape of viewbus: a local SQLite index, AMQP peeks that don't consume, bulk operations that back off under throttling, and an MCP server that stays read-only.";
+const path = "/why-viewbus";
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://viewbus.app/" },
+    { "@type": "ListItem", position: 2, name: "Why viewbus", item: "https://viewbus.app/why-viewbus/" },
+  ],
+};
+
+const techArticleSchema = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: "Why viewbus — how it's built",
+  description,
+  url: "https://viewbus.app/why-viewbus/",
+  author: { "@type": "Person", name: "Håkon Lia" },
+};
+
+// One decision per row, one consequence. Keep it to two sentences.
+const groups: {
+  title: string;
+  lede: string;
+  rows: { h: string; p: string }[];
+}[] = [
+  {
+    title: "Speed",
+    lede: "Nothing waits on the network that doesn't have to.",
+    rows: [
+      {
+        h: "Local SQLite index",
+        p: "Namespaces, queues, topics and subscriptions are indexed to disk on first sign-in. Browsing is a local read, so the tree stays instant across thousands of resources.",
+      },
+      {
+        h: "Rust on the hot paths",
+        p: "Indexing, fuzzy matching, AMQP and bulk jobs are compiled. The UI is a system webview through Tauri, not a bundled browser.",
+      },
+      {
+        h: "System-wide spotlight",
+        p: "Ctrl+I opens a fuzzy search over the whole index from anywhere in the OS, including with the app closed to the tray. Rebindable.",
+      },
+      {
+        h: "Connection strings are first-class",
+        p: "Namespaces added by connection string land in the same tables as Azure-discovered ones, and behave identically in peek, resend, spotlight and MCP.",
+      },
+    ],
+  },
+  {
+    title: "Safe against production",
+    lede: "The destructive things are the ones worth being explicit about.",
+    rows: [
+      {
+        h: "Peek, not receive",
+        p: "Messages are read over AMQP with peek semantics. Nothing is dequeued, delivery counts don't move, and session locks are released after the read.",
+      },
+      {
+        h: "Bulk work runs as a job",
+        p: "Purge, dead-letter, resend and delete preview the matched set before anything happens, then run with progress, an ETA and cancel. Throttling backs off instead of failing, and every run lands in a per-resource history.",
+      },
+      {
+        h: "Credentials stay in the OS",
+        p: "Tokens and connection strings go to Windows Credential Manager or the macOS Keychain. Never the index, never the log files.",
+      },
+      {
+        h: "No backend",
+        p: "The app's content security policy limits egress to Microsoft's endpoints, your own namespaces, and two static JSON files for update and notice checks.",
+      },
+    ],
+  },
+  {
+    title: "Reach",
+    lede: "The things the Portal and the original explorer can't do.",
+    rows: [
+      {
+        h: "Body search across a namespace",
+        p: "Search message contents across every queue, topic and dead-letter queue at once, rather than opening entities one at a time.",
+      },
+      {
+        h: "Diff and resend",
+        p: "Edit a dead-lettered message's body and properties in a side-by-side diff, then send it back. Composing and scheduling new messages uses the same editor.",
+      },
+      {
+        h: "Background monitoring",
+        p: "Grouped resources, a dead-letter threshold per set, native notifications, and mutes that expire on their own. Samples counts only, never message bodies.",
+      },
+      {
+        h: "Two automation surfaces",
+        p: "A read-only MCP server over local stdio, and a loopback HTTP API with a per-launch bearer token. Neither opens a network listener.",
+      },
+    ],
+  },
+];
+
+const next = [
+  { href: "/mcp-server/", label: "MCP server", note: "the ten tools, per-client setup, and what the AI can't do" },
+  { href: "/developers/", label: "Local HTTP API", note: "discovery, auth, and the three /v1 endpoints" },
+  { href: "/privacy/", label: "Privacy", note: "every file written, every host contacted" },
+  { href: "/service-bus-explorer-alternative/", label: "Coming from Service Bus Explorer", note: "what carries over and what's new" },
+];
+---
+<Base title={title} description={description} path={path}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(techArticleSchema)} />
+  </Fragment>
+
+  <article class="why max-w-4xl mx-auto px-6 py-16 md:py-20">
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]">
+      Why viewbus
+    </h1>
+    <p class="mt-5 max-w-2xl text-lg text-[var(--color-muted)] leading-relaxed">
+      A desktop client for Azure Service Bus, built on a local index and non-destructive reads.
+      Here's what that means in practice.
+    </p>
+
+    {groups.map((group) => (
+      <section class="why-group">
+        <div class="why-head">
+          <h2 class="why-title">{group.title}</h2>
+          <p class="why-lede">{group.lede}</p>
+        </div>
+        <dl>
+          {group.rows.map((row) => (
+            <div class="why-row">
+              <dt class="why-term">{row.h}</dt>
+              <dd class="why-def">{row.p}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    ))}
+
+    <section class="mt-16 rounded-[var(--radius)] border border-[var(--color-border)] p-6">
+      <h2 class="font-semibold">Worth reading next</h2>
+      <ul class="mt-4 flex flex-col gap-2.5 text-sm">
+        {next.map((item) => (
+          <li class="flex flex-col gap-x-2 sm:flex-row sm:items-baseline">
+            <a href={item.href} class="shrink-0 text-[var(--color-accent)] hover:underline">{item.label}</a>
+            <span class="text-[var(--color-muted)]">— {item.note}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <div class="mt-10">
+      <a
+        href="/download/"
+        class="inline-flex items-center justify-center rounded-full h-11 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] transition-colors hover:bg-[color-mix(in_oklab,var(--color-fg)_88%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+      >Download viewbus</a>
+    </div>
+  </article>
+
+  <style>
+    /* A definition list rather than a card grid: rows are the same shape
+       whatever length the copy is, so nothing leaves a ragged hole beside a
+       short neighbour, and the rules give the eye something to follow. */
+    .why-group { margin-top: 4rem; }
+
+    .why-head {
+      padding-bottom: 1rem;
+      border-bottom: 2px solid color-mix(in oklab, var(--color-fg) 55%, transparent);
+    }
+    .why-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--color-fg);
+    }
+    .why-lede {
+      margin-top: 0.4rem;
+      font-size: 0.9375rem;
+      color: var(--color-muted);
+    }
+
+    .why-row {
+      display: grid;
+      gap: 0.35rem 2.5rem;
+      padding: 1.35rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    @media (min-width: 768px) {
+      .why-row { grid-template-columns: 14rem minmax(0, 1fr); }
+    }
+
+    .why-term {
+      font-weight: 600;
+      line-height: 1.4;
+      text-wrap: balance;
+    }
+    .why-def {
+      margin: 0;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      color: var(--color-muted);
+    }
+  </style>
+</Base>

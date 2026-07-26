@@ -1,5 +1,5 @@
 ---
-import Base from "../layouts/Base.astro";
+import Base from "../../layouts/Base.astro";
 import { getCollection, render } from "astro:content";
 
 const entries = (await getCollection("changelog")).sort(
@@ -31,7 +31,9 @@ const breadcrumbSchema = {
   <article class="max-w-3xl mx-auto px-6 py-20 prose">
     <h1 class="text-4xl font-bold tracking-tight mb-4">Changelog</h1>
     <p class="text-[var(--color-muted)] mb-12">
-      Latest: <a href={`https://github.com/haakofli/viewbus-site/releases/tag/v${entries[0]?.data.version}`} class="underline">v{entries[0]?.data.version}</a>
+      Latest: <a href={`/changelog/${entries[0]?.data.version}/`} class="underline">v{entries[0]?.data.version}</a>
+      <span class="mx-2 select-none">·</span>
+      <a href="/rss.xml" class="underline">RSS feed</a>
     </p>
 
     {rendered.map(({ entry, Content }, i) => (
@@ -57,12 +59,18 @@ const breadcrumbSchema = {
         </summary>
         <div class="changelog-body prose pb-8 pt-1">
           <Content />
-          <p class="mt-6 mb-0">
+          <p class="mt-6 mb-0 flex flex-wrap gap-x-6 gap-y-1">
             <a
               class="text-[var(--color-accent)] hover:underline"
               href={`https://github.com/haakofli/viewbus-site/releases/tag/v${entry.data.version}`}
             >
               Download v{entry.data.version} →
+            </a>
+            <a
+              class="text-[var(--color-accent)] hover:underline"
+              href={`/changelog/${entry.data.version}/`}
+            >
+              Permalink
             </a>
           </p>
         </div>
@@ -90,8 +98,9 @@ const breadcrumbSchema = {
   /* Hide the redundant `## X.Y.Z — date` heading the markdown body carries —
      the summary already shows the version + date, so re-rendering it inside
      would be visual noise. Targets only top-level h2s; section headers (h3+)
-     for Features / Improvements / Fixes still render normally. */
-  .changelog-body > h2 { display: none; }
+     for Features / Improvements / Fixes still render normally. The h2 comes
+     from rendered markdown, which carries no scope attribute — hence :global. */
+  .changelog-body > :global(h2) { display: none; }
 
   /* Drop the teaser if it would collide with the version + date in tight
      viewports — sm:block above already gates it. */

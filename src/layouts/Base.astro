@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
+import monoLatin from "@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url";
 import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 
@@ -8,11 +10,15 @@ export interface Props {
   description: string;
   path: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
-const { title, description, path, ogImage = "/og.png" } = Astro.props;
+const { title, description, path, ogImage = "/og.png", noindex = false } = Astro.props;
 const site = "https://viewbus.app";
-const canonical = new URL(path, site).toString();
+// GitHub Pages serves directory-style URLs, so `/privacy` 301s to `/privacy/`.
+// Canonicals and og:url must name the URL that actually answers 200.
+const normalized = path === "/" ? "/" : `${path.replace(/\/+$/, "")}/`;
+const canonical = new URL(normalized, site).toString();
 const ogImageUrl = new URL(ogImage, site).toString();
 ---
 <!doctype html>
@@ -24,13 +30,23 @@ const ogImageUrl = new URL(ogImage, site).toString();
     <meta name="theme-color" content="#f7eddc" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)" />
     <meta name="author" content="Håkon Lia" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    {noindex
+      ? <meta name="robots" content="noindex, follow" />
+      : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg?v=2" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.svg?v=2" />
-    <link rel="preconnect" href="https://github.com" crossorigin />
+    <!-- iOS ignores SVG here and falls back to a generated letter tile, so the
+         home-screen icon has to be a real bitmap. -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3" />
+    <meta name="apple-mobile-web-app-title" content="viewbus" />
+    <link rel="alternate" type="application/rss+xml" title="viewbus changelog" href="/rss.xml" />
+
+    <!-- The latin subsets cover everything above the fold; without the preload
+         they're only discovered after the stylesheet parses. -->
+    <link rel="preload" as="font" type="font/woff2" href={geistLatin} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={monoLatin} crossorigin />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="viewbus" />
@@ -51,10 +67,31 @@ const ogImageUrl = new URL(ogImage, site).toString();
     <meta name="twitter:image:alt" content="viewbus — Azure Service Bus desktop manager for Windows and macOS" />
 
     <script is:inline>
-      // Cream is the brand. Only honor an explicit "dark" preference.
+      // Follow the OS unless the visitor has overridden it with the nav toggle.
+      // Runs before first paint so there's no flash of the wrong theme.
       const pref = localStorage.getItem("viewbus-site-theme");
-      if (pref !== "dark") {
+      const dark =
+        pref === "dark" ||
+        (pref !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+      if (!dark) {
         document.documentElement.classList.add("light");
+      }
+
+      // viewbus is a desktop app, so a phone can't install it. Decide before
+      // first paint which copy to show. Capability-based, not viewport width:
+      // a narrow window on a laptop still gets the real download buttons.
+      if (
+        navigator.userAgentData?.mobile === true ||
+        (matchMedia("(pointer: coarse)").matches && matchMedia("(hover: none)").matches)
+      ) {
+        document.documentElement.classList.add("handheld");
+      }
+
+      // Scroll-reveal is opt-in: content is visible by default, and only the
+      // environments that can run the IntersectionObserver hide it for the
+      // entrance animation. No JS, no IO, no render — nothing is ever hidden.
+      if ("IntersectionObserver" in window) {
+        document.documentElement.classList.add("js-reveal");
       }
     </script>
 
@@ -67,14 +104,14 @@ const ogImageUrl = new URL(ogImage, site).toString();
     >
       Skip to content
     </a>
-    <Nav />
+    <Nav path={normalized} />
     <main id="main" class="flex-1">
       <slot />
     </main>
     <Footer />
 
     <script is:inline>
-      if ("IntersectionObserver" in window) {
+      if (document.documentElement.classList.contains("js-reveal")) {
         const observer = new IntersectionObserver(
           (entries) => {
             for (const entry of entries) {
@@ -87,33 +124,6 @@ const ogImageUrl = new URL(ogImage, site).toString();
           { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
         );
         document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
-      } else {
-        document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
-      }
-
-      // Tease: clicking the fake-interactive chrome animates the download
-      // buttons. Each button gets a random variant per click for a playful mix.
-      const VARIANTS = [
-        "wiggle", "pulse", "bounce", "wobble", "flash", "nudge", "shimmer",
-        "glow-accent", "glow-info", "glow-success", "glow-danger",
-        "squish", "heartbeat", "rainbow", "shake-v", "sweep",
-      ];
-      const pick = () => VARIANTS[Math.floor(Math.random() * VARIANTS.length)];
-      const clear = (btn) => { for (const v of VARIANTS) btn.classList.remove(v); };
-      const downloads = document.querySelectorAll("[data-download]");
-      if (downloads.length > 0) {
-        document.querySelectorAll("[data-tease]").forEach((el) => {
-          el.addEventListener("click", () => {
-            downloads.forEach((btn) => {
-              clear(btn);
-              void btn.offsetWidth;
-              btn.classList.add(pick());
-            });
-          });
-        });
-        downloads.forEach((btn) => {
-          btn.addEventListener("animationend", () => clear(btn));
-        });
       }
     </script>
   </body>

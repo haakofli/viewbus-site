@@ -2,14 +2,15 @@
 import Base from "../layouts/Base.astro";
 
 const title = "Privacy — viewbus";
-const description = "viewbus has no telemetry, no backend servers, and no account system. Everything happens on your machine.";
+const description =
+  "viewbus has no telemetry, no backend servers, and no account system. Everything happens on your machine.";
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://viewbus.app/" },
-    { "@type": "ListItem", "position": 2, "name": "Privacy", "item": "https://viewbus.app/privacy" }
+    { "@type": "ListItem", "position": 2, "name": "Privacy", "item": "https://viewbus.app/privacy/" }
   ]
 };
 ---
@@ -19,7 +20,7 @@ const breadcrumbSchema = {
   </Fragment>
   <article class="max-w-3xl mx-auto px-6 py-20 prose">
     <h1 class="text-4xl font-bold tracking-tight mb-4">Privacy</h1>
-    <p class="text-[var(--color-muted)] mb-12">Last updated: 2026-06-01</p>
+    <p class="text-[var(--color-muted)] mb-12">Last updated: 2026-07-26</p>
 
     <p>
       viewbus does not send telemetry, does not phone home, and has no backend servers.
@@ -45,6 +46,12 @@ const breadcrumbSchema = {
         </ul>
       </li>
       <li><strong>Custom themes</strong> in the <code>themes/</code> subfolder of the settings directory above — drop a JSON file in and it shows up in Settings on next launch.</li>
+      <li><strong>Local API discovery file</strong> — while the app is running it serves a small HTTP API on <code>127.0.0.1</code> for launcher plugins and scripts (see the <a href="/developers/">developer docs</a>). On each launch it writes the port and a freshly generated bearer token to a discovery file so local tools can find it. The token is regenerated every launch, the listener binds loopback only, and requests carrying an <code>Origin</code> header are rejected so no web page can reach it. Turn the whole thing off with <code>localApi.enabled: false</code> in <code>settings.json</code>.
+        <ul>
+          <li>Windows: <code>%APPDATA%\viewbus\local-api.json</code></li>
+          <li>macOS: <code>~/Library/Application Support/viewbus/local-api.json</code></li>
+        </ul>
+      </li>
       <li><strong>Log files</strong> — daily-rotated plain-text diagnostics via <code>tracing</code>. No PII, no credentials, no message bodies. Attached only if you opt in via the in-app feedback dialog.
         <ul>
           <li>Windows: <code>%LOCALAPPDATA%\viewbus\logs\</code></li>
@@ -60,6 +67,25 @@ const breadcrumbSchema = {
       <li>Azure Resource Manager + Service Bus REST / AMQP calls (direct to the endpoints in your connection strings — the app's Content Security Policy allows only <code>login.microsoftonline.com</code>, <code>management.azure.com</code>, <code>*.servicebus.windows.net</code>, and the static viewbus.app hosts below).</li>
       <li>An update check on app start that reads <code>https://viewbus.app/latest.json</code> — a static JSON file with the current version number. No query parameters, no identifiers, no user agent beyond what the OS adds. Apps installed from the Microsoft Store are updated through the Store instead.</li>
       <li>An announcements check on app start that reads <code>https://viewbus.app/announcements.json</code> — the same kind of static file. Notices that don't apply to your version are filtered locally; dismissed ones are remembered in <code>localStorage</code>.</li>
+      <li>If you send feedback from the in-app dialog, whatever you typed — plus the log file, but only if you tick the box to attach it.</li>
+    </ul>
+    <p>
+      The built-in MCP server doesn't change any of this: it runs locally over stdio and holds no
+      credentials of its own. If you ask an AI assistant to read a message through it, that message
+      goes to whichever AI provider your client is configured with — that's between you and them, and
+      viewbus never sees it. Details on <a href="/mcp-server/">the MCP page</a>.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">This website</h2>
+    <p>
+      <code>viewbus.app</code> is a static site hosted on GitHub Pages. There is no analytics script,
+      no tag manager, no cookies, and no third-party embeds — fonts are served from this domain rather
+      than a font CDN, so no request leaves it while you read this.
+    </p>
+    <ul>
+      <li><strong>Server logs.</strong> GitHub, as the host, sees the standard request data any web server sees: your IP address, user agent, and the page requested. That data is GitHub's to handle under <a href="https://docs.github.com/site-policy/privacy-policies/github-privacy-statement" rel="noopener">their privacy statement</a>; it isn't forwarded to us and we can't query it.</li>
+      <li><strong>Browser storage.</strong> Two <code>localStorage</code> keys, both set only by your own clicks and never read by anything but this site: <code>viewbus-site-theme</code> (light or dark) and <code>viewbus-mcp-client</code> (which config tab you last looked at). Clearing site data removes them.</li>
+      <li><strong>Outbound links.</strong> GitHub, the Microsoft Store, and Buy Me a Coffee are ordinary links — nothing is prefetched or contacted until you click.</li>
     </ul>
 
     <h2 class="text-2xl font-semibold mt-10 mb-3">No third parties</h2>
@@ -67,6 +93,26 @@ const breadcrumbSchema = {
       No analytics SDK, no crash reporter, no A/B framework, no affiliate tracking. If a
       future version adds any of these, it will be opt-in with a clear prompt, and this
       page will list them.
+    </p>
+
+    <h2 class="text-2xl font-semibold mt-10 mb-3">Who's responsible, and how to reach us</h2>
+    <p>
+      viewbus is made and operated by <strong>Håkon Lia</strong>, an individual developer in Norway,
+      who is the data controller for anything on this page. There's no company and no support desk;
+      the routes on the <a href="/support/">support page</a> all reach me directly:
+    </p>
+    <ul>
+      <li><a href="https://github.com/haakofli/viewbus-site/issues" rel="noopener">GitHub issues</a> for anything you're happy to discuss in public.</li>
+      <li>The feedback dialog inside the app (Settings → Send feedback), which needs no GitHub account and is the right route for anything you'd rather not post publicly.</li>
+    </ul>
+    <p>
+      Under the GDPR you have the right to access, correct, or erase personal data a controller holds
+      about you, and to complain to a supervisory authority — in Norway,
+      <a href="https://www.datatilsynet.no/" rel="noopener">Datatilsynet</a>. In practice there is
+      nothing for us to produce or delete: viewbus operates no servers, no database, and no account
+      system, so we hold no personal data about you at all. Everything the app stores is on your own
+      machine, in the files listed above, and deleting them is entirely in your hands. If you believe
+      that's wrong, get in touch and I'll look into it.
     </p>
   </article>
 </Base>

@@ -1,0 +1,202 @@
+---
+import Base from "../layouts/Base.astro";
+import { latest } from "../lib/latest";
+
+const title = "Download viewbus — free for Windows and macOS";
+const description =
+  "Install viewbus from the Microsoft Store, with Homebrew, or as a direct installer. Free, no account, version " +
+  latest.version + ".";
+const path = "/download";
+
+const storeUrl = "https://apps.microsoft.com/detail/9p0q5zmlv15k";
+const windowsInstaller = latest.platforms["windows-x86_64"]?.url ?? latest.installerUrl;
+const macInstaller = latest.platforms["darwin-aarch64"]?.url ?? null;
+const brewCmd = "brew install --cask haakofli/viewbus/viewbus";
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://viewbus.app/" },
+    { "@type": "ListItem", position: 2, name: "Download", item: "https://viewbus.app/download/" },
+  ],
+};
+---
+<Base title={title} description={description} path={path}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+
+  <article class="max-w-3xl mx-auto px-6 py-16 md:py-20">
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Download viewbus</h1>
+    <p class="mt-4 text-lg text-[var(--color-muted)] leading-relaxed">
+      Free, no account, no telemetry. Version <span class="font-mono text-[var(--color-fg)]">{latest.version}</span>,
+      released {latest.publishedAt.slice(0, 10)}.
+    </p>
+    <p data-handheld-only class="mt-4 rounded-[var(--radius)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-accent)_6%,transparent)] p-4 text-sm leading-relaxed">
+      viewbus is a desktop app for Windows and macOS — there's no phone build. Open this page on your
+      computer to install it.
+    </p>
+
+    <!-- Windows -->
+    <section class="mt-14">
+      <h2 class="flex items-center gap-2.5 text-2xl font-semibold tracking-tight">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <rect x="0" y="0" width="10" height="10" /><rect x="12" y="0" width="10" height="10" />
+          <rect x="0" y="12" width="10" height="10" /><rect x="12" y="12" width="10" height="10" />
+        </svg>
+        Windows
+      </h2>
+
+      <div class="mt-5 rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h3 class="font-semibold">Microsoft Store</h3>
+          <span class="rounded-full bg-[color-mix(in_oklab,var(--color-success)_15%,transparent)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-success)]">Recommended</span>
+        </div>
+        <p class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">
+          Microsoft re-signs the package, so there's no SmartScreen warning, and updates arrive through
+          the Store automatically.
+        </p>
+        <a
+          href={storeUrl}
+          target="_blank"
+          rel="noopener"
+          class="mt-4 inline-flex items-center justify-center gap-2 rounded-full h-11 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] transition-colors hover:bg-[color-mix(in_oklab,var(--color-fg)_88%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+        >
+          Get it from the Microsoft Store
+        </a>
+      </div>
+
+      <div class="mt-4 rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+        <h3 class="font-semibold">Direct installer (.exe)</h3>
+        <p class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">
+          An NSIS installer for Windows 10 and 11 (x64). It isn't code-signed yet, so SmartScreen warns
+          once — click <span class="text-[var(--color-fg)]">More info → Run anyway</span>. Updates are
+          handled by the app's built-in updater.
+        </p>
+        <a
+          href={windowsInstaller}
+          class="mt-4 inline-flex items-center justify-center gap-2 rounded-full h-11 px-6 text-sm font-medium border border-[var(--color-border)] transition-colors hover:bg-[var(--color-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+        >
+          Download v{latest.version} for Windows
+        </a>
+      </div>
+    </section>
+
+    <!-- macOS -->
+    <section class="mt-14">
+      <h2 class="flex items-center gap-2.5 text-2xl font-semibold tracking-tight">
+        <svg width="16" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        </svg>
+        macOS
+      </h2>
+
+      <div class="mt-5 rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h3 class="font-semibold">Homebrew</h3>
+          <span class="rounded-full bg-[color-mix(in_oklab,var(--color-success)_15%,transparent)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-success)]">Recommended</span>
+        </div>
+        <p class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">
+          The cask clears the quarantine flag for you, so there's no Gatekeeper dance.
+          Upgrade later with <code class="font-mono text-[12px] text-[var(--color-fg)]">brew upgrade --cask viewbus</code>.
+        </p>
+        <div class="mt-4 flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-fg)_3%,transparent)] px-3 py-2">
+          <code data-brew-cmd class="dl-cmd flex-1 overflow-x-auto whitespace-nowrap font-mono text-[12px] text-[var(--color-fg)]"><span class="select-none text-[var(--color-muted)]">$ </span>{brewCmd}</code>
+          <button
+            type="button"
+            data-copy-link
+            data-copy-value={brewCmd}
+            aria-label="Copy the Homebrew command"
+            class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs text-[var(--color-muted)] transition-colors hover:bg-[var(--color-hover)] hover:text-[var(--color-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            <span data-copy-label>Copy</span>
+          </button>
+        </div>
+      </div>
+
+      {macInstaller && (
+        <div class="mt-4 rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+          <h3 class="font-semibold">Direct download (.dmg)</h3>
+          <p class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">
+            Apple Silicon build. It isn't notarized yet, so macOS blocks it on first launch — drag
+            <span class="text-[var(--color-fg)]"> ViewBus.app</span> into
+            <span class="text-[var(--color-fg)]"> /Applications</span>, then either run
+            <code class="font-mono text-[12px] text-[var(--color-fg)]">xattr -cr /Applications/ViewBus.app</code>
+            or use <span class="text-[var(--color-fg)]">System Settings → Privacy &amp; Security → Open Anyway</span>.
+            Once per install.
+          </p>
+          <a
+            href={macInstaller}
+            class="mt-4 inline-flex items-center justify-center gap-2 rounded-full h-11 px-6 text-sm font-medium border border-[var(--color-border)] transition-colors hover:bg-[var(--color-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+          >
+            Download v{latest.version} for macOS
+          </a>
+        </div>
+      )}
+    </section>
+
+    <section class="mt-14">
+      <h2 class="text-2xl font-semibold tracking-tight">What you need</h2>
+      <dl class="mt-5 flex flex-col gap-3 text-sm">
+        {[
+          ["Windows", "Windows 10 or 11, x64."],
+          ["macOS", "Apple Silicon. Intel Macs run the same build under Rosetta 2."],
+          ["Azure", "An Azure account with read access to your Service Bus namespaces, or a connection string for each namespace you want to reach."],
+          ["Network", "Outbound HTTPS to login.microsoftonline.com, management.azure.com, and your *.servicebus.windows.net endpoints."],
+        ].map(([term, def]) => (
+          <div class="flex flex-col gap-1 border-b border-[var(--color-border)] pb-3 last:border-0 sm:flex-row sm:gap-4">
+            <dt class="w-24 shrink-0 font-medium text-[var(--color-fg)]">{term}</dt>
+            <dd class="text-[var(--color-muted)] leading-relaxed">{def}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <section class="mt-14 rounded-[var(--radius)] border border-[var(--color-border)] p-5 text-sm leading-relaxed text-[var(--color-muted)]">
+      <p>
+        Every release is listed on the <a href="/changelog/" class="text-[var(--color-accent)] hover:underline">changelog</a>,
+        and <a href="/latest.json" class="text-[var(--color-accent)] hover:underline">latest.json</a> is
+        the machine-readable feed the app's updater reads — script against that rather than hardcoding
+        a version. Installing means you accept the <a href="/terms/" class="text-[var(--color-accent)] hover:underline">terms</a>.
+      </p>
+    </section>
+  </article>
+
+  <script is:inline>
+    (() => {
+      document.querySelectorAll("[data-copy-link]").forEach((btn) => {
+        const label = btn.querySelector("[data-copy-label]");
+        btn.addEventListener("click", async () => {
+          const value = btn.getAttribute("data-copy-value") || "";
+          try {
+            await navigator.clipboard.writeText(value);
+            if (label) {
+              const was = label.textContent;
+              label.textContent = "Copied";
+              setTimeout(() => { label.textContent = was; }, 1500);
+            }
+          } catch {
+            const code = btn.parentElement && btn.parentElement.querySelector("[data-brew-cmd]");
+            const sel = window.getSelection && window.getSelection();
+            if (code && sel) {
+              const range = document.createRange();
+              range.selectNode(code);
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
+          }
+        });
+      });
+    })();
+  </script>
+
+  <style>
+    .dl-cmd { scrollbar-width: none; }
+    .dl-cmd::-webkit-scrollbar { display: none; }
+  </style>
+</Base>

@@ -1,4 +1,4 @@
-# ViewBus — full product reference
+# viewbus — full product reference
 
 > The fastest way to debug Azure Service Bus. A fast, native desktop app for Windows and macOS. Free, local, private.
 > This file concatenates the full content of viewbus.app for AI agents that
@@ -6,27 +6,31 @@
 
 ---
 
-## What ViewBus is
+## What viewbus is
 
-ViewBus is a native desktop app (Windows + macOS) for developers, DevOps engineers, and SREs working with Azure Service Bus day-to-day. It lets users:
+viewbus is a native desktop app (Windows + macOS) for developers, DevOps engineers, and SREs working with Azure Service Bus day-to-day. It lets users:
 
 - Browse Azure subscriptions and their Service Bus namespaces in a live, locally-indexed tree (multi-tenant aware).
 - Peek and filter active and dead-lettered queue and topic messages without dequeuing them.
 - Search message *bodies* across every queue, topic, and dead-letter queue in a namespace at once.
-- Edit a message body/properties in a side-by-side diff editor, then resend it (single or filtered-bulk); bulk-delete or empty a dead-letter queue.
+- Edit a message body/properties in a side-by-side diff editor, then resend it (single or filtered-bulk).
+- Run bulk queue operations — purge, move-to-dead-letter, bulk resend, bulk delete — with a preview, live progress, an ETA, cancel, and a run history.
 - Set background alerts that watch dead-letter counts per resource and notify before a backlog becomes an incident (opt-in).
-- Expose all of the above to AI assistants via a built-in Model Context Protocol (MCP) server.
+- Drive everything by keyboard, including a system-wide spotlight search.
+- Expose the index and live message queries to AI assistants via a built-in Model Context Protocol (MCP) server.
+- Expose the same index to your own tooling via a local HTTP API on `127.0.0.1`.
 
 All data stays on the user's machine — no telemetry, no cloud sync, no accounts.
 
 ### Key facts
 
-- **Name:** ViewBus (stylized "viewbus")
+- **Name:** viewbus, lowercase (the Windows installer and macOS bundle are named `ViewBus` for install-time stability; user-facing copy is lowercase)
 - **Platform:** Windows 10 / 11 (x64) and macOS (Apple Silicon; Intel via Rosetta)
 - **Price:** Free
-- **Source:** Closed source; distributed via the Microsoft Store and GitHub Releases
+- **Source:** Closed source; distributed via the Microsoft Store, Homebrew, and GitHub Releases
 - **Privacy:** No telemetry, no backend servers, no accounts
 - **Built with:** Tauri 2, Rust, React, TypeScript, SQLite
+- **Author:** Håkon Lia, an independent developer in Norway. viewbus is not affiliated with, sponsored by, or endorsed by Microsoft.
 - **Current version:** See https://viewbus.app/latest.json
 
 ### Who it's for
@@ -35,10 +39,10 @@ Developers, DevOps engineers, and SREs who work with Azure Service Bus day-to-da
 
 ### Differentiators vs alternatives
 
-- **vs Service Bus Explorer:** native on macOS as well as Windows; message-body search across queues/topics/subscriptions at once; edit-and-resend with a side-by-side diff; background dead-letter alerts; an MCP server for AI workflows; VS Code theme import; manual connection strings in the OS keychain.
+- **vs Service Bus Explorer:** native on macOS as well as Windows; message-body search across queues/topics/subscriptions at once; edit-and-resend with a side-by-side diff; background dead-letter alerts; an MCP server and a local HTTP API for automation; VS Code theme import; manual connection strings in the OS keychain.
 - **vs the Azure Portal:** finds a message across every resource at once, no 100-message peek caps, background alerting, reaches namespaces outside the user's tenant via connection strings, keyboard-driven bulk operations.
-- **vs Microsoft's official Azure MCP Server:** that server exposes Service Bus metadata (counts, status) but cannot peek dead-letter messages or trace a message across queues; ViewBus's MCP server can.
-- **vs custom SDK scripts:** a polished GUI with a persistent local index and spotlight search — no code required for common operations.
+- **vs Microsoft's official Azure MCP Server:** that server exposes Service Bus metadata (counts, status) but cannot peek dead-letter messages or trace a message across queues; viewbus's MCP server can, because it reuses the local index and the credentials the desktop app already holds.
+- **vs custom SDK scripts:** a polished GUI with a persistent local index and spotlight search — no code required for common operations — plus a documented local HTTP API when you do want to script it.
 
 ---
 
@@ -46,11 +50,15 @@ Developers, DevOps engineers, and SREs who work with Azure Service Bus day-to-da
 
 ### Fast tree browsing
 
-Subscriptions, namespaces, queues, and topics are indexed locally in SQLite. Navigation is instant, even on enterprise tenants with thousands of resources, with no round-trip to Azure for typical browsing after the initial index. If the account spans several Azure tenants, ViewBus enumerates them and lets the user switch from the account dialog; the tree, search, and MCP results all stay scoped to the active tenant.
+Subscriptions, namespaces, queues, and topics are indexed locally in SQLite. Navigation is instant, even on enterprise tenants with thousands of resources, with no round-trip to Azure for typical browsing after the initial index. If the account spans several Azure tenants, viewbus enumerates them and lets the user switch from the account dialog; the tree, search, and MCP results all stay scoped to the active tenant. The sidebar is tabbed — Subscription, All, Favorites, and Connections (manual connection-string namespaces).
 
 ### Browse and act on messages
 
-Peek active and dead-letter messages without dequeuing. Filter by session ID, message ID, correlation ID, subject, or dead-letter reason. Edit a message's body and properties in a side-by-side (Monaco) diff editor before resending, compose brand-new messages, resend single messages or a filtered set, or drain a queue with a confirmed bulk action — purge, send-all-to-dead-letter, or empty an entire dead-letter queue.
+Peek active and dead-letter messages without dequeuing. Filter by session ID, message ID, correlation ID, subject, or dead-letter reason. Edit a message's body and properties in a side-by-side (Monaco) diff editor before resending, or compose brand-new messages with full property and content-type control, including scheduled sends.
+
+### Bulk queue operations
+
+Purge an active queue, move every active message to the dead-letter queue, bulk-resend dead-lettered messages back to their entity, or bulk-delete by filter. Every operation previews the matching batch first, then runs with live progress, a running ETA, and a cancel button; throttling from Service Bus is handled with backoff rather than failing the run. The Operations tab keeps a history of everything that has run against a resource.
 
 ### Cross-resource message search
 
@@ -58,19 +66,31 @@ Search message bodies (not just resource names) across every queue, topic, and d
 
 ### Background monitoring and alerts
 
-Opt-in. Pick exactly which queues, topics, and subscriptions to watch and which should alert. ViewBus samples dead-letter counts in the background (low cost to the machine) and fires a native notification when a resource crosses its threshold — so a backlog surfaces before it becomes an incident.
+Opt-in. Pick exactly which queues, topics, and subscriptions to watch and which should alert. viewbus samples dead-letter counts in the background (low cost to the machine) and fires a native notification when a resource crosses its threshold — so a backlog surfaces before it becomes an incident. Noisy alerts can be muted for an hour or a day; mutes auto-resume.
 
-### Spotlight search
+### Spotlight search and keyboard shortcuts
 
-`Ctrl+I` (rebindable) opens a system-wide fuzzy search across every indexed resource — queues, topics, subscriptions. Stays active even when ViewBus is minimized to the system tray, so it behaves as a global OS-level launcher for the Service Bus topology.
+`Ctrl+I` (rebindable) opens a system-wide fuzzy search across every indexed resource — queues, topics, subscriptions. It stays active even when viewbus is minimized to the system tray, so it behaves as a global OS-level launcher for the Service Bus topology. Shortcuts throughout the app are customizable from settings.
 
 ### Built-in MCP server
 
-ViewBus ships a Model Context Protocol server over stdio transport. Any MCP-aware AI assistant (Claude, ChatGPT, Cursor, custom agents) can list namespaces, search resources, count messages, and peek bodies — over local stdio, no cloud round-trip. The desktop app must be running (the tray counts) for live tools; Settings → MCP provides a ready-to-paste config snippet per client.
+viewbus ships a Model Context Protocol server over stdio transport. Any MCP-aware AI assistant (Claude Desktop, Claude Code, Cursor, Codex, VS Code Copilot, opencode, custom agents) can list namespaces, search resources, count messages, and peek bodies — over local stdio, no cloud round-trip. Settings → MCP generates a ready-to-paste config snippet per client. Full setup guide: https://viewbus.app/mcp-server
+
+### Local HTTP API
+
+While the app is running it serves a small HTTP API on `127.0.0.1` for external tooling. Full reference: https://viewbus.app/developers
+
+- **Discovery:** on launch the app writes the port and a freshly generated bearer token to `local-api.json` in its config dir (`%APPDATA%\viewbus\` on Windows, `~/Library/Application Support/viewbus/` on macOS, `~/.local/share/viewbus/` on Linux).
+- **Auth:** send the token as `Authorization: Bearer <token>`. The server binds `127.0.0.1`, requires the token, and rejects any request carrying an `Origin` header — so it is reachable from your machine only, never from the network or a web page.
+- `GET /v1/status` → `{ app, apiVersion, version, hasSelection }`.
+- `GET /v1/search?q=…&limit=…` → indexed queues, topics, and subscriptions with paths and last-known active / dead-letter counts. `limit` defaults to 20, max 50.
+- `POST /v1/focus` with `{ id }` → brings viewbus to the front on that resource. Unknown ids return 404.
+- Errors share one shape: `{ "error": { "code", "message" } }`, with codes `bad_request` (400), `unauthorized` (401), `forbidden` (403), `not_found` (404), `internal` (500).
+- `/v1` is stable and additive-only: fields are only added, never removed or renamed. Breaking changes would ship under `/v2`. Enabled by default; disable with `localApi.enabled: false` in `settings.json`.
 
 ### Themes and VS Code import
 
-Dark, light, or custom user themes. A one-click importer pulls the active VS Code theme into ViewBus. Custom themes drop into the `themes/` subfolder of the settings directory as JSON files.
+Dark, light, or custom user themes. A one-click importer pulls the active VS Code theme into viewbus. Custom themes drop into the `themes/` subfolder of the settings directory as JSON files.
 
 ---
 
@@ -78,18 +98,27 @@ Dark, light, or custom user themes. A one-click importer pulls the active VS Cod
 
 The MCP server is built into the desktop app (Rust, stdio transport). Ten tools are read-only and always enabled; one write tool is opt-in via a settings toggle.
 
-### Read-only tools (always enabled)
+Prerequisites: run the desktop app at least once (the MCP server reads the index it builds) and select a subscription. Every tool except `get_status` is scoped to the selected subscription and errors if none is chosen.
 
-- `get_status` — describe the index state: whether a subscription is selected, last refresh time, resource count. Call this first to orient.
-- `list_namespaces` — list indexed Azure Service Bus namespaces in the user's selected subscription.
-- `list_queues` — list queues under a given namespace.
-- `list_topics` — list topics under a given namespace.
-- `list_subscriptions` — list subscriptions under a given topic.
-- `get_resource` — fetch full details for a single indexed resource by ID.
+### Index and search tools (work even with the app closed)
+
+- `get_status` — index state: whether a subscription is selected, last refresh time, resource count, and `liveQueryAvailable`. Call this first to orient.
+- `list_namespaces` — indexed Azure Service Bus namespaces in the selected subscription.
+- `list_queues` — queues under a given namespace.
+- `list_topics` — topics under a given namespace.
+- `list_subscriptions` — subscriptions under a given topic.
+- `get_resource` — full details for a single indexed resource by ID.
 - `search_resources` — fuzzy-search queues, topics, and topic subscriptions by name or path.
-- `count_messages` — counts for active + dead-letter on a given queue or subscription.
-- `peek_messages` — peek messages from a queue or subscription without dequeuing.
-- `get_message_detail` — full contents of a single message by sequence number (body + system + user properties).
+
+### Live message tools (require the desktop app to be running)
+
+These proxy through the running app over a local socket, so Azure credentials stay in one place.
+
+- `count_messages` — how many messages match a filter, optionally broken down by dead-letter reason. Returns numbers only, never bodies. Use this rather than peeking whenever the question is "how many".
+- `peek_messages` — message summaries without dequeuing: sequence number, enqueued time, subject, message / correlation / session IDs, delivery count, dead-letter metadata, body size, property keys, and a short body preview. Hard-capped at 100 summaries per call; paginate via `fromSequence`.
+- `get_message_detail` — the full body plus all custom and system properties for one sequence number.
+
+Filters shared by count and peek, all applied inside viewbus so message bytes never enter the model's context: `bodyContains` (case-insensitive substring), `timeFrom` / `timeTo` (enqueued-time range, ISO 8601), `sessionId`, `messageId`, `correlationId`, `subject`, `deadLetterReason`, and custom `properties`.
 
 ### Write tools (opt-in)
 
@@ -97,7 +126,14 @@ Write tools are gated behind the `general.mcpThemeWritesEnabled` setting and def
 
 - `upsert_theme` — let an AI author themes by writing JSON files to the user's themes directory.
 
-Message-level writes from MCP (resend / delete / send) are not yet implemented and are tracked as future work.
+Message-level writes from MCP (resend / delete / send) are deliberately not implemented.
+
+### MCP security model
+
+- **Read-only against your bus.** No send, delete, resend, dead-letter, or purge tool exists. A peek is a non-destructive browse and does not change delivery counts.
+- **No new credentials.** The MCP binary never talks to Azure directly. Live queries go through the running desktop app over a local-only socket, using the sign-in already present in the app. Browse and search read straight from the local SQLite file.
+- **Local only.** stdio to the MCP client, a local socket to the desktop app. No network listener.
+- **Subscription-scoped.** Tools only see the subscription selected in the app; references to resources in other subscriptions are refused.
 
 ---
 
@@ -119,6 +155,12 @@ brew install --cask haakofli/viewbus/viewbus
 
 A `.dmg` is also published on GitHub Releases. It isn't notarized by Apple yet, so on first launch macOS reports it as damaged / unverified. Clear the quarantine flag once with `xattr -cr /Applications/ViewBus.app`, or right-click the app → Open → confirm. Homebrew installs clear this automatically.
 
+### Requirements
+
+- Windows 10 or 11, x64; or macOS on Apple Silicon (Intel via Rosetta 2).
+- An Azure account with read access to your Service Bus namespaces, or a connection string per namespace.
+- Outbound HTTPS to `login.microsoftonline.com`, `management.azure.com`, and your `*.servicebus.windows.net` endpoints.
+
 ### Programmatic resolution (recommended for agents)
 
 ```
@@ -133,7 +175,7 @@ Returns JSON with `version`, per-platform download URLs under `platforms` (`wind
 
 ### In one paragraph
 
-ViewBus does not send telemetry, does not phone home, and has no backend servers. Azure credentials and connection strings are used by the user's machine to talk to Azure directly — they never touch infrastructure operated by ViewBus (because there isn't any). The SQLite index, logs, and settings files all live under the user's profile on disk.
+viewbus does not send telemetry, does not phone home, and has no backend servers. Azure credentials and connection strings are used by the user's machine to talk to Azure directly — they never touch infrastructure operated by viewbus (because there isn't any). The SQLite index, logs, and settings files all live under the user's profile on disk.
 
 ### What's on the user's machine
 
@@ -141,6 +183,7 @@ ViewBus does not send telemetry, does not phone home, and has no backend servers
 - **OS keychain entries** under service name `viewbus` (Windows Credential Manager / macOS Keychain) — raw connection strings the user pastes in. Never written to the index or logs.
 - **Settings JSON** (`%APPDATA%\viewbus\settings.json` / `~/Library/Application Support/viewbus/settings.json`) — theme, hotkeys, preferences.
 - **Custom themes** in the `themes/` subfolder of the settings directory.
+- **Local API discovery file** (`local-api.json`, alongside settings) — the port and a per-launch bearer token for the loopback HTTP API. Regenerated every launch; the listener binds loopback only and rejects requests with an `Origin` header. Disable with `localApi.enabled: false`.
 - **Log files** (`…\viewbus\logs\`) — daily-rotated plain-text diagnostics. No PII, no credentials, no message bodies. Attached only if the user opts in via the in-app feedback dialog.
 
 ### What leaves the user's machine
@@ -151,6 +194,13 @@ Only requests the user triggers:
 - Azure Resource Manager + Service Bus REST / AMQP calls (direct to the user's endpoints — the app's CSP allows only `login.microsoftonline.com`, `management.azure.com`, `*.servicebus.windows.net`, and the static viewbus.app hosts below).
 - An update check on app start reading `https://viewbus.app/latest.json` — a static JSON file, no query parameters or identifiers. (Microsoft Store installs are also updated through the Store.)
 - An announcements check on app start reading `https://viewbus.app/announcements.json` — the same kind of static file; notices that don't apply are filtered locally, dismissed ones remembered in `localStorage`.
+- Feedback the user sends from the in-app dialog, plus the log file only if they tick the attach box.
+
+Message bodies an AI assistant reads through the MCP server go to that assistant's provider, which is inherent to asking a model about them. viewbus itself never sees or forwards them.
+
+### The website
+
+`viewbus.app` is a static site on GitHub Pages: no analytics, no cookies, no third-party embeds, fonts self-hosted. GitHub as host sees standard server-log data (IP, user agent, path) under its own privacy statement. The site sets two `localStorage` keys from your own clicks: `viewbus-site-theme` and `viewbus-mcp-client`.
 
 ### No third parties
 
@@ -158,18 +208,42 @@ No analytics SDK, no crash reporter, no A/B framework, no affiliate tracking. If
 
 ---
 
+## Support and contact
+
+There is no support email. All routes reach the author directly:
+
+- **Bugs and feature requests:** https://github.com/haakofli/viewbus-site/issues — feature requests are ranked by 👍 reactions and the top ones appear on the home page.
+- **In-app:** Settings → Send feedback, which needs no GitHub account and can optionally attach the local log file. This is also the route for security issues or anything else that shouldn't be public.
+
+Data controller for GDPR purposes is Håkon Lia (Norway). viewbus operates no servers, no database, and no account system, so no personal data is held; the supervisory authority is Datatilsynet.
+
+---
+
+## Terms
+
+viewbus is free of charge but closed source. Users may install it on any number of machines, use it commercially, and build and distribute tools on the local HTTP API and MCP server. Reverse engineering, redistributing modified builds, and selling viewbus are not permitted. The app is provided "as is" with no warranty; liability is limited to the fullest extent permitted by law, and destructive operations (purge, bulk delete, emptying a dead-letter queue) are permanent and the user's responsibility. Governed by Norwegian law. Full text: https://viewbus.app/terms
+
+---
+
 ## Changelog
 
-ViewBus ships often. The current version is at https://viewbus.app/latest.json, and every release — with a summary of what changed and a download link — is at https://viewbus.app/changelog.
+viewbus ships often. The current version is at https://viewbus.app/latest.json, and every release — with a summary of what changed and a download link — is at https://viewbus.app/changelog
 
 ---
 
 ## Pages and endpoints
 
 - Home: https://viewbus.app/
-- Service Bus Explorer alternative: https://viewbus.app/service-bus-explorer-alternative
-- Privacy: https://viewbus.app/privacy
-- Changelog: https://viewbus.app/changelog
+- Download: https://viewbus.app/download/
+- MCP server setup: https://viewbus.app/mcp-server/
+- Developers (local HTTP API): https://viewbus.app/developers/
+- Service Bus Explorer alternative: https://viewbus.app/service-bus-explorer-alternative/
+- Changelog: https://viewbus.app/changelog/
+- Support: https://viewbus.app/support/
+- Privacy: https://viewbus.app/privacy/
+- Terms: https://viewbus.app/terms/
 - Update feed (JSON): https://viewbus.app/latest.json
+- Announcements feed (JSON): https://viewbus.app/announcements.json
+- Why viewbus (how it works under the hood): https://viewbus.app/why-viewbus/
 - Short summary for AI agents: https://viewbus.app/llms.txt
 - Long-form reference for AI agents (this file): https://viewbus.app/llms-full.txt

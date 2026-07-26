@@ -1,0 +1,94 @@
+---
+import Base from "../layouts/Base.astro";
+
+const title = "Support — viewbus";
+const description =
+  "How to report a bug, request a feature, raise something privately, or disclose a security issue in viewbus.";
+const path = "/support";
+
+const issuesUrl = "https://github.com/haakofli/viewbus-site/issues";
+const newIssueUrl = "https://github.com/haakofli/viewbus-site/issues/new/choose";
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://viewbus.app/" },
+    { "@type": "ListItem", position: 2, name: "Support", item: "https://viewbus.app/support/" },
+  ],
+};
+
+const routes = [
+  {
+    title: "Bug reports and feature requests",
+    body: "Open an issue on GitHub. Feature requests are ranked by 👍 reactions and the most-wanted ones show up on the home page, so upvoting an existing one helps more than opening a duplicate.",
+    cta: { label: "Open an issue", href: newIssueUrl },
+    secondary: { label: "Browse open issues", href: issuesUrl },
+  },
+  {
+    title: "Feedback from inside the app",
+    body: "viewbus has a feedback dialog built in. It reaches me directly, and it's the easiest route if you'd rather not post in public or don't have a GitHub account — including anything security-sensitive. You can optionally attach your local log file; logs carry no credentials and no message bodies.",
+    note: "In the app: Settings → Send feedback.",
+  },
+];
+---
+<Base title={title} description={description} path={path}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+
+  <article class="max-w-3xl mx-auto px-6 py-16 md:py-20">
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Support</h1>
+    <p class="mt-4 text-lg text-[var(--color-muted)] leading-relaxed">
+      viewbus is a one-person project, so there's no ticket queue and no response-time promise.
+      Everything below reaches me.
+    </p>
+
+    <div class="mt-12 flex flex-col gap-4">
+      {routes.map((route) => (
+        <section class="rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+          <h2 class="text-lg font-semibold tracking-tight">{route.title}</h2>
+          <p class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">{route.body}</p>
+          {route.note && (
+            <p class="mt-3 font-mono text-[12px] text-[var(--color-fg)]">{route.note}</p>
+          )}
+          {route.cta && (
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+              <a
+                href={route.cta.href}
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center justify-center rounded-full h-10 px-5 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] transition-colors hover:bg-[color-mix(in_oklab,var(--color-fg)_88%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+              >{route.cta.label}</a>
+              {route.secondary && (
+                <a
+                  href={route.secondary.href}
+                  target="_blank"
+                  rel="noopener"
+                  class="text-sm text-[var(--color-accent)] hover:underline"
+                >{route.secondary.label} →</a>
+              )}
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
+
+    <section class="mt-14">
+      <h2 class="text-2xl font-semibold tracking-tight">Before you file</h2>
+      <p class="mt-3 text-[var(--color-muted)] leading-relaxed">
+        A few things that usually answer the question faster than I can:
+      </p>
+      <ul class="mt-4 flex flex-col gap-2 text-[var(--color-muted)] leading-relaxed list-disc pl-6 marker:text-[var(--color-muted)]">
+        <li>The <a href="/changelog/" class="text-[var(--color-accent)] hover:underline">changelog</a> — the fix may already have shipped. Check you're on the current version.</li>
+        <li>The <a href="/#faq" class="text-[var(--color-accent)] hover:underline">common questions</a> on the home page.</li>
+        <li><a href="/mcp-server/" class="text-[var(--color-accent)] hover:underline">MCP setup</a> and the <a href="/developers/" class="text-[var(--color-accent)] hover:underline">local API reference</a>, if you're wiring viewbus into something else.</li>
+      </ul>
+      <p class="mt-6 text-[var(--color-muted)] leading-relaxed">
+        When reporting a bug, the viewbus version, your OS, and what you were doing when it broke are
+        usually enough. Never paste a connection string, an access token, or a real message body into a
+        public issue — if the report needs one of those to make sense, use the in-app dialog instead.
+      </p>
+    </section>
+  </article>
+</Base>
