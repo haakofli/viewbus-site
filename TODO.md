@@ -64,13 +64,6 @@ hand-edit. Two are currently the weak point of the feature carousel:
 
 - [ ] Evaluate privacy-respecting analytics: Plausible, Fathom, or self-hosted Umami. Only if we want to know which pages get traffic. Skip if "everything local" feels incompatible with even site analytics. Search Console needs no client-side script and is worth doing regardless.
 
-## Repo settings (human)
-
-- [ ] **Enable private vulnerability reporting** on `haakofli/viewbus-site`
-      (Settings → Security → Reporting). `/support`,
-      `/.well-known/security.txt`, and the privacy page all point at
-      `…/security/advisories/new`, and that link 404s until it's switched on.
-
 ## Done
 
 - [x] Real `public/og.png` (superseded by the line-break fix above)

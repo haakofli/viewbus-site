@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import Faq from "../components/Faq.astro";
 import { Code } from "astro:components";
 
 const title = "Azure Service Bus MCP server — viewbus";
@@ -330,14 +331,7 @@ const faqSchema = {
 
     <section class="mt-14">
       <h2 class="text-2xl font-semibold tracking-tight">Common questions</h2>
-      <dl class="mt-5 flex flex-col">
-        {faqs.map((f) => (
-          <div class="border-b border-[var(--color-border)] py-5 first:pt-0">
-            <dt class="font-semibold leading-snug">{f.q}</dt>
-            <dd class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">{f.a}</dd>
-          </div>
-        ))}
-      </dl>
+      <Faq items={faqs} class="mt-5" />
     </section>
 
     <div class="mt-14 flex flex-col gap-3 border-t border-[var(--color-border)] pt-8 sm:flex-row">

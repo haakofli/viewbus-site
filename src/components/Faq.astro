@@ -1,0 +1,84 @@
+---
+export interface Props {
+  items: { q: string; a: string }[];
+  class?: string;
+}
+const { items, class: className = "" } = Astro.props;
+
+// Answers double as the JSON-LD text, so they stay plain strings. Backticks are
+// the one bit of markup allowed, for inline commands and paths.
+const segments = (answer: string) =>
+  answer.split(/`([^`]+)`/g).map((part, i) => ({ text: part, code: i % 2 === 1 }));
+---
+<div class:list={["faq", className]}>
+  {items.map((item) => (
+    <details class="faq-item">
+      <summary class="faq-q">
+        <span>{item.q}</span>
+        <svg class="faq-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </summary>
+      <div class="faq-a">
+        <p>{segments(item.a).map((s) => (s.code ? <code class="ic">{s.text}</code> : s.text))}</p>
+      </div>
+    </details>
+  ))}
+</div>
+
+<style is:global>
+  .faq { border-top: 1px solid var(--color-border); }
+  .faq-item { border-bottom: 1px solid var(--color-border); }
+
+  .faq-q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    min-height: 3.5rem;
+    padding: 0.9rem 0;
+    font-weight: 600;
+    line-height: 1.45;
+    cursor: pointer;
+    list-style: none;
+    transition: color 0.15s ease;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q::marker { content: ""; }
+  .faq-q:hover { color: var(--color-accent); }
+  .faq-q:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  .faq-chev {
+    flex-shrink: 0;
+    color: var(--color-muted);
+    transition: transform 0.22s ease, color 0.15s ease;
+  }
+  .faq-item[open] > .faq-q .faq-chev { transform: rotate(180deg); }
+  .faq-q:hover .faq-chev { color: var(--color-accent); }
+
+  .faq-a {
+    padding-bottom: 1.25rem;
+    max-width: 60ch;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--color-muted);
+  }
+
+  /* Animate the open/close where the engine supports it; instant elsewhere. */
+  .faq { interpolate-size: allow-keywords; }
+  .faq-item::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition: block-size 0.26s ease, content-visibility 0.26s;
+    transition-behavior: allow-discrete;
+  }
+  .faq-item[open]::details-content { block-size: auto; }
+  @media (prefers-reduced-motion: reduce) {
+    .faq-item::details-content { transition: none; }
+    .faq-chev { transition: none; }
+  }
+</style>

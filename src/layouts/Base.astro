@@ -56,10 +56,13 @@ const ogImageUrl = new URL(ogImage, site).toString();
     <meta name="twitter:image:alt" content="viewbus — Azure Service Bus desktop manager for Windows and macOS" />
 
     <script is:inline>
-      // Cream is the brand. Only honor an explicit "dark" preference — the nav
-      // toggle is the one thing that writes it.
+      // Follow the OS unless the visitor has overridden it with the nav toggle.
+      // Runs before first paint so there's no flash of the wrong theme.
       const pref = localStorage.getItem("viewbus-site-theme");
-      if (pref !== "dark") {
+      const dark =
+        pref === "dark" ||
+        (pref !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+      if (!dark) {
         document.documentElement.classList.add("light");
       }
 
