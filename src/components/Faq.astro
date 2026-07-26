@@ -26,6 +26,49 @@ const segments = (answer: string) =>
   ))}
 </div>
 
+<script>
+  // <details> won't animate on its own in every engine, so drive the open and
+  // close with the Web Animations API and let `open` follow the animation.
+  document.querySelectorAll<HTMLElement>(".faq").forEach((group) => {
+    group.classList.add("faq-js");
+
+    group.querySelectorAll<HTMLDetailsElement>(".faq-item").forEach((item) => {
+      const summary = item.querySelector<HTMLElement>(".faq-q");
+      const body = item.querySelector<HTMLElement>(".faq-a");
+      if (!summary || !body) return;
+
+      let running: Animation | null = null;
+      item.classList.toggle("is-open", item.open);
+
+      summary.addEventListener("click", (event) => {
+        event.preventDefault();
+        running?.cancel();
+
+        const closing = item.open;
+        if (!closing) item.open = true;
+        item.classList.toggle("is-open", !closing);
+
+        // Reduced motion still gets a short cue rather than nothing — an
+        // accordion isn't the kind of movement that setting is guarding against.
+        const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const height = `${body.offsetHeight}px`;
+        const from = closing ? { height, opacity: 1 } : { height: "0px", opacity: 0 };
+        const to = closing ? { height: "0px", opacity: 0 } : { height, opacity: 1 };
+
+        running = body.animate([from, to], {
+          duration: reduced ? 120 : 280,
+          easing: "cubic-bezier(0.32, 0.72, 0, 1)",
+        });
+        running.onfinish = () => {
+          running = null;
+          if (closing) item.open = false;
+        };
+        running.oncancel = () => { running = null; };
+      });
+    });
+  });
+</script>
+
 <style is:global>
   .faq { border-top: 1px solid var(--color-border); }
   .faq-item { border-bottom: 1px solid var(--color-border); }
@@ -55,30 +98,20 @@ const segments = (answer: string) =>
   .faq-chev {
     flex-shrink: 0;
     color: var(--color-muted);
-    transition: transform 0.22s ease, color 0.15s ease;
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), color 0.15s ease;
   }
-  .faq-item[open] > .faq-q .faq-chev { transform: rotate(180deg); }
   .faq-q:hover .faq-chev { color: var(--color-accent); }
+  /* Without JS the chevron follows [open]; with it, it follows the class so it
+     turns the moment you click rather than when the close finishes. */
+  .faq:not(.faq-js) .faq-item[open] > .faq-q .faq-chev,
+  .faq-js .faq-item.is-open > .faq-q .faq-chev { transform: rotate(180deg); }
 
   .faq-a {
+    overflow: hidden; /* required for the height animation to clip */
     padding-bottom: 1.25rem;
     max-width: 60ch;
     font-size: 0.9375rem;
     line-height: 1.65;
     color: var(--color-muted);
-  }
-
-  /* Animate the open/close where the engine supports it; instant elsewhere. */
-  .faq { interpolate-size: allow-keywords; }
-  .faq-item::details-content {
-    block-size: 0;
-    overflow: hidden;
-    transition: block-size 0.26s ease, content-visibility 0.26s;
-    transition-behavior: allow-discrete;
-  }
-  .faq-item[open]::details-content { block-size: auto; }
-  @media (prefers-reduced-motion: reduce) {
-    .faq-item::details-content { transition: none; }
-    .faq-chev { transition: none; }
   }
 </style>
