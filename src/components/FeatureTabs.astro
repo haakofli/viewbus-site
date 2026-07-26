@@ -1,4 +1,13 @@
 ---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import browseShot from "../assets/screenshots/feature-browse.png";
+import messagesShot from "../assets/screenshots/feature-messages.png";
+import operationsShot from "../assets/screenshots/feature-operations.png";
+import monitoringShot from "../assets/screenshots/feature-monitoring.png";
+import spotlightShot from "../assets/screenshots/feature-spotlight.png";
+import themesShot from "../assets/screenshots/feature-themes.png";
+
 const features = [
   {
     id: "browse",
@@ -71,16 +80,16 @@ const visualMaxWidth: Record<string, string> = {
   themes: "max-w-[560px]",
 };
 
-// Intrinsic pixel sizes of the files in public/screenshots. Without these the
-// slide collapses to zero height until the PNG lands, which both shifts the
-// layout and lets autoplay park on a blank card.
-const visualSize: Record<string, { w: number; h: number }> = {
-  browse: { w: 555, h: 1194 },
-  messages: { w: 1548, h: 1134 },
-  operations: { w: 3135, h: 2050 },
-  monitoring: { w: 1347, h: 961 },
-  spotlight: { w: 904, h: 592 },
-  themes: { w: 1342, h: 967 },
+// astro:assets reads intrinsic width/height from the imported files, so the
+// slide never collapses while a PNG loads. `widths` stops at each file's
+// display size × 2 (retina); sharp won't upscale past the original anyway.
+const visuals: Record<string, { src: ImageMetadata; widths: number[]; sizes: string }> = {
+  browse: { src: browseShot, widths: [280, 555], sizes: "(max-width: 360px) 85vw, 280px" },
+  messages: { src: messagesShot, widths: [720, 1440], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
+  operations: { src: operationsShot, widths: [720, 1440], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
+  monitoring: { src: monitoringShot, widths: [720, 1347], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
+  spotlight: { src: spotlightShot, widths: [480, 904], sizes: "(max-width: 540px) calc(100vw - 4rem), 480px" },
+  themes: { src: themesShot, widths: [560, 1120], sizes: "(max-width: 620px) calc(100vw - 4rem), 560px" },
 };
 ---
 <section id="features" data-snap-to="features" class="max-w-6xl mx-auto px-6 py-24 md:py-32 scroll-mt-20">
@@ -152,11 +161,11 @@ const visualSize: Record<string, { w: number; h: number }> = {
                 </div>
               ) : (
                 <div class={`dark-card lifted w-full rounded-[var(--radius)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-bg)] ${visualMaxWidth[f.id]}`}>
-                  <img
-                    src={`/screenshots/feature-${f.id}.png`}
+                  <Image
+                    src={visuals[f.id].src}
                     alt={f.title}
-                    width={visualSize[f.id].w}
-                    height={visualSize[f.id].h}
+                    widths={visuals[f.id].widths}
+                    sizes={visuals[f.id].sizes}
                     loading={i < 2 ? "eager" : "lazy"}
                     fetchpriority={i === 0 ? "high" : undefined}
                     decoding="async"
