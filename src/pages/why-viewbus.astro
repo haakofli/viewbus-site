@@ -1,6 +1,5 @@
 ---
 import Base from "../layouts/Base.astro";
-import Kbd from "../components/Kbd.astro";
 
 const title = "Why viewbus — how it's built";
 const description =
@@ -25,19 +24,20 @@ const techArticleSchema = {
   author: { "@type": "Person", name: "Håkon Lia" },
 };
 
-// Kept deliberately short. Each block is one decision, one consequence, and —
-// where there is one — the cost of that decision stated plainly.
+// One decision per row, one consequence, and the cost where there is one.
 const groups: {
   title: string;
-  blocks: { h: string; p: string; cost?: string }[];
+  lede: string;
+  rows: { h: string; p: string; note?: string }[];
 }[] = [
   {
     title: "Speed",
-    blocks: [
+    lede: "Nothing waits on the network that doesn't have to.",
+    rows: [
       {
         h: "Local SQLite index",
         p: "Namespaces, queues, topics and subscriptions are indexed to disk on first sign-in. Browsing is a local read, so the tree stays instant across thousands of resources.",
-        cost: "Sidebar counts are from the last index. Refresh fires when attention lands on a namespace, above a configurable staleness threshold. Nothing polls.",
+        note: "Sidebar counts come from the last index. A refresh fires when attention lands on a namespace, above a configurable staleness threshold. Nothing polls.",
       },
       {
         h: "Rust on the hot paths",
@@ -49,13 +49,14 @@ const groups: {
       },
       {
         h: "Connection strings are first-class",
-        p: "Namespaces added by connection string land in the same tables as Azure-discovered ones and behave identically in peek, resend, spotlight and MCP.",
+        p: "Namespaces added by connection string land in the same tables as Azure-discovered ones, and behave identically in peek, resend, spotlight and MCP.",
       },
     ],
   },
   {
     title: "Safe against production",
-    blocks: [
+    lede: "The destructive things are the ones worth being explicit about.",
+    rows: [
       {
         h: "Peek, not receive",
         p: "Messages are read over AMQP with peek semantics. Nothing is dequeued, delivery counts don't move, and session locks are released after the read.",
@@ -63,7 +64,7 @@ const groups: {
       {
         h: "Bulk work runs as a job",
         p: "Purge, dead-letter, resend and delete preview the matched set before anything happens, then run with progress, an ETA and cancel. Throttling backs off instead of failing the run.",
-        cost: "Every run is kept in a per-resource history, so a destructive operation is always attributable.",
+        note: "Every run is kept in a per-resource history, so a destructive operation is always attributable.",
       },
       {
         h: "Credentials stay in the OS",
@@ -77,11 +78,12 @@ const groups: {
   },
   {
     title: "Reach",
-    blocks: [
+    lede: "The things the Portal and the original explorer can't do.",
+    rows: [
       {
         h: "Body search across a namespace",
         p: "Search message contents across every queue, topic and dead-letter queue at once, rather than opening entities one at a time.",
-        cost: "It reads through messages to do it, so a large namespace takes time.",
+        note: "It reads through messages to do it, so a large namespace takes time.",
       },
       {
         h: "Diff and resend",
@@ -98,6 +100,13 @@ const groups: {
     ],
   },
 ];
+
+const next = [
+  { href: "/mcp-server/", label: "MCP server", note: "the ten tools, per-client setup, and what the AI can't do" },
+  { href: "/developers/", label: "Local HTTP API", note: "discovery, auth, and the three /v1 endpoints" },
+  { href: "/privacy/", label: "Privacy", note: "every file written, every host contacted" },
+  { href: "/service-bus-explorer-alternative/", label: "Coming from Service Bus Explorer", note: "what carries over and what's new" },
+];
 ---
 <Base title={title} description={description} path={path}>
   <Fragment slot="head">
@@ -105,67 +114,108 @@ const groups: {
     <script type="application/ld+json" is:inline set:html={JSON.stringify(techArticleSchema)} />
   </Fragment>
 
-  <article class="max-w-4xl mx-auto px-6 py-16 md:py-20">
+  <article class="why max-w-4xl mx-auto px-6 py-16 md:py-20">
     <h1 class="text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]">
       Why viewbus
     </h1>
     <p class="mt-5 max-w-2xl text-lg text-[var(--color-muted)] leading-relaxed">
-      A desktop client for Azure Service Bus built on a local index and non-destructive reads.
-      Twelve decisions, and what each one costs.
+      A desktop client for Azure Service Bus, built on a local index and non-destructive reads.
+      Here's what that buys, and where it costs.
     </p>
 
     {groups.map((group) => (
-      <section class="mt-14">
-        <h2 class="font-mono text-xs uppercase tracking-[0.16em] text-[var(--color-muted)]">
-          {group.title}
-        </h2>
-        <div class="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2">
-          {group.blocks.map((block) => (
-            <div>
-              <h3 class="font-semibold leading-snug">{block.h}</h3>
-              <p class="mt-1.5 text-sm leading-relaxed text-[var(--color-muted)]">{block.p}</p>
-              {block.cost && (
-                <p class="mt-2 text-xs leading-relaxed text-[var(--color-muted-dim)]">
-                  <span class="font-mono uppercase tracking-wider text-[10px]">Note</span>
-                  <span> · {block.cost}</span>
-                </p>
-              )}
+      <section class="why-group">
+        <div class="why-head">
+          <h2 class="why-title">{group.title}</h2>
+          <p class="why-lede">{group.lede}</p>
+        </div>
+        <dl>
+          {group.rows.map((row) => (
+            <div class="why-row">
+              <dt class="why-term">{row.h}</dt>
+              <dd class="why-def">
+                <p>{row.p}</p>
+                {row.note && <p class="why-note">{row.note}</p>}
+              </dd>
             </div>
           ))}
-        </div>
+        </dl>
       </section>
     ))}
 
     <section class="mt-16 rounded-[var(--radius)] border border-[var(--color-border)] p-6">
       <h2 class="font-semibold">Worth reading next</h2>
-      <ul class="mt-3 flex flex-col gap-2 text-sm text-[var(--color-muted)]">
-        <li>
-          <a href="/mcp-server/" class="text-[var(--color-accent)] hover:underline">MCP server</a>
-          {" "}— the ten tools, per-client setup, and what the AI can't do.
-        </li>
-        <li>
-          <a href="/developers/" class="text-[var(--color-accent)] hover:underline">Local HTTP API</a>
-          {" "}— discovery, auth, and the three <code class="ic">/v1</code> endpoints.
-        </li>
-        <li>
-          <a href="/privacy/" class="text-[var(--color-accent)] hover:underline">Privacy</a>
-          {" "}— every file written, every host contacted.
-        </li>
-        <li>
-          <a href="/service-bus-explorer-alternative/" class="text-[var(--color-accent)] hover:underline">Coming from Service Bus Explorer</a>
-          {" "}— what carries over and what's new.
-        </li>
+      <ul class="mt-4 flex flex-col gap-2.5 text-sm">
+        {next.map((item) => (
+          <li class="flex flex-col gap-x-2 sm:flex-row sm:items-baseline">
+            <a href={item.href} class="shrink-0 text-[var(--color-accent)] hover:underline">{item.label}</a>
+            <span class="text-[var(--color-muted)]">— {item.note}</span>
+          </li>
+        ))}
       </ul>
     </section>
 
-    <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div class="mt-10">
       <a
         href="/download/"
-        class="inline-flex items-center justify-center rounded-full h-11 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] transition-colors hover:bg-[color-mix(in_oklab,var(--color-fg)_88%,transparent)]"
+        class="inline-flex items-center justify-center rounded-full h-11 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] transition-colors hover:bg-[color-mix(in_oklab,var(--color-fg)_88%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       >Download viewbus</a>
-      <span class="inline-flex items-center text-sm text-[var(--color-muted)]">
-        Free · Windows and macOS · <Kbd class="ml-2">Ctrl</Kbd> <Kbd>I</Kbd>
-      </span>
     </div>
   </article>
+
+  <style>
+    /* A definition list rather than a card grid: rows are the same shape
+       whatever length the copy is, so nothing leaves a ragged hole beside a
+       short neighbour, and the rules give the eye something to follow. */
+    .why-group { margin-top: 4rem; }
+
+    .why-head {
+      padding-bottom: 1rem;
+      border-bottom: 2px solid color-mix(in oklab, var(--color-fg) 55%, transparent);
+    }
+    .why-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--color-fg);
+    }
+    .why-lede {
+      margin-top: 0.4rem;
+      font-size: 0.9375rem;
+      color: var(--color-muted);
+    }
+
+    .why-row {
+      display: grid;
+      gap: 0.35rem 2.5rem;
+      padding: 1.35rem 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    @media (min-width: 768px) {
+      .why-row { grid-template-columns: 14rem minmax(0, 1fr); }
+    }
+
+    .why-term {
+      font-weight: 600;
+      line-height: 1.4;
+      text-wrap: balance;
+    }
+    .why-def { margin: 0; }
+    .why-def > p {
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      color: var(--color-muted);
+    }
+
+    /* Trade-offs read as an aside, not as more body copy. */
+    .why-note {
+      margin-top: 0.7rem;
+      padding-left: 0.85rem;
+      border-left: 2px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
+      font-size: 0.8125rem !important;
+      line-height: 1.55 !important;
+    }
+  </style>
 </Base>
