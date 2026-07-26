@@ -73,6 +73,7 @@ const isActive = (href: string) => href.startsWith("/") && !href.includes("#") &
 
       <a
         href="/download/"
+        data-desktop-only
         class="hidden sm:inline-flex items-center gap-1.5 h-8 px-3.5 rounded-full bg-[var(--color-fg)] text-[var(--color-bg)] text-xs font-medium hover:bg-[color-mix(in_oklab,var(--color-fg)_88%,transparent)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -136,6 +137,7 @@ const isActive = (href: string) => href.startsWith("/") && !href.includes("#") &
         <a
           href="/download/"
           data-nav-link
+          data-desktop-only
           class="inline-flex items-center gap-1.5 h-11 px-4 rounded-full bg-[var(--color-fg)] text-[var(--color-bg)] text-sm font-medium"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

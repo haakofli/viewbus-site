@@ -296,21 +296,9 @@ const yes = "M20 6 9 17l-5-5";
         </button>
       </div>
 
-      <!-- Handheld: nothing here can be installed on a phone, so the job is to
-           get the visitor back to this page on a real machine. -->
+      <!-- Handheld: nothing here can be installed on a phone, so point the
+           visitor at what the app does instead. -->
       <div data-handheld-only class="mt-10 flex flex-col items-center justify-center gap-3">
-        <button
-          type="button"
-          data-copy-link
-          data-copy-value="https://viewbus.app/download/"
-          class="lifted-sm inline-flex items-center gap-2.5 whitespace-nowrap rounded-full h-12 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-          </svg>
-          <span data-copy-label>Copy link for your desktop</span>
-        </button>
         <a
           href="#features"
           class="inline-flex items-center gap-2 whitespace-nowrap rounded-full h-12 px-6 text-sm font-medium border border-[var(--color-border)] text-[var(--color-fg)] transition-colors hover:bg-[var(--color-hover)]"
@@ -856,36 +844,6 @@ const yes = "M20 6 9 17l-5-5";
           if (event.target === dmgDialog) dmgDialog.close();
         });
       }
-    })();
-  </script>
-
-  <script is:inline>
-    // Handheld: copy the download URL so the visitor can pick it up on a machine
-    // that can actually run viewbus.
-    (() => {
-      document.querySelectorAll("[data-copy-link]").forEach((btn) => {
-        const label = btn.querySelector("[data-copy-label]");
-        btn.addEventListener("click", async () => {
-          const value = btn.getAttribute("data-copy-value") || location.href;
-          const done = (text) => {
-            if (!label) return;
-            const was = label.textContent;
-            label.textContent = text;
-            setTimeout(() => { label.textContent = was; }, 1800);
-          };
-          try {
-            await navigator.clipboard.writeText(value);
-            done("Copied — open it on your desktop");
-          } catch {
-            // No clipboard permission (or insecure context): share sheet, else nothing.
-            if (navigator.share) {
-              try { await navigator.share({ url: value, title: "viewbus" }); } catch {}
-            } else {
-              done(value);
-            }
-          }
-        });
-      });
     })();
   </script>
 
