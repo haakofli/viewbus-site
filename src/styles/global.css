@@ -483,9 +483,19 @@ html:not(.light) .cb {
 .prose p, .prose ul, .prose ol {
   margin-bottom: 1em;
 }
+/* Markdown-rendered headings (changelog bodies). Tailwind's preflight zeroes
+   heading margins and sizes, so restore them for prose content. */
 .prose h2 {
   color: var(--color-fg);
   font-weight: 600;
+  font-size: 1.35em;
+  margin: 1.8em 0 0.6em;
+}
+.prose h3 {
+  color: var(--color-fg);
+  font-weight: 600;
+  font-size: 1.05em;
+  margin: 1.6em 0 0.5em;
 }
 .prose ul {
   list-style: disc;
