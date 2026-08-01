@@ -1,20 +1,20 @@
 {
-  "version": "0.8.5",
-  "notes": "See changelog at https://viewbus.app/changelog/0.8.5",
-  "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.8.5/ViewBus_0.8.5_x64-setup.exe",
-  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.8.5/ViewBus_0.8.5_x64-setup.exe",
+  "version": "0.9.1",
+  "notes": "See changelog at https://viewbus.app/changelog/0.9.1",
+  "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.9.1/ViewBus_0.9.1_x64-setup.exe",
+  "installerUrl": "https://github.com/haakofli/viewbus-site/releases/download/v0.9.1/ViewBus_0.9.1_x64-setup.exe",
   "platform": "windows-x64",
   "installerFormat": "nsis",
   "signed": true,
-  "publishedAt": "2026-07-26T18:33:09Z",
-  "pub_date": "2026-07-26T18:33:09Z",
+  "publishedAt": "2026-08-01T08:56:25Z",
+  "pub_date": "2026-08-01T08:56:25Z",
   "platforms": {
     "windows-x86_64": {
-      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.8.5/ViewBus_0.8.5_x64-setup.exe",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSjJucGxkbjZBNmthK3R1TUlTSG5yVzhST1FCQ0YyZXF5TWxlQklQV0xJVmNvbmtQdzczNWRuZDVhWGMvYkh4VUQxSU9nMWhoSStONlVSSHZJUVVRSG1iUVNNR1JYeHdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1MDkwNTg4CWZpbGU6Vmlld0J1c18wLjguNV94NjQtc2V0dXAuZXhlCkF4NlRrcEJ3WWVjTFpORFg5Z2MzMkVTYW0zdkVFdUJFYUZMOEMybU9zOFZyek94a3Rub3VsdVoxcEJzWFBoYnV4S1kxK01EQWNjd2phKzBTb2d0YkRnPT0K"
+      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.9.1/ViewBus_0.9.1_x64-setup.exe",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSSjJucGxkbjZBNnY0VEZXTUhqeDZtZHVIdFFMa2x3cXZPb0t5VDJtRVVwLy9MbnpaVTVDYk5ROTFYUW9sYXpZdS9IaDBjWjZZb1JvaWRWQStJN2lOUTZ3a1FPVitSbXdvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NTc0NTUzCWZpbGU6Vmlld0J1c18wLjkuMV94NjQtc2V0dXAuZXhlCkwxN2lFNkhzdFBYTER6elMrR2l1SWZCUEgrL29VSnB0cTBlT0F2MUtqZDJ5N0JRbExtSTdvQnFjeXFNTkFmUDRPdFBHQW40elI1enF0eFBkMS9YQkFnPT0K"
     },
     "darwin-aarch64": {
-      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.8.5/ViewBus_0.8.5_aarch64.dmg",
+      "url": "https://github.com/haakofli/viewbus-site/releases/download/v0.9.1/ViewBus_0.9.1_aarch64.dmg",
       "signature": "unsigned-by-design: macOS uses browser-open install, not in-app updater"
     }
   }
