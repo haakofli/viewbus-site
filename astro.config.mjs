@@ -12,5 +12,8 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
 
-  integrations: [sitemap()]
+  // `/open` is a `viewbus://` hand-off target, not a page anyone should land
+  // on from search. It's `noindex`, and submitting a noindex URL in the
+  // sitemap is what Search Console flags as a coverage error.
+  integrations: [sitemap({ filter: (page) => !page.startsWith('https://viewbus.app/open') })]
 });

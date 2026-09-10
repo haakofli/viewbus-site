@@ -1,0 +1,145 @@
+---
+import Base from "../layouts/Base.astro";
+
+// Hand-off page for `viewbus://` deep links.
+//
+// Chat clients only linkify a short allowlist of URL schemes — Slack drops a
+// custom-scheme link outright — so an alert in Slack can't point at
+// `viewbus://` directly. It points here instead, and this page does the
+// hand-off: try the app, and if nothing takes the URL, offer the download.
+//
+// Everything happens client-side. The site is a static build with no server,
+// and `?r=` is only ever read by the browser that was handed the link.
+const title = "Opening in viewbus";
+const description = "Hand off a Service Bus resource link to the viewbus desktop app.";
+---
+
+<Base title={title} description={description} path="/open" noindex>
+  <section class="max-w-xl mx-auto px-6 py-24">
+    <div id="resource" class="hidden mb-8">
+      <p class="font-mono text-sm uppercase tracking-[0.22em] text-[var(--color-muted)] mb-3">
+        Resource
+      </p>
+      <p
+        id="resource-entity"
+        class="font-mono text-base break-all text-[var(--color-fg)]"
+      ></p>
+      <p
+        id="resource-namespace"
+        class="font-mono text-sm break-all text-[var(--color-muted)] mt-1"
+      ></p>
+    </div>
+
+    <div id="launching">
+      <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">Opening viewbus…</h1>
+      <p class="text-[var(--color-muted)] leading-relaxed mb-8">
+        Your browser may ask for permission to open the app. If nothing happens, use the
+        button below.
+      </p>
+    </div>
+
+    <div id="fallback" class="hidden">
+      <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">viewbus didn't open</h1>
+      <p class="text-[var(--color-muted)] leading-relaxed mb-8">
+        Either it isn't installed on this machine, or the browser blocked the hand-off.
+        viewbus is a free desktop app for Windows and macOS.
+      </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button
+        id="retry"
+        type="button"
+        class="inline-flex items-center justify-center rounded-full h-11 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] transition-colors hover:bg-[color-mix(in_oklab,var(--color-fg)_88%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)]"
+      >
+        Open in viewbus
+      </button>
+      <a
+        href="/download/"
+        class="inline-flex items-center justify-center rounded-full h-11 px-6 text-sm font-medium border border-[var(--color-border)] transition-colors hover:bg-[var(--color-hover)]"
+      >
+        Download viewbus
+      </a>
+    </div>
+
+    <p id="no-resource" class="hidden mt-8 text-sm text-[var(--color-muted)] leading-relaxed">
+      This link didn't name a resource, so viewbus will just open where you left off.
+    </p>
+  </section>
+</Base>
+
+<script is:inline>
+  (() => {
+    const params = new URLSearchParams(location.search);
+    const resourceId = params.get("r");
+
+    const el = (id) => document.getElementById(id);
+    const show = (id) => el(id).classList.remove("hidden");
+    const hide = (id) => el(id).classList.add("hidden");
+
+    // Mirrors `entity_label` / `namespace_label` in
+    // `viewbus-core::monitoring::webhook_format` — the same two id shapes,
+    // classified the same way. Cosmetic only: the raw id is what gets handed
+    // to the app either way, so a parse miss costs a nicer heading, nothing
+    // more.
+    function describe(id) {
+      const afterNamespace = id.startsWith("cs://")
+        ? id.slice("cs://".length)
+        : id.split("/namespaces/")[1];
+      if (!afterNamespace) return null;
+      const slash = afterNamespace.indexOf("/");
+      if (slash === -1) return { namespace: afterNamespace, entity: null };
+      const namespace = afterNamespace.slice(0, slash);
+      const tail = afterNamespace.slice(slash + 1);
+      if (tail.startsWith("topics/")) {
+        const [topic, subscription] = tail.slice("topics/".length).split("/subscriptions/");
+        return { namespace, entity: subscription ? `${topic} / ${subscription}` : topic };
+      }
+      if (tail.startsWith("queues/")) {
+        return { namespace, entity: tail.slice("queues/".length) };
+      }
+      return { namespace, entity: tail };
+    }
+
+    if (resourceId) {
+      const parts = describe(resourceId);
+      el("resource-entity").textContent = parts?.entity ?? resourceId;
+      el("resource-namespace").textContent = parts?.entity ? (parts.namespace ?? "") : "";
+      show("resource");
+    } else {
+      show("no-resource");
+    }
+
+    const target = resourceId
+      ? `viewbus://open?r=${encodeURIComponent(resourceId)}`
+      : "viewbus://open";
+
+    // The only reliable "did it launch" signal a page gets is losing focus to
+    // the app that took over the URL. Nothing fires on failure, so the
+    // fallback is a timer the success path cancels.
+    let handedOff = false;
+    const markHandedOff = () => {
+      handedOff = true;
+    };
+    addEventListener("blur", markHandedOff);
+    addEventListener("pagehide", markHandedOff);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) markHandedOff();
+    });
+
+    function launch() {
+      handedOff = false;
+      hide("fallback");
+      show("launching");
+      location.href = target;
+      setTimeout(() => {
+        if (handedOff || document.hidden) return;
+        hide("launching");
+        show("fallback");
+      }, 2000);
+    }
+
+    el("retry").addEventListener("click", launch);
+    launch();
+  })();
+</script>
