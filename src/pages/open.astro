@@ -41,8 +41,9 @@ const description = "Hand off a Service Bus resource link to the viewbus desktop
     <div id="fallback" class="hidden">
       <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">viewbus didn't open</h1>
       <p class="text-[var(--color-muted)] leading-relaxed mb-8">
-        Either it isn't installed on this machine, or the browser blocked the hand-off.
-        viewbus is a free desktop app for Windows and macOS.
+        Either it isn't installed on this machine, it's an older version that didn't yet
+        handle <code class="font-mono">viewbus://</code> links, or the browser blocked the
+        hand-off. viewbus is a free desktop app for Windows and macOS.
       </p>
     </div>
 
@@ -140,6 +141,19 @@ const description = "Hand off a Service Bus resource link to the viewbus desktop
     }
 
     el("retry").addEventListener("click", launch);
-    launch();
+
+    // Wait for the load event before the first attempt. Pointing
+    // `location.href` at a scheme the browser may not know puts the tab into
+    // a navigation that then fails, and anything the browser hadn't fetched
+    // yet goes with it — the favicon, which Chrome only requests once the
+    // document has loaded, is the visible casualty. A tab stuck on the
+    // generic globe is a small thing, but this page is often someone's first
+    // sight of viewbus. The retry button is unaffected: by the time there's
+    // something to click, loading is long done.
+    if (document.readyState === "complete") {
+      launch();
+    } else {
+      addEventListener("load", launch, { once: true });
+    }
   })();
 </script>
