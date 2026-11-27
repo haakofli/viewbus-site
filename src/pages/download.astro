@@ -27,8 +27,8 @@ const breadcrumbSchema = {
     <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
   </Fragment>
 
-  <article class="max-w-3xl mx-auto px-6 py-16 md:py-20">
-    <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Download viewbus</h1>
+  <article class="has-aura max-w-3xl mx-auto px-6 py-16 md:py-20">
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Download viewbus. <span class="tt-quiet">It's free.</span></h1>
     <p class="mt-4 text-lg text-[var(--color-muted)] leading-relaxed">
       Free, no account, no telemetry. Version <span class="font-mono text-[var(--color-fg)]">{latest.version}</span>,
       released {latest.publishedAt.slice(0, 10)}.
@@ -48,7 +48,7 @@ const breadcrumbSchema = {
         Windows
       </h2>
 
-      <div class="mt-5 rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+      <div class="spot-card beam-frame dl-rec mt-5 p-5">
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h3 class="font-semibold">Microsoft Store</h3>
           <span class="rounded-full bg-[color-mix(in_oklab,var(--color-success)_15%,transparent)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-success)]">Recommended</span>
@@ -67,7 +67,7 @@ const breadcrumbSchema = {
         </a>
       </div>
 
-      <div class="mt-4 rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+      <div class="spot-card mt-4 p-5">
         <h3 class="font-semibold">Direct installer (.exe)</h3>
         <p class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">
           An NSIS installer for Windows 10 and 11 (x64). It isn't code-signed yet, so SmartScreen warns
@@ -92,7 +92,7 @@ const breadcrumbSchema = {
         macOS
       </h2>
 
-      <div class="mt-5 rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+      <div class="spot-card beam-frame dl-rec mt-5 p-5">
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h3 class="font-semibold">Homebrew</h3>
           <span class="rounded-full bg-[color-mix(in_oklab,var(--color-success)_15%,transparent)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-success)]">Recommended</span>
@@ -120,7 +120,7 @@ const breadcrumbSchema = {
       </div>
 
       {macInstaller && (
-        <div class="mt-4 rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+        <div class="spot-card mt-4 p-5">
           <h3 class="font-semibold">Direct download (.dmg)</h3>
           <p class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">
             Apple Silicon build. It isn't notarized yet, so macOS blocks it on first launch — drag

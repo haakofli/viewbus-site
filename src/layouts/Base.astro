@@ -125,6 +125,15 @@ const ogImageUrl = new URL(ogImage, site).toString();
         );
         document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
       }
+
+      // Spotlight cards: feed the pointer position to the card under it.
+      document.addEventListener("pointermove", (e) => {
+        const card = e.target instanceof Element ? e.target.closest(".spot-card") : null;
+        if (!card) return;
+        const r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        card.style.setProperty("--my", `${e.clientY - r.top}px`);
+      }, { passive: true });
     </script>
   </body>
 </html>

@@ -1,0 +1,80 @@
+---
+// A terminal that types two real /v1 calls — search, then focus — and streams
+// the responses back. The script replays it whenever the card scrolls into
+// view; without JS every line is simply shown.
+const lines = [
+  { kind: "cmd", text: `curl -H "$AUTH" "$BASE/v1/search?q=orders&limit=10"` },
+  { kind: "meta", text: "HTTP/1.1 200 OK · application/json · 3 ms" },
+  { kind: "json", text: `{ "results": [` },
+  { kind: "json", text: `  { "displayName": "orders-incoming", "resourceType": "queue",` },
+  { kind: "json", text: `    "activeCount": 12, "deadLetterCount": 30 },` },
+  { kind: "json", text: `  { "displayName": "orders-dead", "resourceType": "queue",` },
+  { kind: "json", text: `    "activeCount": 128, "deadLetterCount": 4 }` },
+  { kind: "json", text: `] }` },
+  { kind: "cmd", text: `curl -X POST -H "$AUTH" -d '{"id":"…/queues/orders-incoming"}' "$BASE/v1/focus"` },
+  { kind: "meta", text: "HTTP/1.1 200 OK · 2 ms" },
+  { kind: "ok", text: `{ "ok": true }  # viewbus jumps to orders-incoming` },
+];
+const tint = (s: string) =>
+  s
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/("[^"]*")(\s*:)/g, '<span class="at-key">$1</span>$2')
+    .replace(/:\s*("[^"]*")/g, ': <span class="at-str">$1</span>')
+    .replace(/:\s*(\d+)/g, ': <span class="at-num">$1</span>');
+---
+<div class="fx-card dark-card at" data-api-term>
+  <div class="fx-card-head">
+    <span class="flex items-center gap-2">
+      <span class="at-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="font-mono text-[12px] text-[var(--color-muted)]">bash · 127.0.0.1</span>
+    </span>
+    <span class="font-mono text-[11px] text-[var(--color-muted)]">/v1</span>
+  </div>
+  <pre class="at-body font-mono" aria-label="Example: search the index, then focus a queue in viewbus">{lines.map((l) => (
+    <span class={`at-line at-${l.kind}`} data-text={l.text}>{l.kind === "cmd" && <span class="at-prompt">$ </span>}<span class="at-text" set:html={l.kind === "json" ? tint(l.text) : l.text.replace(/&/g, "&amp;").replace(/</g, "&lt;")} /></span>
+  ))}<span class="at-caret" aria-hidden="true"></span></pre>
+</div>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll("[data-api-term]").forEach((card) => {
+      const lines = Array.from(card.querySelectorAll(".at-line"));
+      const caret = card.querySelector(".at-caret");
+      let timers = [];
+
+      const reset = () => {
+        timers.forEach(clearTimeout); timers = [];
+        card.classList.add("is-playing");
+        lines.forEach((l) => l.classList.remove("is-shown"));
+      };
+
+      const play = () => {
+        reset();
+        let t = 250;
+        lines.forEach((l) => {
+          if (l.classList.contains("at-cmd")) {
+            const textEl = l.querySelector(".at-text");
+            const full = l.dataset.text;
+            timers.push(setTimeout(() => { l.classList.add("is-shown"); textEl.textContent = ""; l.appendChild(caret); }, t));
+            for (let i = 1; i <= full.length; i++) {
+              timers.push(setTimeout(() => { textEl.textContent = full.slice(0, i); }, t + i * 22));
+            }
+            t += full.length * 22 + 450;
+          } else {
+            timers.push(setTimeout(() => { l.classList.add("is-shown"); l.parentNode.appendChild(caret); }, t));
+            t += l.classList.contains("at-meta") ? 260 : 110;
+          }
+        });
+        timers.push(setTimeout(play, t + 4500));
+      };
+
+      if ("IntersectionObserver" in window) {
+        let visible = false;
+        new IntersectionObserver((es) => es.forEach((e) => {
+          if (e.isIntersecting && !visible) { visible = true; play(); }
+          else if (!e.isIntersecting && visible) { visible = false; timers.forEach(clearTimeout); }
+        }), { threshold: 0.4 }).observe(card);
+      }
+    });
+  })();
+</script>

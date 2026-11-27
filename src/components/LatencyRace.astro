@@ -1,0 +1,23 @@
+---
+// Listing a namespace's queues: a read from viewbus's local index vs. an ARM
+// round-trip to Azure. Both bars grow at the same speed (real time, slowed
+// equally), so the gap is the point. Typical figures, not a benchmark.
+---
+<div class="fx-card dark-card lr" data-race>
+  <div class="fx-card-head">
+    <span class="font-mono text-[12.5px]"><span class="text-[var(--color-muted)]">list</span> queues in sb-shop-prod</span>
+    <span class="font-mono text-[11px] text-[var(--color-muted)]">typical · same scale</span>
+  </div>
+  <div class="lr-body">
+    <div class="lr-lane is-local">
+      <div class="lr-label"><span>viewbus</span><span class="lr-sub">local index read</span></div>
+      <div class="lr-track"><span class="lr-bar"></span></div>
+      <span class="lr-time font-mono">~1 ms</span>
+    </div>
+    <div class="lr-lane is-remote">
+      <div class="lr-label"><span>Azure Resource Manager</span><span class="lr-sub">network round-trip</span></div>
+      <div class="lr-track"><span class="lr-bar"></span></div>
+      <span class="lr-time font-mono">~300 ms</span>
+    </div>
+  </div>
+</div>

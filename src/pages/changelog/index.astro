@@ -28,14 +28,15 @@ const breadcrumbSchema = {
   <Fragment slot="head">
     <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
   </Fragment>
-  <article class="max-w-3xl mx-auto px-6 py-20 prose">
-    <h1 class="text-4xl font-bold tracking-tight mb-4">Changelog</h1>
+  <article class="has-aura max-w-3xl mx-auto px-6 py-20 prose">
+    <h1 class="text-4xl font-bold tracking-tight mb-4">Changelog. <span class="tt-quiet">Every release, and why.</span></h1>
     <p class="text-[var(--color-muted)] mb-12">
       Latest: <a href={`/changelog/${entries[0]?.data.version}/`} class="underline">v{entries[0]?.data.version}</a>
       <span class="mx-2 select-none">·</span>
       <a href="/rss.xml" class="underline">RSS feed</a>
     </p>
 
+    <div class="cl-timeline">
     {rendered.map(({ entry, Content }, i) => (
       <details class="changelog-entry not-prose mb-3 border-b border-[var(--color-border)] last:border-0" open={i === 0}>
         <summary class="changelog-summary flex items-baseline gap-3 py-4 cursor-pointer select-none list-none">
@@ -55,6 +56,7 @@ const breadcrumbSchema = {
           </svg>
           <span class="text-lg font-semibold tracking-tight tabular-nums">v{entry.data.version}</span>
           <time class="text-sm text-[var(--color-muted)] tabular-nums" datetime={entry.data.publishedAt}>{entry.data.publishedAt}</time>
+          {i === 0 && <span class="cl-latest">Latest</span>}
           <span class="changelog-teaser hidden sm:block ml-auto text-sm text-[var(--color-muted)] truncate">{entry.data.summary}</span>
         </summary>
         <div class="changelog-body prose pb-8 pt-1">
@@ -76,6 +78,7 @@ const breadcrumbSchema = {
         </div>
       </details>
     ))}
+    </div>
   </article>
 </Base>
 

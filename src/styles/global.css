@@ -674,6 +674,247 @@ html.js-reveal .cmp.is-visible .cmp-check path {
   transition: stroke-dashoffset 0.5s cubic-bezier(0.65, 0, 0.35, 1) calc(250ms + var(--i) * 70ms);
 }
 
+/* Page aura: a soft accent glow behind a page's heading. */
+.has-aura { position: relative; isolation: isolate; }
+.has-aura::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: -7rem;
+  width: min(60rem, 100%);
+  height: 30rem;
+  translate: -50% 0;
+  pointer-events: none;
+  background: radial-gradient(50% 55% at 50% 40%, color-mix(in oklch, var(--color-accent) 16%, transparent), transparent 75%);
+  filter: blur(20px);
+}
+
+/* 404: the request gets dead-lettered. One CSS loop, no JS needed. */
+.nf-card { max-width: 30rem; }
+.nf-stage { position: relative; height: 170px; margin: 0.5rem 1.25rem 1rem; }
+.nf-you { position: absolute; left: 0; top: 38%; translate: 0 -50%; font-size: 11px; color: var(--color-muted); }
+.nf-line { position: absolute; left: 9%; right: 48%; top: 38%; height: 1px; background: oklch(1 0 0 / 14%); }
+.nf-node { left: 52%; top: 38%; animation: nf-node 4.2s ease infinite; }
+.nf-drop {
+  position: absolute;
+  left: 52%;
+  top: calc(38% + 24px);
+  height: calc(40% - 40px);
+  border-left: 1px dashed color-mix(in oklch, var(--fx-glow-fail) 55%, transparent);
+}
+.nf-dlq {
+  position: absolute;
+  left: 52%;
+  top: 80%;
+  translate: -50% -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in oklch, var(--fx-glow-fail) 35%, transparent);
+  background: color-mix(in oklch, var(--fx-glow-fail) 8%, oklch(0.16 0.008 260));
+  font-size: 11.5px;
+  color: color-mix(in oklch, var(--fx-glow-fail) 80%, white);
+  white-space: nowrap;
+  animation: nf-dlq 4.2s ease infinite;
+}
+.nf-reason { padding: 1px 8px; border-radius: 9999px; font-size: 10.5px; color: var(--fx-glow-fail); background: color-mix(in oklch, var(--fx-glow-fail) 16%, transparent); }
+.nf-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 9999px;
+  background: var(--fx-glow-ok);
+  box-shadow: 0 0 12px 2px color-mix(in oklch, var(--fx-glow-ok) 60%, transparent);
+  animation: nf-travel 4.2s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+}
+@keyframes nf-travel {
+  0% { left: 9%; top: 38%; opacity: 0; }
+  6% { opacity: 1; }
+  36% { left: 52%; top: 38%; background: var(--fx-glow-ok); }
+  44% { left: 52%; top: 38%; background: var(--fx-glow-fail); box-shadow: 0 0 14px 3px color-mix(in oklch, var(--fx-glow-fail) 60%, transparent); }
+  62% { left: 52%; top: 80%; opacity: 1; background: var(--fx-glow-fail); box-shadow: 0 0 14px 3px color-mix(in oklch, var(--fx-glow-fail) 60%, transparent); }
+  68%, 100% { left: 52%; top: 80%; opacity: 0; background: var(--fx-glow-fail); }
+}
+@keyframes nf-node {
+  0%, 36%, 56%, 100% { border-color: oklch(1 0 0 / 16%); box-shadow: none; }
+  42% { border-color: var(--fx-glow-fail); box-shadow: 0 0 0 6px color-mix(in oklch, var(--fx-glow-fail) 25%, transparent); }
+}
+@keyframes nf-dlq {
+  0%, 58%, 90%, 100% { box-shadow: none; }
+  64% { box-shadow: 0 0 22px -4px var(--fx-glow-fail); border-color: var(--fx-glow-fail); }
+}
+
+/* Changelog timeline: a rail down the left with a node per release; the
+   latest pulses, and a light travels down the rail. */
+.cl-timeline { position: relative; padding-left: 1.9rem; }
+.cl-timeline::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1.5rem;
+  bottom: 1rem;
+  width: 1px;
+  background: linear-gradient(var(--color-success), color-mix(in oklch, var(--color-accent) 50%, transparent) 15%, var(--color-border) 40%);
+}
+.cl-timeline::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1.5rem;
+  width: 3px;
+  height: 120px;
+  border-radius: 9999px;
+  background: linear-gradient(transparent, oklch(0.9 0.08 200), transparent);
+  box-shadow: 0 0 10px oklch(0.8 0.12 220);
+  animation: cl-travel 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  pointer-events: none;
+}
+@keyframes cl-travel {
+  from { transform: translateY(-120px); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  to { transform: translateY(min(2400px, 100vh)); opacity: 0; }
+}
+.cl-timeline .changelog-summary { position: relative; }
+.cl-timeline .changelog-summary::before {
+  content: "";
+  position: absolute;
+  left: calc(-1.9rem + 1px);
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  translate: 0 -50%;
+  border-radius: 9999px;
+  border: 1.5px solid var(--color-muted);
+  background: var(--color-bg);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.cl-timeline .changelog-entry:hover > .changelog-summary::before,
+.cl-timeline .changelog-entry[open] > .changelog-summary::before { border-color: var(--color-accent); }
+.cl-timeline .changelog-entry:first-of-type > .changelog-summary::before {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  animation: cl-pulse 2s ease-out infinite;
+}
+@keyframes cl-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-success) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
+.cl-latest {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-success);
+  background: color-mix(in oklch, var(--color-success) 12%, transparent);
+}
+
+/* Latency race (why page): one 5s CSS loop. The local bar is done almost at
+   once; the remote one keeps crawling at the same speed. */
+.lr { --lr-cycle: 5s; }
+.lr-body { display: flex; flex-direction: column; gap: 1.1rem; padding: 1.3rem 1.25rem 1.4rem; }
+.lr-lane { display: grid; grid-template-columns: 11.5rem minmax(0, 1fr) 4.5rem; align-items: center; gap: 1rem; }
+.lr-label { display: flex; flex-direction: column; font-size: 13.5px; color: var(--color-fg); }
+.lr-sub { font-size: 11.5px; color: var(--color-muted); }
+.lr-track { position: relative; height: 10px; border-radius: 9999px; background: oklch(1 0 0 / 6%); overflow: hidden; }
+.lr-bar { position: absolute; inset: 0 auto 0 0; border-radius: inherit; }
+.is-local .lr-bar {
+  width: 1.2%;
+  min-width: 6px;
+  background: var(--fx-glow-ok);
+  box-shadow: 0 0 12px var(--fx-glow-ok);
+  transform-origin: left;
+  animation: lr-local var(--lr-cycle) linear infinite;
+}
+.is-remote .lr-bar {
+  width: 100%;
+  background: linear-gradient(90deg, oklch(0.6 0.12 240 / 50%), oklch(0.72 0.14 240));
+  transform-origin: left;
+  animation: lr-remote var(--lr-cycle) linear infinite;
+}
+@keyframes lr-local { 0% { transform: scaleX(0); } 1%, 100% { transform: scaleX(1); } }
+@keyframes lr-remote { 0% { transform: scaleX(0); } 70%, 100% { transform: scaleX(1); } }
+.lr-time { justify-self: end; font-size: 12.5px; }
+.is-local .lr-time { color: var(--fx-glow-ok); }
+.is-remote .lr-time { color: var(--color-muted); animation: lr-remote-done var(--lr-cycle) steps(1) infinite; }
+@keyframes lr-remote-done { 0% { opacity: 0.25; } 70%, 100% { opacity: 1; } }
+@media (max-width: 520px) {
+  .lr-lane { grid-template-columns: minmax(0, 1fr) auto; gap: 0.4rem 0.75rem; }
+  .lr-track { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* Local API terminal (developers page). */
+.at-dots { display: inline-flex; gap: 5px; }
+.at-dots i { width: 9px; height: 9px; border-radius: 9999px; background: oklch(1 0 0 / 16%); }
+.at-body {
+  margin: 0;
+  min-height: 17.5rem;
+  padding: 1rem 1.25rem 1.2rem;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--color-fg);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.at-line { display: block; }
+.at-cmd { color: var(--color-fg); margin-top: 0.35rem; }
+.at-cmd:first-child { margin-top: 0; }
+.at-prompt { color: var(--fx-glow-ok); user-select: none; }
+.at-meta { color: var(--color-muted); font-size: 11.5px; }
+.at-json { color: oklch(0.8 0.02 260); }
+.at-ok { color: var(--fx-glow-ok); }
+.at-key { color: oklch(0.78 0.12 240); }
+.at-str { color: oklch(0.82 0.13 150); }
+.at-num { color: oklch(0.82 0.13 70); }
+.at-caret {
+  display: inline-block;
+  width: 7px;
+  height: 1.05em;
+  margin-left: 1px;
+  vertical-align: -0.15em;
+  background: var(--fx-glow-ok);
+  animation: at-blink 1s steps(1) infinite;
+}
+@keyframes at-blink { 50% { opacity: 0; } }
+.at.is-playing .at-line:not(.is-shown) { display: none; }
+.at.is-playing .at-line.is-shown:not(.at-cmd) { animation: at-in 0.25s ease-out; }
+@keyframes at-in { from { opacity: 0; transform: translateY(2px); } }
+
+/* Explorer-alternative lists: a check for what carries over, an accent
+   sparkle for what's new. */
+.sbe-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.sbe-list li {
+  position: relative;
+  padding: 0.7rem 0.9rem 0.7rem 2.6rem;
+  border-radius: var(--radius);
+  transition: background-color 0.2s ease;
+}
+.sbe-list li:hover { background: color-mix(in oklch, var(--color-fg) 3.5%, transparent); }
+.sbe-list li::before {
+  position: absolute;
+  left: 0.9rem;
+  top: 0.78rem;
+  display: grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 9999px;
+  font-size: 11px;
+  line-height: 1;
+}
+.sbe-list.is-same li::before { content: "✓"; color: var(--color-success); background: color-mix(in oklch, var(--color-success) 14%, transparent); }
+.sbe-list.is-new li::before { content: "✦"; color: var(--color-accent); background: color-mix(in oklch, var(--color-accent) 16%, transparent); box-shadow: 0 0 12px -2px color-mix(in oklch, var(--color-accent) 60%, transparent); }
+
+/* Download: the recommended option on each platform carries the beam. Both
+   spot-card and beam-frame paint ::after; beam-frame comes later in this file
+   so its border wins, and opacity is forced back on because spot-card hides
+   its ::after until hover. The pointer glow (::before) still works. */
+.dl-rec { background: linear-gradient(color-mix(in oklch, var(--color-accent) 7%, transparent), transparent 70%); }
+.dl-rec.beam-frame::after { animation-duration: 8s; opacity: 1; }
+
 /* Spotlight cards (Linear / Vercel): a soft light follows the pointer and
    lights the border under it. --mx / --my come from a tiny pointer script;
    without it the cards are simply flat. */

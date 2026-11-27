@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import LatencyRace from "../components/LatencyRace.astro";
 
 const title = "Why viewbus — how it's built";
 const description =
@@ -111,14 +112,19 @@ const next = [
     <script type="application/ld+json" is:inline set:html={JSON.stringify(techArticleSchema)} />
   </Fragment>
 
-  <article class="why max-w-4xl mx-auto px-6 py-16 md:py-20">
+  <article class="why has-aura max-w-4xl mx-auto px-6 py-16 md:py-20">
     <h1 class="text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]">
-      Why viewbus
+      Why viewbus.
+      <span class="tt-quiet">How it's built.</span>
     </h1>
     <p class="mt-5 max-w-2xl text-lg text-[var(--color-muted)] leading-relaxed">
       A desktop client for Azure Service Bus, built on a local index and non-destructive reads.
       Here's what that means in practice.
     </p>
+
+    <div class="mt-10 lifted rounded-[var(--radius-lg)]">
+      <LatencyRace />
+    </div>
 
     {groups.map((group) => (
       <section class="why-group">
@@ -137,7 +143,7 @@ const next = [
       </section>
     ))}
 
-    <section class="mt-16 rounded-[var(--radius)] border border-[var(--color-border)] p-6">
+    <section class="spot-card mt-16 p-6">
       <h2 class="font-semibold">Worth reading next</h2>
       <ul class="mt-4 flex flex-col gap-2.5 text-sm">
         {next.map((item) => (
@@ -164,9 +170,29 @@ const next = [
     .why-group { margin-top: 4rem; }
 
     .why-head {
+      position: relative;
       padding-bottom: 1rem;
-      border-bottom: 2px solid color-mix(in oklab, var(--color-fg) 55%, transparent);
     }
+    /* The rule under each group draws in from the left as it scrolls into
+       view; browsers without scroll timelines just show it. */
+    .why-head::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-accent), color-mix(in oklab, var(--color-fg) 55%, transparent) 40%);
+      transform-origin: left;
+    }
+    @supports (animation-timeline: view()) {
+      .why-head::after {
+        animation: why-draw linear both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 35%;
+      }
+    }
+    @keyframes why-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
     .why-title {
       font-family: var(--font-mono);
       font-size: 0.75rem;
@@ -182,6 +208,7 @@ const next = [
     }
 
     .why-row {
+      position: relative;
       display: grid;
       gap: 0.35rem 2.5rem;
       padding: 1.35rem 0;
@@ -190,6 +217,21 @@ const next = [
     @media (min-width: 768px) {
       .why-row { grid-template-columns: 14rem minmax(0, 1fr); }
     }
+
+    /* An accent bar slides in beside the row under the pointer. */
+    .why-row::before {
+      content: "";
+      position: absolute;
+      left: -1rem;
+      top: 1.35rem;
+      bottom: 1.35rem;
+      width: 2px;
+      border-radius: 2px;
+      background: var(--color-accent);
+      transform: scaleY(0);
+      transition: transform 0.25s ease;
+    }
+    .why-row:hover::before { transform: scaleY(1); }
 
     .why-term {
       font-weight: 600;

@@ -599,16 +599,6 @@ const yes = "M20 6 9 17l-5-5";
     </div>
   </section>
 
-  <script is:inline>
-    document.addEventListener("pointermove", (e) => {
-      const card = e.target instanceof Element ? e.target.closest(".spot-card") : null;
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      card.style.setProperty("--mx", `${e.clientX - r.left}px`);
-      card.style.setProperty("--my", `${e.clientY - r.top}px`);
-    }, { passive: true });
-  </script>
-
   <section id="faq" class="max-w-3xl mx-auto px-6 py-24 md:py-32 scroll-mt-20">
     <h2 class="reveal text-3xl md:text-4xl font-bold mb-10 md:mb-12 tracking-tight text-center">
       Common questions

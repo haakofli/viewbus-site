@@ -44,9 +44,10 @@ const faqSchema = {
     <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
   </Fragment>
 
-  <article class="max-w-2xl mx-auto px-6 py-20">
+  <article class="has-aura max-w-2xl mx-auto px-6 py-20">
     <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
-      A modern Service Bus Explorer alternative
+      A modern Service Bus Explorer alternative.
+      <span class="tt-quiet">Picking up where it left off.</span>
     </h1>
     <p class="text-lg text-[var(--color-muted)] leading-relaxed mb-12">
       New and improved. Now on macOS, too.
@@ -60,20 +61,20 @@ const faqSchema = {
     </p>
 
     <h2 class="text-2xl font-semibold tracking-tight mt-12 mb-4">What stays the same</h2>
-    <ul class="space-y-3 leading-relaxed mb-12 list-disc pl-6 marker:text-[var(--color-muted)]">
+    <ul class="sbe-list is-same leading-relaxed mb-12">
       <li>No telemetry, no accounts. Your data stays on your machine.</li>
       <li>Connection strings still work — paste one in and you're browsing. They live in the OS keychain instead of a config file.</li>
       <li>The verbs you already know: peek, dead-letter, resend, requeue.</li>
     </ul>
 
     <h2 class="text-2xl font-semibold tracking-tight mb-4">What's different</h2>
-    <ul class="space-y-3 leading-relaxed mb-12 list-disc pl-6 marker:text-[var(--color-muted)]">
+    <ul class="sbe-list is-new leading-relaxed mb-12">
       <li>Sign in with Azure once and viewbus indexes every namespace, queue, topic, and subscription you can see — locally, in SQLite. Navigation stays instant across thousands of resources.</li>
       <li>Multi-tenant aware. If your account spans several Azure tenants, viewbus enumerates them and lets you flip between them from the account dialog. Sidebar tree, search, and MCP results all stay scoped to the active tenant.</li>
       <li><kbd class="font-mono text-[12px] px-1.5 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-fg)]/[0.04]">Ctrl+I</kbd> opens a fuzzy spotlight that searches every queue and topic at once. Works even when the window is closed to tray.</li>
       <li>Native macOS build for Apple Silicon. Same app, same shortcuts.</li>
       <li>Search message bodies across every queue, topic, and dead-letter queue at once — trace a stuck order by its ID without opening each resource by hand. Neither the original nor the Portal can do that.</li>
-      <li>Background dead-letter alerts: pick the queues and subscriptions to watch, set thresholds, and viewbus notifies you when a backlog builds — before it becomes an incident.</li>
+      <li>Dead-letter alerts: set a threshold or watch for a spike, and viewbus tells you on the desktop, in Slack or Discord, when a backlog builds — before it becomes an incident. It all runs on your machine.</li>
       <li>An <a href="/mcp-server/" class="text-[var(--color-accent)] hover:underline">MCP server is built in</a>. Claude, ChatGPT, Cursor, or any MCP-aware assistant can list namespaces, search resources, count messages, and peek bodies — over local stdio, no cloud round-trip.</li>
     </ul>
 

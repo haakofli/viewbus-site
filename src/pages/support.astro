@@ -37,8 +37,8 @@ const routes = [
     <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
   </Fragment>
 
-  <article class="max-w-3xl mx-auto px-6 py-16 md:py-20">
-    <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Support</h1>
+  <article class="has-aura max-w-3xl mx-auto px-6 py-16 md:py-20">
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight">Support. <span class="tt-quiet">Straight to me.</span></h1>
     <p class="mt-4 text-lg text-[var(--color-muted)] leading-relaxed">
       viewbus is a one-person project, so there's no ticket queue and no response-time promise.
       Everything below reaches me.
@@ -46,7 +46,7 @@ const routes = [
 
     <div class="mt-12 flex flex-col gap-4">
       {routes.map((route) => (
-        <section class="rounded-[var(--radius)] border border-[var(--color-border)] p-5">
+        <section class="spot-card p-5">
           <h2 class="text-lg font-semibold tracking-tight">{route.title}</h2>
           <p class="mt-2 text-sm text-[var(--color-muted)] leading-relaxed">{route.body}</p>
           {route.note && (

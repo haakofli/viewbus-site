@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import { Code } from "astro:components";
 import CodeTabs from "../components/CodeTabs.astro";
+import ApiTerminal from "../components/ApiTerminal.astro";
 import shRaw from "../examples/local-api/snippets.sh?raw";
 import tsRaw from "../examples/local-api/snippets.ts?raw";
 import pyRaw from "../examples/local-api/snippets.py?raw";
@@ -98,9 +99,10 @@ const techArticleSchema = {
   <div class="api-shell">
     <div class="api-page">
       <!-- 1 · Build your own extensions -->
-      <header id="overview" class="pt-16 md:pt-20">
+      <header id="overview" class="has-aura pt-16 md:pt-20">
         <h1 class="text-4xl md:text-5xl font-semibold tracking-tight leading-[1.05]">
-          Build your own extensions
+          Build your own extensions.
+          <span class="tt-quiet">Just HTTP.</span>
         </h1>
         <p class="mt-5 text-lg text-[var(--color-muted)] leading-relaxed">
           viewbus runs a small HTTP API on your machine while it's open. Read the resources it has
@@ -110,18 +112,22 @@ const techArticleSchema = {
         <!-- Card labels, not document sections — headings here would compete
              with the real h2s below in the page outline. -->
         <div class="uses">
-          <div class="use">
+          <div class="use spot-card">
             <p class="use-h">Launcher commands</p>
             <p class="use-p">Search your queues from Raycast, Alfred, or PowerToys Run and jump straight to one.</p>
           </div>
-          <div class="use">
+          <div class="use spot-card">
             <p class="use-h">Editor &amp; CLI scripts</p>
             <p class="use-p">Wire viewbus into a VS Code task or a shell script in a few lines.</p>
           </div>
-          <div class="use">
+          <div class="use spot-card">
             <p class="use-h">Status widgets</p>
             <p class="use-p">Ping it from a taskbar or menu-bar script to show if viewbus is running.</p>
           </div>
+        </div>
+
+        <div class="mt-10 lifted rounded-[var(--radius-lg)]">
+          <ApiTerminal />
         </div>
 
         <p class="mt-6 text-sm text-[var(--color-muted)] leading-relaxed">
@@ -440,7 +446,8 @@ const techArticleSchema = {
     }
 
     /* ── Hero use-cases ── */
-    .api-page .uses { display: grid; gap: 1.5rem 2rem; margin-top: 2.5rem; }
+    .api-page .uses { display: grid; gap: 0.75rem; margin-top: 2.5rem; }
+    .api-page .use { padding: 1rem 1.1rem; }
     @media (min-width: 640px) { .api-page .uses { grid-template-columns: repeat(3, 1fr); } }
     .api-page .use-h { font-size: 0.95rem; font-weight: 600; }
     .api-page .use-p { margin-top: 0.35rem; font-size: 0.875rem; line-height: 1.55; color: var(--color-muted); }

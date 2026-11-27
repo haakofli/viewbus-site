@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import LogoMark from "../components/LogoMark.astro";
 
 const title = "Page not found — viewbus";
 const description = "That page doesn't exist.";
@@ -14,18 +15,37 @@ const elsewhere = [
 ];
 ---
 <Base title={title} description={description} path="/404" noindex>
-  <section class="max-w-2xl mx-auto px-6 py-24 text-center">
+  <section class="has-aura max-w-2xl mx-auto px-6 py-20 text-center">
+    <div class="fx-card dark-card nf-card lifted mx-auto mb-12 text-left" aria-hidden="true">
+      <div class="fx-card-head">
+        <span class="font-mono text-[12.5px] truncate"><span class="text-[var(--color-muted)]">GET</span> <span data-nf-path>/this-page</span></span>
+        <span class="font-mono text-[11px] text-[var(--fx-glow-fail)]">404</span>
+      </div>
+      <div class="nf-stage">
+        <span class="nf-line"></span>
+        <span class="nf-drop"></span>
+        <span class="nf-you font-mono">you</span>
+        <span class="fo-node nf-node"><LogoMark variant="color" width={20} height={17} /></span>
+        <span class="nf-dlq">
+          <span class="font-mono">$deadletterqueue</span>
+          <span class="nf-reason font-mono">PageNotFound</span>
+        </span>
+        <span class="nf-dot"></span>
+      </div>
+    </div>
+
     <p class="font-mono text-sm uppercase tracking-[0.22em] text-[var(--color-muted)] mb-4">404</p>
-    <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">Page not found</h1>
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">This page was <span class="whitespace-nowrap">dead-lettered.</span></h1>
     <p class="text-[var(--color-muted)] leading-relaxed mb-8">
-      That page doesn't exist — it may have moved, or never did. Let's get you back on track.
+      Delivery failed: there's nothing at this address. It may have moved, or it never existed.
     </p>
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
       <a
         href="/"
-        class="inline-flex items-center justify-center rounded-full h-11 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] hover:bg-[var(--color-fg)]/90 transition-colors"
+        class="nf-resend inline-flex items-center justify-center gap-2 rounded-full h-11 px-6 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] hover:bg-[var(--color-fg)]/90 transition-colors"
       >
-        Back home
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
+        Resend to home
       </a>
       <a
         href="/download/"
@@ -35,10 +55,10 @@ const elsewhere = [
       </a>
     </div>
 
-    <ul class="mt-14 grid gap-x-8 gap-y-5 text-left sm:grid-cols-2">
+    <ul class="mt-14 grid gap-3 text-left sm:grid-cols-2">
       {elsewhere.map(({ href, label, note }) => (
         <li>
-          <a href={href} class="group block">
+          <a href={href} class="spot-card group block px-4 py-3">
             <span class="font-medium transition-colors group-hover:text-[var(--color-accent)]">{label}</span>
             <span class="block text-sm text-[var(--color-muted)]">{note}</span>
           </a>
@@ -46,4 +66,11 @@ const elsewhere = [
       ))}
     </ul>
   </section>
+
+  <script is:inline>
+    (function () {
+      const el = document.querySelector("[data-nf-path]");
+      if (el) el.textContent = location.pathname.length > 40 ? location.pathname.slice(0, 39) + "…" : location.pathname;
+    })();
+  </script>
 </Base>

@@ -152,6 +152,7 @@ const faqSchema = {
     acceptedAnswer: { "@type": "Answer", text: f.a },
   })),
 };
+import McpChat from "../components/McpChat.astro";
 ---
 <Base title={title} description={description} path={path}>
   <Fragment slot="head">
@@ -159,7 +160,7 @@ const faqSchema = {
     <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
   </Fragment>
 
-  <article class="max-w-3xl mx-auto px-6 py-16 md:py-20">
+  <article class="has-aura max-w-3xl mx-auto px-6 py-16 md:py-20">
     <h1 class="text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]">
       An MCP server for Azure Service&nbsp;Bus
     </h1>
@@ -174,9 +175,13 @@ const faqSchema = {
       and it's already there.
     </p>
 
+    <div class="mt-10 lifted rounded-[var(--radius-lg)]">
+      <McpChat />
+    </div>
+
     <section class="mt-14">
       <h2 class="text-2xl font-semibold tracking-tight">Setting it up</h2>
-      <ol class="mt-5 flex flex-col gap-6">
+      <ol class="mcp-steps mt-5 flex flex-col gap-6">
         <li class="grid grid-cols-[1.6rem_1fr] gap-x-3.5 gap-y-1">
           <span class="mcp-step">1</span>
           <h3 class="self-center font-semibold">Run viewbus once and pick a subscription</h3>
@@ -290,7 +295,7 @@ const faqSchema = {
       <h2 class="text-2xl font-semibold tracking-tight">Things worth asking it</h2>
       <ul class="mt-4 flex flex-col gap-2.5">
         {questions.map((q) => (
-          <li class="rounded-[var(--radius)] border border-[var(--color-border)] px-4 py-3 text-sm leading-relaxed text-[var(--color-muted)]">
+          <li class="spot-card px-4 py-3 text-sm leading-relaxed text-[var(--color-muted)]">
             <span class="mr-1.5 select-none text-[var(--color-accent)]">&rsaquo;</span>{q}
           </li>
         ))}
@@ -415,6 +420,19 @@ const faqSchema = {
       color: var(--color-accent);
       border: 1px solid color-mix(in oklab, var(--color-accent) 35%, transparent);
       border-radius: 9999px;
+      background: var(--color-bg);
+      box-shadow: 0 0 14px -4px color-mix(in oklab, var(--color-accent) 60%, transparent);
+    }
+    /* A rail joining the step numbers, fading toward the last one. */
+    .mcp-steps > li { position: relative; }
+    .mcp-steps > li:not(:last-child)::before {
+      content: "";
+      position: absolute;
+      left: calc(0.8rem - 0.5px);
+      top: 1.75rem;
+      bottom: -1.4rem;
+      width: 1px;
+      background: linear-gradient(color-mix(in oklab, var(--color-accent) 45%, transparent), transparent);
     }
   </style>
 </Base>
