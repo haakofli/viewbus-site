@@ -760,24 +760,26 @@ html.js-reveal .cmp.is-visible .cmp-check path {
   width: 1px;
   background: linear-gradient(var(--color-success), color-mix(in oklch, var(--color-accent) 50%, transparent) 15%, var(--color-border) 40%);
 }
+/* The light is a background on a rail-sized box, so it can never show above
+   the first release or below the last. */
 .cl-timeline::after {
   content: "";
   position: absolute;
   left: 4px;
   top: 1.5rem;
+  bottom: 1rem;
   width: 3px;
-  height: 120px;
   border-radius: 9999px;
-  background: linear-gradient(transparent, oklch(0.9 0.08 200), transparent);
-  box-shadow: 0 0 10px oklch(0.8 0.12 220);
+  background: linear-gradient(transparent, oklch(0.9 0.08 200), transparent) no-repeat;
+  background-size: 100% 120px;
+  filter: drop-shadow(0 0 5px oklch(0.8 0.12 220));
   animation: cl-travel 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   pointer-events: none;
 }
 @keyframes cl-travel {
-  from { transform: translateY(-120px); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  to { transform: translateY(min(2400px, 100vh)); opacity: 0; }
+  from { background-position: 0 -120px; opacity: 1; }
+  85% { opacity: 1; }
+  to { background-position: 0 calc(min(100%, 100vh) + 120px); opacity: 0; }
 }
 .cl-timeline .changelog-summary { position: relative; }
 .cl-timeline .changelog-summary::before {
