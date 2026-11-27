@@ -1,0 +1,117 @@
+---
+import LogoMark from "./LogoMark.astro";
+
+// Where data goes, drawn as a boundary: everything viewbus keeps lives inside
+// "your machine"; the lines out go to Microsoft (sign-in) and your Azure.
+// Without JS it's a still diagram.
+const NODE_X = 33;
+const locals = [
+  { id: "keychain", label: "Keychain", sub: "tokens", y: 22 },
+  { id: "index", label: "Index", sub: "SQLite", y: 50 },
+  { id: "logs", label: "Logs", sub: "local", y: 78 },
+];
+const remotes = [
+  { id: "entra", label: "Microsoft Entra ID", sub: "sign-in", y: 30, optional: false },
+  { id: "azure", label: "Azure", sub: "namespaces & messages", y: 70, optional: false },
+];
+const localPath = (y: number) => `M22 ${y} C 27 ${y}, 27 50, ${NODE_X - 4} 50`;
+const remotePath = (y: number) => `M${NODE_X + 4} 50 C 46 50, 48 ${y}, 60 ${y}`;
+---
+<div class="fx-card dark-card" data-boundary>
+  <div class="fx-card-head">
+    <span class="text-[13px] font-medium">Where your data goes</span>
+    <span class="font-mono text-[11px] text-[var(--color-muted)]">viewbus · outbound</span>
+  </div>
+
+  <div class="db-stage" aria-hidden="true">
+    <div class="db-machine"><span class="db-machine-label font-mono">your machine</span></div>
+    <svg class="fo-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+      {locals.map((l) => <path data-path={l.id} class="db-local-line" d={localPath(l.y)} />)}
+      {remotes.map((r) => <path data-path={r.id} class:list={[r.optional && "rv-held-line"]} d={remotePath(r.y)} />)}
+    </svg>
+
+    {locals.map((l) => (
+      <span class="db-local" style={`left:0;top:${l.y}%`}>
+        <span class="db-local-label">{l.label}</span>
+        <span class="db-local-sub font-mono">{l.sub}</span>
+      </span>
+    ))}
+
+    <span class="fo-node db-node" style={`left:${NODE_X}%;top:50%`}><LogoMark variant="color" width={22} height={18} /></span>
+
+    {remotes.map((r) => (
+      <span class:list={["db-remote", r.optional && "is-optional"]} data-remote={r.id} style={`left:60%;top:${r.y}%`}>
+        <span class="truncate">{r.label}</span>
+        <span class="db-remote-sub">{r.sub}</span>
+      </span>
+    ))}
+  </div>
+
+  <div class="fx-card-foot">
+    <span class="flex flex-wrap gap-2">
+      <span class="net-chip">no telemetry</span>
+      <span class="net-chip">no analytics</span>
+      <span class="net-chip">no account</span>
+    </span>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll("[data-boundary]").forEach((card) => {
+      const stage = card.querySelector(".db-stage");
+      const svg = card.querySelector(".fo-lines");
+      const path = (n) => svg.querySelector(`[data-path="${n}"]`);
+
+      // [start s, duration s, path, reverse, kind]
+      const travels = [
+        [0.2, 0.9, "entra", false, "out"], [1.25, 0.9, "entra", true, "in"],
+        [1.6, 0.9, "azure", false, "out"], [2.6, 0.9, "azure", true, "in"],
+        [2.2, 0.9, "azure", false, "out"], [3.2, 0.9, "azure", true, "in"],
+        [3.6, 0.9, "azure", false, "out"], [4.6, 0.9, "azure", true, "in"],
+        [1.0, 0.6, "index", false, "local"], [2.9, 0.6, "keychain", true, "local"],
+        [4.3, 0.6, "logs", false, "local"], [5.4, 0.6, "index", true, "local"],
+        [4.8, 0.9, "azure", false, "out"], [5.8, 0.9, "azure", true, "in"],
+      ];
+      const CYCLE = 7;
+      const pool = travels.map(([, , , , kind]) => {
+        const d = document.createElement("span");
+        d.className = `fo-dot db-dot is-${kind}`;
+        stage.appendChild(d);
+        return d;
+      });
+      const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+      const remote = (id) => card.querySelector(`[data-remote="${id}"]`);
+      const lit = {};
+
+      let start = 0, raf = 0, running = false, inView = false;
+      const frame = (now) => {
+        const t = ((now - start) / 1000) % CYCLE;
+        travels.forEach(([t0, dur, p, rev, kind], i) => {
+          const d = pool[i];
+          const k = (t - t0) / dur;
+          if (k <= 0 || k >= 1) { d.style.opacity = "0"; return; }
+          const el = path(p);
+          const pt = el.getPointAtLength(el.getTotalLength() * ease(rev ? 1 - k : k));
+          d.style.transform = `translate(${(pt.x / 100) * stage.clientWidth}px, ${(pt.y / 100) * stage.clientHeight}px)`;
+          d.style.opacity = String(Math.min(1, k * 6, (1 - k) * 6));
+          if (!rev && kind !== "local" && k > 0.92) {
+            const r = remote(p);
+            if (r && !lit[p]) { lit[p] = true; r.classList.add("is-hit"); setTimeout(() => { r.classList.remove("is-hit"); lit[p] = false; }, 700); }
+          }
+        });
+        raf = requestAnimationFrame(frame);
+      };
+      const play = () => {
+        if (running || !inView || document.hidden) return;
+        running = true; start = performance.now(); raf = requestAnimationFrame(frame);
+      };
+      const stop = () => { running = false; cancelAnimationFrame(raf); pool.forEach((d) => (d.style.opacity = "0")); };
+
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver((es) => es.forEach((e) => { inView = e.isIntersecting; inView ? play() : stop(); }), { threshold: 0.2 }).observe(card);
+      } else { inView = true; play(); }
+      document.addEventListener("visibilitychange", () => (document.hidden ? stop() : play()));
+    });
+  })();
+</script>

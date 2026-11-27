@@ -7,6 +7,7 @@ import operationsShot from "../assets/screenshots/feature-operations.png";
 import monitoringShot from "../assets/screenshots/feature-monitoring.png";
 import spotlightShot from "../assets/screenshots/feature-spotlight.png";
 import themesShot from "../assets/screenshots/feature-themes.png";
+import McpChat from "./McpChat.astro";
 
 const features = [
   {
@@ -33,7 +34,7 @@ const features = [
     id: "monitoring",
     label: "Monitoring",
     title: "Automatic monitoring and alerting",
-    body: "Dead-letter counts are sampled in the background at a low cost to your machine. Every queue and subscription gets its dead-letter and active history on one timeline, and you choose which ones should alert — with each fired alert marked on the chart.",
+    body: "While it runs, viewbus keeps an eye on your dead-letter counts — right on your machine, with your own sign-in. Every queue and subscription gets its dead-letter and active history on one timeline, and you choose which ones should alert, with each fired alert marked on the chart.",
     wide: true,
   },
   {
@@ -46,7 +47,7 @@ const features = [
     id: "mcp",
     label: "MCP",
     title: "Built-in MCP server",
-    body: "Ships a Model Context Protocol server so Claude, ChatGPT, or any MCP-aware AI can list namespaces, search resources, peek queues, and fetch full messages.",
+    body: "Ships a Model Context Protocol server so Claude, ChatGPT, or any MCP-aware AI can list namespaces, search resources, peek queues, and fetch full messages — ten read-only tools, nothing that can change your bus.",
   },
   {
     id: "themes",
@@ -56,26 +57,13 @@ const features = [
   },
 ];
 
-const mcpTools = [
-  { name: "get_status", note: "index state + last refresh" },
-  { name: "list_namespaces", note: "azure subscription namespaces" },
-  { name: "list_queues", note: "queues in a namespace" },
-  { name: "list_topics", note: "topics in a namespace" },
-  { name: "list_subscriptions", note: "subs under a topic" },
-  { name: "get_resource", note: "full detail for a resource" },
-  { name: "search_resources", note: "fuzzy across names + paths" },
-  { name: "count_messages", note: "active + dead-letter totals" },
-  { name: "peek_messages", note: "read without dequeuing" },
-  { name: "get_message_detail", note: "body + properties by seq no." },
-];
-
 const visualMaxWidth: Record<string, string> = {
   browse: "max-w-[280px]",
   messages: "max-w-[720px]",
   operations: "max-w-[720px]",
   monitoring: "max-w-[720px]",
-  spotlight: "max-w-[480px]",
-  mcp: "max-w-[480px]",
+  spotlight: "max-w-[540px]",
+  mcp: "max-w-[520px]",
   themes: "max-w-[560px]",
 };
 
@@ -134,28 +122,31 @@ const visuals: Record<string, { src: ImageMetadata; widths: number[]; sizes: str
             </div>
             <div class="flex justify-center md:justify-start min-w-0">
               {f.id === "mcp" ? (
-                <div class={`dark-card lifted w-full rounded-[var(--radius)] border border-[var(--color-border)] bg-[var(--color-bg)] overflow-hidden font-mono text-[11.5px] ${visualMaxWidth[f.id]}`}>
-                  <div class="h-7 border-b border-[var(--color-border)] flex items-center px-3 gap-2 text-[10px] text-[var(--color-muted)]">
-                    <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
-                    <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
-                    <span class="size-1.5 rounded-full bg-[var(--color-muted)]/50"></span>
-                    <span class="ml-2">viewbus-mcp</span>
+                <div class={`lifted w-full ${visualMaxWidth[f.id]}`}>
+                  <McpChat />
+                </div>
+              ) : f.id === "spotlight" ? (
+                <div class={`sp-stage dark-card lifted w-full ${visualMaxWidth[f.id]}`}>
+                  <div class="sp-desk" aria-hidden="true">
+                    <span class="sp-win sp-win-a"></span>
+                    <span class="sp-win sp-win-b"></span>
                   </div>
-                  <div class="p-4 space-y-0.5 text-[var(--color-fg)]">
-                    <div class="text-[var(--color-muted)]">$ viewbus-mcp --list-tools</div>
-                    <div class="text-[var(--color-accent)]">10 read-only tools · 1 opt-in write tool</div>
-                    <div class="h-2"></div>
-                    {mcpTools.map((t) => (
-                      <div class="flex gap-3">
-                        <span class="text-[var(--color-success)] shrink-0">{t.name}</span>
-                        <span class="text-[var(--color-muted)] truncate">{t.note}</span>
-                      </div>
-                    ))}
-                    <div class="h-2"></div>
-                    <div class="text-[var(--color-muted)]">
-                      <span class="text-[var(--color-fg)]">upsert_theme</span>
-                      <span class="ml-3">write · opt-in via settings</span>
-                    </div>
+                  <div class="sp-panel">
+                    <Image
+                      src={visuals.spotlight.src}
+                      alt={f.title}
+                      widths={visuals.spotlight.widths}
+                      sizes={visuals.spotlight.sizes}
+                      loading="lazy"
+                      decoding="async"
+                      class="block w-full h-auto"
+                    />
+                  </div>
+                  <div class="sp-keys" aria-hidden="true">
+                    <kbd class="sp-key sp-key-ctrl">Ctrl</kbd>
+                    <span class="sp-plus">+</span>
+                    <kbd class="sp-key sp-key-i">I</kbd>
+                    <kbd class="sp-key sp-key-esc">Esc</kbd>
                   </div>
                 </div>
               ) : (

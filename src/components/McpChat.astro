@@ -1,0 +1,79 @@
+---
+// An assistant answering a dead-letter question through viewbus's MCP tools
+// (Cursor's streamed agent chat). Every step is in the HTML, so without JS the
+// card shows the finished conversation; the script replays it each time the
+// card scrolls or slides into view.
+const answer =
+  "30 messages are dead-lettered. 18 failed with PaymentDeclined — Stripe rejected the charge, all from checkout-api since 11:15. 9 are InvalidShippingAddress with postal code 99999, which look like test orders. The other 3 are one-offs.";
+const words = answer.split(" ");
+const strong = new Set(["PaymentDeclined", "InvalidShippingAddress"]);
+---
+<div class="fx-card dark-card mc-card" data-mcp-chat>
+  <div class="fx-card-head">
+    <span class="flex items-center gap-2 text-[13px] font-medium text-[var(--color-fg)]">
+      <span class="mc-avatar" aria-hidden="true"></span>Your AI assistant
+    </span>
+    <span class="font-mono text-[11px] text-[var(--color-muted)]">mcp · viewbus</span>
+  </div>
+
+  <div class="mc-body">
+    <p class="mc-user mc-step" data-at="0">Why is orders-incoming dead-lettering?</p>
+
+    <div class="mc-tool mc-step" data-at="700" data-done="1500">
+      <span class="mc-state" aria-hidden="true"></span>
+      <span class="font-mono">count_messages</span>
+      <span class="mc-arg">orders-incoming</span>
+      <span class="mc-result">12 active · 30 DL</span>
+    </div>
+
+    <div class="mc-tool mc-step" data-at="1700" data-done="2700">
+      <span class="mc-state" aria-hidden="true"></span>
+      <span class="font-mono">peek_messages</span>
+      <span class="mc-arg">dead-letter · 30</span>
+      <span class="mc-result">30 messages</span>
+    </div>
+
+    <p class="mc-answer mc-step" data-at="2900" data-stream>
+      {words.map((w) => (
+        <span class:list={["mc-w", strong.has(w.replace(/[.,]/g, "")) && "mc-strong"]}>{w} </span>
+      ))}
+    </p>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll("[data-mcp-chat]").forEach((card) => {
+      const steps = Array.from(card.querySelectorAll(".mc-step"));
+      const words = Array.from(card.querySelectorAll(".mc-w"));
+      let timers = [];
+
+      const reset = () => {
+        timers.forEach(clearTimeout);
+        timers = [];
+        card.classList.add("is-playing");
+        steps.forEach((s) => s.classList.remove("is-shown", "is-done"));
+        words.forEach((w) => w.classList.remove("is-shown"));
+      };
+
+      const play = () => {
+        reset();
+        steps.forEach((s) => {
+          timers.push(setTimeout(() => s.classList.add("is-shown"), Number(s.dataset.at)));
+          if (s.dataset.done) timers.push(setTimeout(() => s.classList.add("is-done"), Number(s.dataset.done)));
+          if (s.hasAttribute("data-stream")) {
+            words.forEach((w, i) => timers.push(setTimeout(() => w.classList.add("is-shown"), Number(s.dataset.at) + 120 + i * 55)));
+          }
+        });
+      };
+
+      if ("IntersectionObserver" in window) {
+        let visible = false;
+        new IntersectionObserver((es) => es.forEach((e) => {
+          if (e.isIntersecting && !visible) { visible = true; play(); }
+          else if (!e.isIntersecting) visible = false;
+        }), { threshold: 0.6 }).observe(card);
+      }
+    });
+  })();
+</script>
