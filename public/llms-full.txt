@@ -66,7 +66,7 @@ Search message bodies (not just resource names) across every queue, topic, and d
 
 ### Background monitoring and alerts
 
-viewbus samples dead-letter counts in the background (low cost to the machine), and each queue and subscription has a Monitoring tab that charts its dead-letter and active counts on one timeline, with fired alerts marked on the chart. You choose which resources should alert; viewbus fires a native notification when one crosses its threshold — so a backlog surfaces before it becomes an incident. Noisy alerts can be muted for an hour or a day; mutes auto-resume.
+While it runs, viewbus checks dead-letter counts in the background — on the user's own machine, with their own Azure sign-in; nothing passes through a viewbus server. Each queue and subscription has a Monitoring tab that charts its dead-letter and active counts on one timeline, with fired alerts marked on the chart. You choose which resources should alert; viewbus fires a native notification (and optionally a Slack, Discord or generic webhook post) when one crosses its threshold or spikes — so a backlog surfaces before it becomes an incident. Noisy alerts can be muted for an hour or a day; mutes auto-resume.
 
 ### Spotlight search and keyboard shortcuts
 
