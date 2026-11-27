@@ -1,0 +1,120 @@
+---
+// AI alert review, kept small: one alert notification at a time, written by
+// the user's own AI, with viewbus's verdict under it. Cycles the outcomes of
+// DEV-031's rule — action needed → sent; a clear "no" → held; "no" while the
+// count is still rising → sent anyway. Without JS the card shows the first
+// alert.
+const SCENARIOS = [
+  {
+    name: "orders-incoming",
+    count: 30,
+    samples: [3, 3, 4, 4, 5, 6, 8, 11, 15, 19, 24, 30],
+    trend: "rising",
+    message: "Checkout's payment provider started declining every order at 13:02. Resend once it's back — the orders themselves are fine.",
+    send: true,
+    rule: "action needed",
+  },
+  {
+    name: "refunds-processing",
+    count: 27,
+    samples: [27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27],
+    trend: "flat",
+    message: "Test refunds from staging, postal code 99999, parked since Tuesday. Nothing to fix — safe to purge.",
+    send: false,
+    rule: "a clear no, count not rising",
+  },
+  {
+    name: "shipping-confirmations",
+    count: 64,
+    samples: [8, 9, 9, 11, 14, 18, 23, 29, 36, 45, 54, 64],
+    trend: "rising",
+    message: "Looks like retry noise from the carrier API blip at 14:10 — this usually clears on its own.",
+    send: true,
+    rule: "AI said no, but the count is rising",
+  },
+  {
+    name: "inventory-reservations",
+    count: 19,
+    samples: [48, 46, 44, 41, 37, 33, 30, 27, 24, 22, 20, 19],
+    trend: "falling",
+    message: "Lock timeouts during this morning's deploy, and someone is already resending them.",
+    send: false,
+    rule: "a clear no, count falling",
+  },
+];
+const spark = (s: number[]) => {
+  const lo = Math.min(...s), hi = Math.max(...s), span = hi - lo || 1;
+  return s.map((v, i) => `${(i / (s.length - 1)) * 40},${hi === lo ? 7 : 1.5 + (1 - (v - lo) / span) * 11}`).join(" ");
+};
+const data = SCENARIOS.map((s) => ({ ...s, spark: spark(s.samples) }));
+const first = data[0];
+---
+<div class="fx-card dark-card tg-card" data-triage data-scenarios={JSON.stringify(data)}>
+  <div class="tg-top">
+    <span class="tg-orb-mini" aria-hidden="true"></span>
+    <span class="tg-title"><span data-count>{first.count}</span> dead letters — <span class="text-[var(--color-fg)]" data-name>{first.name}</span></span>
+    <svg class="tg-spark" viewBox="0 0 40 14" aria-hidden="true"><polyline data-spark points={first.spark} /></svg>
+    <span class:list={["tg-trend font-mono", `is-${first.trend}`]} data-trend>{first.trend}</span>
+  </div>
+  <p class="tg-msg" data-msg>{first.message}</p>
+  <div class="tg-bottom font-mono">
+    <span class="truncate" data-rule><span class="text-[var(--color-muted)]">viewbus:</span> {first.rule} →</span>
+    <span class:list={["tg-stamp", first.send ? "is-sent" : "is-held"]} data-stamp>{first.send ? "sent" : "held"}</span>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll("[data-triage]").forEach((card) => {
+      const S = JSON.parse(card.dataset.scenarios);
+      const $ = (s) => card.querySelector(s);
+      const countEl = $("[data-count]"), nameEl = $("[data-name]"), sparkEl = $("[data-spark]"), trend = $("[data-trend]");
+      const msg = $("[data-msg]"), rule = $("[data-rule]"), stamp = $("[data-stamp]");
+      const LEN = 7, CPS = 48, TYPE_AT = 0.7;
+      let fired = {}, idx = -1, start = 0, raf = 0, running = false, inView = false;
+      const once = (k, fn) => { if (!fired[k]) { fired[k] = true; fn(); } };
+
+      const setup = (s) => {
+        countEl.textContent = String(s.count);
+        nameEl.textContent = s.name;
+        sparkEl.setAttribute("points", s.spark);
+        trend.textContent = s.trend;
+        trend.className = `tg-trend font-mono is-${s.trend}`;
+        msg.textContent = "";
+        rule.innerHTML = `<span class="text-[var(--color-muted)]">viewbus:</span> ${s.rule} →`;
+        stamp.textContent = s.send ? "sent" : "held";
+        stamp.className = `tg-stamp ${s.send ? "is-sent" : "is-held"}`;
+        card.classList.remove("is-out", "is-decided", "is-sent", "is-held");
+        card.classList.add("is-thinking");
+      };
+
+      const frame = (now) => {
+        const el = (now - start) / 1000;
+        const n = Math.floor(el / LEN), t = el % LEN, s = S[n % S.length];
+        if (n !== idx) { idx = n; fired = {}; setup(s); }
+        if (t > TYPE_AT) {
+          const k = Math.min(s.message.length, Math.floor((t - TYPE_AT) * CPS));
+          if (msg.textContent.length !== k) msg.textContent = s.message.slice(0, k);
+        }
+        if (t > TYPE_AT + s.message.length / CPS + 0.3) once("decide", () => {
+          card.classList.remove("is-thinking");
+          card.classList.add("is-decided", s.send ? "is-sent" : "is-held");
+        });
+        if (t > LEN - 0.45) once("out", () => card.classList.add("is-out"));
+        raf = requestAnimationFrame(frame);
+      };
+
+      card.classList.add("is-js");
+      const play = () => {
+        if (running || !inView || document.hidden) return;
+        running = true; start = performance.now(); idx = -1; raf = requestAnimationFrame(frame);
+      };
+      const stop = () => { running = false; cancelAnimationFrame(raf); };
+
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver((es) => es.forEach((e) => { inView = e.isIntersecting; inView ? play() : stop(); }), { threshold: 0.2 }).observe(card);
+      } else { inView = true; play(); }
+      document.addEventListener("visibilitychange", () => (document.hidden ? stop() : play()));
+    });
+  })();
+</script>

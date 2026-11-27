@@ -2,10 +2,10 @@
 import { Image } from "astro:assets";
 import Base from "../layouts/Base.astro";
 import FeatureTabs from "../components/FeatureTabs.astro";
-import AlertRouter from "../components/AlertRouter.astro";
+import AlertTriage from "../components/AlertTriage.astro";
 import DataBoundary from "../components/DataBoundary.astro";
 import LogoMark from "../components/LogoMark.astro";
-import BulkStream from "../components/BulkStream.astro";
+import ResendField from "../components/ResendField.astro";
 import Faq from "../components/Faq.astro";
 import { latest } from "../lib/latest";
 import heroShot from "../assets/screenshots/viewbus-main.png";
@@ -383,32 +383,12 @@ const yes = "M20 6 9 17l-5-5";
     </div>
   </section>
 
-  <section class="max-w-6xl mx-auto px-6 py-20 md:py-28">
-    <div class="grid items-center gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:gap-14">
-      <div class="reveal">
-        <h2 class="text-3xl md:text-4xl font-bold tracking-tight leading-tight">
-          Only the alerts worth waking up for.
-          <span class="tt-quiet">Your AI reads them first.</span>
-        </h2>
-        <p class="mt-5 text-[var(--color-muted)] leading-relaxed">
-          When a rule matches, viewbus can ask the AI assistant you already use — Claude Code or Codex — whether this one needs you. The AI only answers questions; viewbus makes the call. A count that's still climbing always reaches you, and only a clear “no” holds an alert back.
-        </p>
-        <p class="mt-3 text-[var(--color-muted)] leading-relaxed">
-          Alerts land on your desktop, in Slack or Discord, or at any webhook. The checks run inside the app on your machine, with your own Azure sign-in — nothing passes through us.
-        </p>
-      </div>
-      <div class="reveal lifted rounded-[var(--radius-lg)]">
-        <AlertRouter />
-      </div>
-    </div>
-  </section>
-
   <FeatureTabs />
 
   <section class="max-w-6xl mx-auto px-6 py-20 md:py-28">
     <div class="grid items-center gap-10 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] md:gap-14">
       <div class="reveal lifted rounded-[var(--radius-lg)] order-2 md:order-1">
-        <BulkStream />
+        <ResendField />
       </div>
       <div class="reveal order-1 md:order-2">
         <h2 class="text-3xl md:text-4xl font-bold tracking-tight leading-tight">
@@ -417,6 +397,9 @@ const yes = "M20 6 9 17l-5-5";
         </h2>
         <p class="mt-5 text-[var(--color-muted)] leading-relaxed">
           Filter by reason, preview the batch, then send it all back where it came from. viewbus spreads the job across parallel workers, backs off when Service Bus throttles, and resumes an interrupted run from where it stopped.
+        </p>
+        <p class="mt-3 text-[var(--color-muted)] leading-relaxed">
+          Everything that doesn't match stays exactly where it was. If the run is cut off halfway, untouched messages simply return to the dead-letter queue.
         </p>
       </div>
     </div>
@@ -502,6 +485,26 @@ const yes = "M20 6 9 17l-5-5";
         Coming from Service Bus Explorer? →
       </a>
     </p>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-6 py-16 md:py-20">
+    <div class="reveal grid items-center gap-8 md:grid-cols-2 md:gap-12">
+      <div>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight leading-tight">
+          Alerts your AI reads first.
+          <span class="tt-quiet">If you want it.</span>
+        </h2>
+        <p class="mt-4 text-[var(--color-muted)] leading-relaxed">
+          Turn it on for a monitored set and viewbus asks the AI you already use — Claude Code or Codex — whether an alert needs you, and lets it write the message you get. viewbus still makes the call: a count that's still climbing always reaches you, and only a clear “no” holds one back.
+        </p>
+        <p class="mt-3 text-sm text-[var(--color-muted)] leading-relaxed">
+          Alerts land on your desktop, in Slack or Discord, or at any webhook. The checks run on your machine, with your own Azure sign-in.
+        </p>
+      </div>
+      <div class="lifted rounded-[var(--radius-lg)]">
+        <AlertTriage />
+      </div>
+    </div>
   </section>
 
   <section class="max-w-4xl mx-auto px-6 py-24 md:py-32">

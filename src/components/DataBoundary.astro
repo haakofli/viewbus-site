@@ -27,7 +27,7 @@ const remotePath = (y: number) => `M${NODE_X + 4} 50 C 46 50, 48 ${y}, 60 ${y}`;
     <div class="db-machine"><span class="db-machine-label font-mono">your machine</span></div>
     <svg class="fo-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
       {locals.map((l) => <path data-path={l.id} class="db-local-line" d={localPath(l.y)} />)}
-      {remotes.map((r) => <path data-path={r.id} class:list={[r.optional && "rv-held-line"]} d={remotePath(r.y)} />)}
+      {remotes.map((r) => <path data-path={r.id} class:list={[r.optional && "fo-dashed"]} d={remotePath(r.y)} />)}
     </svg>
 
     {locals.map((l) => (

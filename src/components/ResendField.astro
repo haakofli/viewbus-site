@@ -1,0 +1,286 @@
+---
+// A filtered bulk resend, drawn as the dead-letter queue itself: one dot per
+// message, coloured by dead-letter reason. A preview scan picks out the
+// matches, then eight workers sweep the queue in parallel — matches fly back
+// to the active queue, everything else is held and left exactly where it was.
+// Service Bus throttles halfway and the workers back off. Mirrors the bulk
+// engine in viewbus-core/src/bulk (8 workers by default, hold-don't-abandon).
+// The dots are a canvas; labels, legend and footer are HTML. Without JS the
+// card shows the legend and counts, with no dots.
+const REASONS = [
+  { id: "PaymentDeclined", n: 880, rgb: "242,98,92" },
+  { id: "InvalidShippingAddress", n: 214, rgb: "112,156,232" },
+  { id: "InventoryUnavailable", n: 98, rgb: "86,196,184" },
+  { id: "FraudCheckFailed", n: 56, rgb: "186,140,226" },
+];
+const TOTAL = REASONS.reduce((a, r) => a + r.n, 0);
+const MATCH = REASONS[0].n;
+const fmt = (n: number) => n.toLocaleString("en-US");
+---
+<div class="fx-card dark-card" data-resend data-reasons={JSON.stringify(REASONS)}>
+  <div class="fx-card-head">
+    <span class="min-w-0 truncate font-mono text-[13px]"><span class="text-[var(--color-muted)]">bulk resend ·</span> reason = <span class="text-[var(--fx-glow-fail)]">"PaymentDeclined"</span></span>
+    <span class="rs-steps font-mono" aria-hidden="true">
+      <span data-step="preview">preview</span>
+      <span data-step="resend">resend</span>
+      <span data-step="done">done</span>
+    </span>
+  </div>
+
+  <div class="rs-stage">
+    <canvas class="rs-canvas" aria-hidden="true"></canvas>
+    <span class="rs-src font-mono">orders-incoming/$deadletterqueue · <span class="text-[var(--color-fg)] tabular-nums" data-dlq>{fmt(TOTAL)}</span></span>
+    <span class="rs-dest" data-dest>
+      <span class="rs-dest-label">orders-incoming</span>
+      <span class="rs-dest-sub font-mono">active</span>
+      <span class="rs-dest-count font-mono tabular-nums" data-active>12</span>
+    </span>
+    <span class="rs-chip font-mono" data-chip>throttled by Service Bus · backing off</span>
+    <ul class="rs-legend" aria-label="Dead letters by reason">
+      {REASONS.map((r, i) => (
+        <li class:list={["rs-key", i === 0 && "is-match"]} data-key={r.id}>
+          <span class="rs-key-dot" style={`background: rgb(${r.rgb})`}></span>
+          <span class="rs-key-name">{r.id}</span>
+          <span class="rs-key-n font-mono tabular-nums">{fmt(r.n)}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="rs-foot">
+    <div class="rs-bar"><span data-bar></span></div>
+    <div class="flex items-center justify-between gap-4 text-[13px]">
+      <span class="truncate font-mono tabular-nums text-[var(--color-fg)]" data-progress>{fmt(TOTAL)} dead letters</span>
+      <span class="shrink-0 font-mono tabular-nums text-[var(--color-muted)]" data-rate>8 workers</span>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll("[data-resend]").forEach((card) => {
+      const REASONS = JSON.parse(card.dataset.reasons);
+      const COLS = 52, ROWS = 24, WORKERS = 8, BAND = ROWS / WORKERS;
+      const MATCH = REASONS[0].n;
+      const stage = card.querySelector(".rs-stage");
+      const canvas = card.querySelector(".rs-canvas");
+      const ctx = canvas.getContext("2d");
+      const dest = card.querySelector("[data-dest]");
+      const $ = (s) => card.querySelector(s);
+      const dlqEl = $("[data-dlq]"), activeEl = $("[data-active]"), chip = $("[data-chip]");
+      const bar = $("[data-bar]"), progressEl = $("[data-progress]"), rateEl = $("[data-rate]");
+      const steps = Array.from(card.querySelectorAll("[data-step]"));
+      const keys = Array.from(card.querySelectorAll("[data-key]"));
+      const matchN = keys[0].querySelector(".rs-key-n");
+      const fmt = (n) => n.toLocaleString("en-US");
+      const LIME = [190, 242, 100], AMBER = [245, 176, 65];
+
+      // Deterministic shuffle, so the queue looks the same on every visit.
+      let seed = 7;
+      const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+      const bag = [];
+      REASONS.forEach((r, i) => { for (let k = 0; k < r.n; k++) bag.push(i); });
+      for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+      const rgb = REASONS.map((r) => r.rgb.split(",").map(Number));
+
+      let W = 0, H = 0, pitch = 0, fr = 0, fy = 0, dx = 0, dy = 0, dr = 0;
+      const layout = () => {
+        const dpr = window.devicePixelRatio || 1;
+        W = stage.clientWidth; H = stage.clientHeight;
+        canvas.width = W * dpr; canvas.height = H * dpr;
+        canvas.style.width = W + "px"; canvas.style.height = H + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const s = stage.getBoundingClientRect(), d = dest.getBoundingClientRect();
+        dx = d.left - s.left; dy = d.top - s.top + d.height / 2; dr = d.height * 0.28;
+        const top = 26, bottom = H - 34;
+        fr = dx - Math.max(14, W * 0.035);
+        pitch = Math.min(fr / COLS, (bottom - top) / ROWS);
+        fy = top + (bottom - top - pitch * ROWS) / 2 + pitch / 2;
+      };
+      // Column-major from the right: the head of the queue sits next to the
+      // destination and is read first, so the workers sweep away from it and
+      // resent messages fly back over ground already covered.
+      const cx = (i) => fr - pitch / 2 - Math.floor(i / ROWS) * pitch;
+      const cy = (i) => fy + (i % ROWS) * pitch;
+      const colX = (p) => fr - p * pitch;
+
+      let cells, parts, heads, phase, phaseAt, scan, resent, active, held, throttled, runTime, lastHit, last, raf = 0, running = false, inView = false;
+      const reset = (now) => {
+        cells = bag.map((reason) => ({ reason, seen: false, gone: false, heldAt: -1 }));
+        parts = [];
+        heads = Array.from({ length: WORKERS }, () => ({ p: 0, v: 11 + rand() * 4 }));
+        phase = "intro"; phaseAt = now; scan = 0; resent = 0; active = 12; held = 0; throttled = false; runTime = 0; lastHit = 0;
+        chip.classList.remove("is-on");
+        card.classList.remove("is-throttled", "is-done", "is-filtered");
+        keys.forEach((k) => k.classList.remove("is-dim"));
+        setStep(null);
+      };
+      const setStep = (name) => {
+        const order = ["preview", "resend", "done"];
+        const at = order.indexOf(name);
+        steps.forEach((s, i) => { s.classList.toggle("is-on", i === at); s.classList.toggle("is-past", i < at); });
+      };
+
+      const process = (i, now) => {
+        const c = cells[i];
+        if (c.reason === 0) {
+          c.gone = true;
+          const x0 = cx(i), y0 = cy(i), ty = dy + (rand() - 0.5) * 2 * dr;
+          parts.push({ x0, y0, x1: dx, y1: ty, mx: (x0 + dx) / 2, my: (y0 + ty) / 2 + (rand() - 0.5) * 50, t: 0, v: 1.1 + rand() * 0.5 });
+        } else {
+          c.heldAt = now; held += 1;
+        }
+      };
+
+      const update = (now, dt) => {
+        const el = (now - phaseAt) / 1000;
+        if (phase === "intro" && el > 1.1) { phase = "preview"; phaseAt = now; setStep("preview"); }
+        else if (phase === "preview") {
+          scan = Math.min(1, el / 1.9);
+          const upto = Math.floor(scan * COLS * ROWS);
+          for (let i = 0; i < upto; i++) cells[i].seen = true;
+          if (scan >= 1) { phase = "ready"; phaseAt = now; card.classList.add("is-filtered"); keys.forEach((k, i) => k.classList.toggle("is-dim", i > 0)); }
+        } else if (phase === "ready" && el > 0.9) { phase = "run"; phaseAt = now; setStep("resend"); }
+        else if (phase === "run") {
+          if (!throttled && resent >= MATCH * 0.46) {
+            throttled = true; phase = "throttle"; phaseAt = now;
+            chip.classList.add("is-on"); card.classList.add("is-throttled");
+          } else {
+            runTime += dt;
+            heads.forEach((h, w) => {
+              if (h.p >= COLS) return;
+              h.v += (11 + rand() * 4 - h.v) * Math.min(1, dt * 2);
+              const before = Math.floor(h.p);
+              h.p = Math.min(COLS, h.p + h.v * dt);
+              for (let c = before; c < Math.floor(h.p); c++) {
+                for (let r = w * BAND; r < (w + 1) * BAND; r++) process(c * ROWS + r, now);
+              }
+            });
+            if (heads.every((h) => h.p >= COLS) && parts.length === 0) {
+              phase = "done"; phaseAt = now; setStep("done"); card.classList.add("is-done");
+              keys.forEach((k) => k.classList.remove("is-dim"));
+            }
+          }
+        } else if (phase === "throttle" && el > 2.0) {
+          phase = "run"; phaseAt = now; chip.classList.remove("is-on"); card.classList.remove("is-throttled");
+        } else if (phase === "done" && el > 3.4) {
+          reset(now);
+        }
+
+        parts.forEach((p) => (p.t += p.v * dt));
+        parts = parts.filter((p) => {
+          if (p.t < 1) return true;
+          resent += 1; active += 1;
+          if (now - lastHit > 140) { lastHit = now; dest.classList.remove("is-hit"); void dest.offsetWidth; dest.classList.add("is-hit"); }
+          return false;
+        });
+
+        const left = cells.filter((c) => !c.gone).length;
+        matchN.textContent = fmt(left - (cells.length - MATCH));
+        dlqEl.textContent = fmt(left);
+        activeEl.textContent = fmt(active);
+        bar.style.width = `${(resent / MATCH) * 100}%`;
+        if (phase === "intro") progressEl.textContent = `${fmt(cells.length)} dead letters`;
+        else if (phase === "preview") progressEl.textContent = `previewing · ${fmt(cells.filter((c) => c.seen && c.reason === 0).length)} match`;
+        else if (phase === "ready") progressEl.textContent = `${fmt(MATCH)} match · resend ${fmt(MATCH)}`;
+        else if (phase === "done") progressEl.textContent = `${fmt(MATCH)} resent · 0 failed · ${fmt(left)} left untouched`;
+        else progressEl.textContent = `${fmt(resent)} / ${fmt(MATCH)} resent`;
+        if (phase === "throttle") rateEl.textContent = "backing off · 8 workers";
+        else if (phase === "run") rateEl.textContent = runTime > 0.4 ? `${Math.round(resent / runTime)} msg/s · 8 workers` : "8 workers";
+        else if (phase === "done") rateEl.textContent = "completed";
+        else rateEl.textContent = "8 workers";
+      };
+
+      const draw = (now) => {
+        ctx.clearRect(0, 0, W, H);
+        const r = Math.max(1.1, pitch * 0.2);
+        const filtered = phase !== "intro" && phase !== "preview";
+        const restored = phase === "done" ? Math.min(1, (now - phaseAt) / 900) : 0;
+        cells.forEach((c, i) => {
+          if (c.gone) return;
+          const x = cx(i), y = cy(i), [cr, cg, cb] = rgb[c.reason];
+          const match = c.reason === 0;
+          let a;
+          if (!c.seen && !filtered) a = 0.55;
+          else if (match) a = 0.95;
+          else a = 0.16 + restored * 0.34;
+          const grey = !match && (c.seen || filtered) && restored < 1;
+          const k = grey ? 1 - restored : 0;
+          const col = grey ? [cr + (150 - cr) * k, cg + (155 - cg) * k, cb + (165 - cb) * k] : [cr, cg, cb];
+          ctx.fillStyle = `rgba(${col[0] | 0},${col[1] | 0},${col[2] | 0},${a})`;
+          ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+          if (match && c.seen && filtered) {
+            ctx.fillStyle = `rgba(${cr},${cg},${cb},0.12)`;
+            ctx.beginPath(); ctx.arc(x, y, r * 2.4, 0, Math.PI * 2); ctx.fill();
+          }
+          if (c.heldAt > 0) {
+            const age = (now - c.heldAt) / 600;
+            if (age < 1) {
+              ctx.strokeStyle = `rgba(255,255,255,${0.55 * (1 - age)})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath(); ctx.arc(x, y, r + 1.5 + age * 1.5, 0, Math.PI * 2); ctx.stroke();
+            }
+          }
+        });
+
+        if (phase === "preview") {
+          const x = colX(Math.min(COLS, scan * COLS));
+          const g = ctx.createLinearGradient(x + 40, 0, x, 0);
+          g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,0.10)");
+          ctx.fillStyle = g; ctx.fillRect(x, fy - pitch, 40, pitch * (ROWS + 1));
+          ctx.fillStyle = "rgba(235,240,255,0.85)";
+          ctx.fillRect(x - 0.75, fy - pitch, 1.5, pitch * (ROWS + 1));
+        }
+
+        if (phase === "run" || phase === "throttle") {
+          const c = phase === "throttle" ? AMBER : LIME;
+          heads.forEach((h, w) => {
+            if (h.p >= COLS) return;
+            const x = colX(h.p), y0 = fy - pitch / 2 + w * BAND * pitch, hgt = BAND * pitch;
+            const g = ctx.createLinearGradient(x + 34, 0, x, 0);
+            g.addColorStop(0, `rgba(${c},0)`); g.addColorStop(1, `rgba(${c},0.22)`);
+            ctx.fillStyle = g; ctx.fillRect(x, y0 + 1, 34, hgt - 2);
+            ctx.shadowColor = `rgba(${c},0.9)`; ctx.shadowBlur = 10;
+            ctx.fillStyle = `rgba(${c},0.95)`;
+            ctx.fillRect(x - 1, y0 + 1.5, 2, hgt - 3);
+            ctx.shadowBlur = 0;
+          });
+        }
+
+        parts.forEach((p) => {
+          const t = Math.min(1, p.t), e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, u = 1 - e;
+          const x = u * u * p.x0 + 2 * u * e * p.mx + e * e * p.x1;
+          const y = u * u * p.y0 + 2 * u * e * p.my + e * e * p.y1;
+          const k = Math.min(1, t * 1.6);
+          const cr = 242 + (LIME[0] - 242) * k, cg = 98 + (LIME[1] - 98) * k, cb = 92 + (LIME[2] - 92) * k;
+          const fade = Math.min(1, (1 - t) * 6);
+          ctx.fillStyle = `rgba(${cr | 0},${cg | 0},${cb | 0},${0.18 * fade})`;
+          ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = `rgba(${cr | 0},${cg | 0},${cb | 0},${0.95 * fade})`;
+          ctx.beginPath(); ctx.arc(x, y, 1.7, 0, Math.PI * 2); ctx.fill();
+        });
+      };
+
+      const frame = (now) => {
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
+        update(now, dt);
+        draw(now);
+        raf = requestAnimationFrame(frame);
+      };
+
+      card.classList.add("is-js");
+      const play = () => {
+        if (running || !inView || document.hidden) return;
+        running = true; layout(); last = performance.now(); reset(last); raf = requestAnimationFrame(frame);
+      };
+      const stop = () => { running = false; cancelAnimationFrame(raf); };
+
+      window.addEventListener("resize", () => running && layout());
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver((es) => es.forEach((e) => { inView = e.isIntersecting; inView ? play() : stop(); }), { threshold: 0.2 }).observe(card);
+      } else { inView = true; play(); }
+      document.addEventListener("visibilitychange", () => (document.hidden ? stop() : play()));
+    });
+  })();
+</script>
