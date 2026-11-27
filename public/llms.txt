@@ -7,7 +7,7 @@ viewbus is a native desktop app (Windows + macOS) for developers working with Az
 ## Key facts
 
 - **Name:** viewbus, lowercase (the installer and the macOS bundle are named `ViewBus` for install-time stability; user-facing copy is lowercase)
-- **Platform:** Windows 10 / 11 (x64) and macOS (Apple Silicon; Intel via Rosetta)
+- **Platform:** Windows 10 / 11 (x64) and macOS 11+ (Apple Silicon only; Intel Macs are not supported)
 - **Price:** Free
 - **Source:** Closed source; distributed via the Microsoft Store, Homebrew, and GitHub Releases
 - **Privacy:** No telemetry, no backend servers, no accounts. See /privacy
@@ -84,7 +84,7 @@ While the app is running it serves a small HTTP API on `127.0.0.1`, meant for la
 
 - **Windows — Microsoft Store (recommended):** https://apps.microsoft.com/detail/9p0q5zmlv15k — signed by Microsoft, no SmartScreen warning, auto-updates via the Store.
 - **Windows — direct installer:** the NSIS `.exe` on GitHub Releases. It isn't code-signed yet, so Windows SmartScreen warns once ("More info" → "Run anyway"). Resolve the current URL from https://viewbus.app/latest.json or https://github.com/haakofli/viewbus-site/releases/latest.
-- **macOS — Homebrew (recommended):** `brew install --cask haakofli/viewbus/viewbus`. A `.dmg` is also on GitHub Releases; it isn't notarized yet, so first launch needs a one-time unlock (`xattr -cr /Applications/ViewBus.app`, or right-click → Open).
+- **macOS — Homebrew (recommended):** `brew install --cask haakofli/viewbus/viewbus`. A `.dmg` is also on GitHub Releases; it isn't notarized yet, so first launch needs a one-time unlock (`xattr -cr /Applications/ViewBus.app`; the right-click → Open bypass no longer exists on macOS 15.1+).
 - **Programmatic:** https://viewbus.app/latest.json returns `version`, per-platform download URLs, and signing status — agents should read it rather than hardcoding a version.
 
 ## Support
@@ -99,6 +99,7 @@ No support email. Bugs and feature requests go to GitHub issues (https://github.
 - [MCP server](https://viewbus.app/mcp-server/) — setup per AI client, tool reference, limits
 - [Developers](https://viewbus.app/developers/) — the local HTTP API reference
 - [Service Bus Explorer alternative](https://viewbus.app/service-bus-explorer-alternative/) — positioning vs the original
+- [Azure Service Bus Explorer for Mac](https://viewbus.app/azure-service-bus-explorer-mac/) — the macOS build: what it does, install, requirements
 - [Changelog](https://viewbus.app/changelog/) — every release with summaries and download links
 - [Support](https://viewbus.app/support/) — how to report a bug or reach the author
 - [Privacy](https://viewbus.app/privacy/) — full data-handling details

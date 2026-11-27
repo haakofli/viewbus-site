@@ -1,0 +1,216 @@
+---
+import Base from "../layouts/Base.astro";
+import Faq from "../components/Faq.astro";
+import { latest } from "../lib/latest";
+
+const title = "Azure Service Bus Explorer for Mac — viewbus";
+const description =
+  "A native Azure Service Bus explorer for macOS. Peek and resend dead-letter messages and search every queue at once. Free, local, no account.";
+const path = "/azure-service-bus-explorer-mac";
+
+const brewCmd = "brew install --cask haakofli/viewbus/viewbus";
+
+const faqs = [
+  {
+    q: "Is there a Service Bus Explorer for Mac?",
+    a: "The original Service Bus Explorer is a Windows Forms app on .NET Framework, so it only runs on Windows. viewbus is a free, native alternative for macOS on Apple Silicon. It covers the same workflows (peek, dead-letter, resend) and adds message search across every queue and topic at once.",
+  },
+  {
+    q: "Does viewbus run on Intel Macs?",
+    a: "No. The macOS build is Apple Silicon only (M1 or newer). Rosetta 2 translates Intel apps to run on Apple Silicon, not the other way around, so an Intel Mac can't run it.",
+  },
+  {
+    q: "Why does macOS say the app is damaged?",
+    a: "The direct download isn't notarized by Apple yet, and macOS shows that warning for every unnotarized download. Nothing is wrong with the file. Install with Homebrew, which clears the quarantine flag for you, or run `xattr -cr /Applications/ViewBus.app` once after dragging the app into Applications.",
+  },
+  {
+    q: "Can I use it without signing in to Azure?",
+    a: "Yes. Paste a namespace connection string and you're browsing. It's stored in the macOS Keychain, never in a file. Signing in with Azure is optional and lets viewbus find every namespace you have access to.",
+  },
+  {
+    q: "Can I browse Service Bus from the Azure CLI instead?",
+    a: "Only partly. `az servicebus` manages namespaces, queues, and topics, but it can't peek, search, or resend messages. You need the portal, an SDK script, or a desktop explorer like viewbus for that.",
+  },
+  {
+    q: "Is it free?",
+    a: "Yes. No account, no telemetry, no trial. Everything runs on your Mac.",
+  },
+];
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://viewbus.app/" },
+    { "@type": "ListItem", position: 2, name: "Azure Service Bus Explorer for Mac", item: "https://viewbus.app/azure-service-bus-explorer-mac/" },
+  ],
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a.replace(/`/g, "") },
+  })),
+};
+
+const appSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "viewbus",
+  operatingSystem: "macOS 11 or later (Apple Silicon)",
+  applicationCategory: "DeveloperApplication",
+  softwareVersion: latest.version,
+  url: "https://viewbus.app/azure-service-bus-explorer-mac/",
+  downloadUrl: "https://viewbus.app/download/",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
+---
+<Base title={title} description={description} path={path}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(appSchema)} />
+  </Fragment>
+
+  <article class="has-aura max-w-2xl mx-auto px-6 py-20">
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
+      An Azure Service Bus explorer for Mac.
+      <span class="tt-quiet">Native, on Apple Silicon.</span>
+    </h1>
+    <p class="text-lg text-[var(--color-muted)] leading-relaxed mb-12">
+      Peek queues, fix dead-letters, and find a message anywhere in your namespaces without a
+      Windows VM.
+    </p>
+
+    <h2 class="text-2xl font-semibold tracking-tight mb-4">Why Mac users have been making do</h2>
+    <p class="leading-relaxed mb-5">
+      Paolo Salvatori's <a href="https://github.com/paolosalvatori/ServiceBusExplorer" class="text-[var(--color-accent)] hover:underline" rel="noopener">Service Bus Explorer</a>
+      is the tool most Azure developers learned on. It's a Windows Forms app on .NET Framework,
+      so it has never run on macOS.
+    </p>
+    <p class="leading-relaxed mb-5">On a Mac, that has meant one of these:</p>
+    <ul class="list-disc pl-5 leading-relaxed mb-5 flex flex-col gap-2">
+      <li>The Service Bus Explorer in the Azure portal: one entity at a time, in a browser tab.</li>
+      <li>A Windows VM kept around for the one tool that needs it.</li>
+      <li>A throwaway SDK script every time a dead-letter queue fills up.</li>
+    </ul>
+    <p class="leading-relaxed mb-12">
+      The Azure CLI doesn't fill the gap either. <code class="font-mono text-[0.9em]">az servicebus</code>
+      manages entities, but it can't read a single message.
+    </p>
+
+    <h2 class="text-2xl font-semibold tracking-tight mb-4">What viewbus gives you on a Mac</h2>
+    <ul class="sbe-list is-new leading-relaxed mb-12">
+      <li>A native Apple Silicon app, built from the same code as the Windows version and released alongside it.</li>
+      <li>Sign in with Azure once and viewbus indexes every namespace, queue, topic, and subscription you can see, locally in SQLite. Browsing stays instant across thousands of resources.</li>
+      <li>Peek active and dead-letter messages without receiving them. Filter by message ID, correlation ID, subject, session, or dead-letter reason.</li>
+      <li>Search message bodies across every queue, topic, and dead-letter queue at once. Trace a stuck order by its ID without opening each resource.</li>
+      <li>Edit a dead-lettered message in a side-by-side diff, then resend it, one at a time or in bulk.</li>
+      <li><kbd class="font-mono text-[12px] px-1.5 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-fg)]/[0.04]">⌘⇧I</kbd> opens a spotlight that fuzzy-searches every queue and topic from anywhere on your Mac.</li>
+      <li>Connection strings live in the macOS Keychain, not in a config file.</li>
+      <li>Dead-letter alerts arrive as Mac notifications, or in Slack or Discord.</li>
+      <li>A <a href="/mcp-server/" class="text-[var(--color-accent)] hover:underline">built-in MCP server</a> lets Claude, Cursor, or any MCP client read your queues over local stdio.</li>
+    </ul>
+
+    <h2 class="text-2xl font-semibold tracking-tight mb-4">Install</h2>
+    <p class="leading-relaxed mb-4">
+      Homebrew is the easiest route. The cask clears macOS's quarantine flag for you, so the app
+      opens on the first try.
+    </p>
+    <div class="mb-6 flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-fg)_3%,transparent)] px-3 py-2">
+      <code data-brew-cmd class="mac-cmd flex-1 overflow-x-auto whitespace-nowrap font-mono text-[12px] text-[var(--color-fg)]"><span class="select-none text-[var(--color-muted)]">$ </span>{brewCmd}</code>
+      <button
+        type="button"
+        data-copy-link
+        data-copy-value={brewCmd}
+        aria-label="Copy the Homebrew command"
+        class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs text-[var(--color-muted)] transition-colors hover:bg-[var(--color-hover)] hover:text-[var(--color-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+    <p class="leading-relaxed mb-12 text-[var(--color-muted)]">
+      Prefer a <code class="font-mono text-[0.9em] text-[var(--color-fg)]">.dmg</code>? It's on the
+      <a href="/download/" class="text-[var(--color-accent)] hover:underline">download page</a>. The build
+      isn't notarized by Apple yet, so macOS calls it damaged on first launch. Drag
+      <span class="text-[var(--color-fg)]">ViewBus.app</span> into Applications and run
+      <code class="font-mono text-[0.9em] text-[var(--color-fg)]">xattr -cr /Applications/ViewBus.app</code>
+      once.
+    </p>
+
+    <h2 class="text-2xl font-semibold tracking-tight mb-4">What you need</h2>
+    <dl class="mb-12 flex flex-col gap-3 text-sm">
+      {[
+        ["Mac", "Apple Silicon (M1 or newer). Intel Macs aren't supported."],
+        ["macOS", "11 Big Sur or later."],
+        ["Azure", "Read access to your Service Bus namespaces, or a connection string for each one."],
+      ].map(([term, def]) => (
+        <div class="flex flex-col gap-1 border-b border-[var(--color-border)] pb-3 last:border-0 sm:flex-row sm:gap-4">
+          <dt class="w-24 shrink-0 font-medium text-[var(--color-fg)]">{term}</dt>
+          <dd class="text-[var(--color-muted)] leading-relaxed">{def}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <h2 class="text-2xl font-semibold tracking-tight mb-1">Questions</h2>
+    <Faq items={faqs} class="mt-5 mb-12" />
+
+    <div class="flex flex-col sm:flex-row gap-3 pt-8 border-t border-[var(--color-border)]">
+      <a
+        href="/download/"
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap bg-[var(--color-fg)] text-[var(--color-bg)] hover:bg-[var(--color-fg)]/90 rounded-full h-11 px-6 text-sm font-medium transition-colors"
+      >
+        Get viewbus for Mac
+      </a>
+      <a
+        href="/service-bus-explorer-alternative/"
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap border border-[var(--color-border)] hover:bg-[var(--color-hover)] rounded-full h-11 px-6 text-sm font-medium transition-colors"
+      >
+        vs Service Bus Explorer
+      </a>
+      <span class="inline-flex items-center text-sm text-[var(--color-muted)] sm:ml-auto">
+        Free · v{latest.version}
+      </span>
+    </div>
+  </article>
+
+  <script is:inline>
+    (() => {
+      document.querySelectorAll("[data-copy-link]").forEach((btn) => {
+        const label = btn.querySelector("[data-copy-label]");
+        btn.addEventListener("click", async () => {
+          const value = btn.getAttribute("data-copy-value") || "";
+          try {
+            await navigator.clipboard.writeText(value);
+            if (label) {
+              const was = label.textContent;
+              label.textContent = "Copied";
+              setTimeout(() => { label.textContent = was; }, 1500);
+            }
+          } catch {
+            const code = btn.parentElement && btn.parentElement.querySelector("[data-brew-cmd]");
+            const sel = window.getSelection && window.getSelection();
+            if (code && sel) {
+              const range = document.createRange();
+              range.selectNode(code);
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
+          }
+        });
+      });
+    })();
+  </script>
+
+  <style>
+    .mac-cmd { scrollbar-width: none; }
+    .mac-cmd::-webkit-scrollbar { display: none; }
+  </style>
+</Base>

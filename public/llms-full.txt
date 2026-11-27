@@ -25,7 +25,7 @@ All data stays on the user's machine — no telemetry, no cloud sync, no account
 ### Key facts
 
 - **Name:** viewbus, lowercase (the Windows installer and macOS bundle are named `ViewBus` for install-time stability; user-facing copy is lowercase)
-- **Platform:** Windows 10 / 11 (x64) and macOS (Apple Silicon; Intel via Rosetta)
+- **Platform:** Windows 10 / 11 (x64) and macOS 11+ (Apple Silicon only; Intel Macs are not supported)
 - **Price:** Free
 - **Source:** Closed source; distributed via the Microsoft Store, Homebrew, and GitHub Releases
 - **Privacy:** No telemetry, no backend servers, no accounts
@@ -153,11 +153,11 @@ The NSIS `.exe` on GitHub Releases. It isn't code-signed yet, so Windows SmartSc
 brew install --cask haakofli/viewbus/viewbus
 ```
 
-A `.dmg` is also published on GitHub Releases. It isn't notarized by Apple yet, so on first launch macOS reports it as damaged / unverified. Clear the quarantine flag once with `xattr -cr /Applications/ViewBus.app`, or right-click the app → Open → confirm. Homebrew installs clear this automatically.
+A `.dmg` is also published on GitHub Releases. It isn't notarized by Apple yet, so on first launch macOS reports it as damaged / unverified. Clear the quarantine flag once with `xattr -cr /Applications/ViewBus.app` (the right-click → Open bypass no longer exists on macOS 15.1+). Homebrew installs clear this automatically.
 
 ### Requirements
 
-- Windows 10 or 11, x64; or macOS on Apple Silicon (Intel via Rosetta 2).
+- Windows 10 or 11, x64; or macOS 11 or later on Apple Silicon (M1 or newer). Intel Macs are not supported.
 - An Azure account with read access to your Service Bus namespaces, or a connection string per namespace.
 - Outbound HTTPS to `login.microsoftonline.com`, `management.azure.com`, and your `*.servicebus.windows.net` endpoints.
 
@@ -238,6 +238,7 @@ viewbus ships often. The current version is at https://viewbus.app/latest.json, 
 - MCP server setup: https://viewbus.app/mcp-server/
 - Developers (local HTTP API): https://viewbus.app/developers/
 - Service Bus Explorer alternative: https://viewbus.app/service-bus-explorer-alternative/
+- Azure Service Bus Explorer for Mac: https://viewbus.app/azure-service-bus-explorer-mac/
 - Changelog: https://viewbus.app/changelog/
 - Support: https://viewbus.app/support/
 - Privacy: https://viewbus.app/privacy/
