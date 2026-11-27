@@ -145,7 +145,7 @@ const breadcrumbSchema = {
       <dl class="mt-5 flex flex-col gap-3 text-sm">
         {[
           ["Windows", "Windows 10 or 11, x64."],
-          ["macOS", "Apple Silicon. Intel Macs run the same build under Rosetta 2."],
+          ["macOS", "macOS 11 or later on Apple Silicon (M1 or newer). Intel Macs aren't supported."],
           ["Azure", "An Azure account with read access to your Service Bus namespaces, or a connection string for each namespace you want to reach."],
           ["Network", "Outbound HTTPS to login.microsoftonline.com, management.azure.com, and your *.servicebus.windows.net endpoints."],
         ].map(([term, def]) => (
