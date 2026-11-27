@@ -50,7 +50,7 @@ Developers, DevOps engineers, and SREs who work with Azure Service Bus day-to-da
 
 ### Fast tree browsing
 
-Subscriptions, namespaces, queues, and topics are indexed locally in SQLite. Navigation is instant, even on enterprise tenants with thousands of resources, with no round-trip to Azure for typical browsing after the initial index. If the account spans several Azure tenants, viewbus enumerates them and lets the user switch from the account dialog; the tree, search, and MCP results all stay scoped to the active tenant. The sidebar is tabbed — Subscription, All, Favorites, and Connections (manual connection-string namespaces).
+Subscriptions, namespaces, queues, and topics are indexed locally in SQLite. Navigation is instant, even on enterprise tenants with thousands of resources, with no round-trip to Azure for typical browsing after the initial index. If the account spans several Azure tenants, viewbus enumerates them and lets the user switch from the account dialog; the tree, search, and MCP results all stay scoped to the active tenant. The sidebar stacks Favorites, the selected subscription's namespaces, and Connections (manual connection-string namespaces) as collapsible sections, under one search box that covers either the current subscription ("Here") or every indexed resource ("Everywhere"). Selecting a namespace opens an overview: dead-letter and active totals, plus its queues and subscriptions in a table grouped by topic.
 
 ### Browse and act on messages
 
@@ -58,7 +58,7 @@ Peek active and dead-letter messages without dequeuing. Filter by session ID, me
 
 ### Bulk queue operations
 
-Purge an active queue, move every active message to the dead-letter queue, bulk-resend dead-lettered messages back to their entity, or bulk-delete by filter. Every operation previews the matching batch first, then runs with live progress, a running ETA, and a cancel button; throttling from Service Bus is handled with backoff rather than failing the run. The Operations tab keeps a history of everything that has run against a resource.
+Purge an active queue, move every active message to the dead-letter queue, bulk-resend dead-lettered messages back to their entity, or bulk-delete by filter. Every operation previews the matching batch first, then runs with live progress, a running ETA, and a cancel button; throttling from Service Bus is handled with backoff rather than failing the run. The Operations tab keeps a history of everything that has run against a resource, and an interrupted run can be resumed from where it stopped.
 
 ### Cross-resource message search
 
@@ -66,11 +66,11 @@ Search message bodies (not just resource names) across every queue, topic, and d
 
 ### Background monitoring and alerts
 
-Opt-in. Pick exactly which queues, topics, and subscriptions to watch and which should alert. viewbus samples dead-letter counts in the background (low cost to the machine) and fires a native notification when a resource crosses its threshold — so a backlog surfaces before it becomes an incident. Noisy alerts can be muted for an hour or a day; mutes auto-resume.
+viewbus samples dead-letter counts in the background (low cost to the machine), and each queue and subscription has a Monitoring tab that charts its dead-letter and active counts on one timeline, with fired alerts marked on the chart. You choose which resources should alert; viewbus fires a native notification when one crosses its threshold — so a backlog surfaces before it becomes an incident. Noisy alerts can be muted for an hour or a day; mutes auto-resume.
 
 ### Spotlight search and keyboard shortcuts
 
-`Ctrl+I` (rebindable) opens a system-wide fuzzy search across every indexed resource — queues, topics, subscriptions. It stays active even when viewbus is minimized to the system tray, so it behaves as a global OS-level launcher for the Service Bus topology. Shortcuts throughout the app are customizable from settings.
+`Ctrl+I` (rebindable) opens a system-wide fuzzy search across every indexed resource — queues, topics, subscriptions — scoped to the current subscription or everywhere, with recent searches remembered and Shift+Enter opening a result's dead letters. When the app's home screen is showing, the same search opens in place there. It stays active even when viewbus is minimized to the system tray, so it behaves as a global OS-level launcher for the Service Bus topology. Shortcuts throughout the app are customizable from settings.
 
 ### Built-in MCP server
 
@@ -213,7 +213,7 @@ No analytics SDK, no crash reporter, no A/B framework, no affiliate tracking. If
 There is no support email. All routes reach the author directly:
 
 - **Bugs and feature requests:** https://github.com/haakofli/viewbus-site/issues — feature requests are ranked by 👍 reactions and the top ones appear on the home page.
-- **In-app:** Settings → Send feedback, which needs no GitHub account and can optionally attach the local log file. This is also the route for security issues or anything else that shouldn't be public.
+- **In-app:** Settings → About → Send feedback, which needs no GitHub account and can optionally attach the local log file. This is also the route for security issues or anything else that shouldn't be public.
 
 Data controller for GDPR purposes is Håkon Lia (Norway). viewbus operates no servers, no database, and no account system, so no personal data is held; the supervisory authority is Datatilsynet.
 

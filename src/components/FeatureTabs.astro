@@ -13,34 +13,34 @@ const features = [
     id: "browse",
     label: "Browse",
     title: "Fast tree browsing",
-    body: "Subscriptions, namespaces, queues, topics — indexed locally in SQLite. Navigation is instant, even on enterprise tenants with thousands of resources.",
+    body: "Favorites, your subscription's namespaces, and connection-string namespaces in one sidebar — indexed locally in SQLite. Navigation is instant, even on enterprise tenants with thousands of resources.",
   },
   {
     id: "messages",
     label: "Messages",
     title: "Browse and act on messages",
-    body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Edit a body before resending, or compose new messages from scratch.",
+    body: "Peek active and dead-letter messages without dequeuing. Filter by session, ID, subject, or DL reason. Tick a few to resend or delete them together, edit a body before resending, or compose new messages from scratch.",
     wide: true,
   },
   {
     id: "operations",
     label: "Operations",
     title: "Run queue operations in bulk",
-    body: "Purge, dead-letter, resend, or delete across a whole queue or DLQ from one place. Preview and filter the batch first, then watch each job run live — progress, an ETA, and a history of every operation that's run.",
+    body: "Purge, dead-letter, resend, or delete across a whole queue or DLQ from one place. Preview and filter the batch first, then watch each job run live — progress, an ETA, and a history of every operation that's run, with one-click resume if one gets interrupted.",
     wide: true,
   },
   {
     id: "monitoring",
     label: "Monitoring",
-    title: "Set up automatic monitoring and alerting",
-    body: "Pick exactly which queues, topics, and subscriptions to watch, and which ones should alert. Runs in the background at a low cost to your machine.",
+    title: "Automatic monitoring and alerting",
+    body: "Dead-letter counts are sampled in the background at a low cost to your machine. Every queue and subscription gets its dead-letter and active history on one timeline, and you choose which ones should alert — with each fired alert marked on the chart.",
     wide: true,
   },
   {
     id: "spotlight",
     label: "Spotlight",
     title: "Spotlight search",
-    body: "Ctrl+I opens a system-wide fuzzy search across every indexed resource. Stays active even with viewbus closed to the tray.",
+    body: "Ctrl+I opens a system-wide fuzzy search across every indexed resource — scoped to one subscription or everywhere, with Shift+Enter jumping straight to dead letters. Stays active even with viewbus closed to the tray.",
   },
   {
     id: "mcp",
@@ -83,11 +83,11 @@ const visualMaxWidth: Record<string, string> = {
 // slide never collapses while a PNG loads. `widths` stops at each file's
 // display size × 2 (retina); sharp won't upscale past the original anyway.
 const visuals: Record<string, { src: ImageMetadata; widths: number[]; sizes: string }> = {
-  browse: { src: browseShot, widths: [280, 555], sizes: "(max-width: 360px) 85vw, 280px" },
+  browse: { src: browseShot, widths: [280, 560], sizes: "(max-width: 360px) 85vw, 280px" },
   messages: { src: messagesShot, widths: [720, 1440], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
   operations: { src: operationsShot, widths: [720, 1440], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
-  monitoring: { src: monitoringShot, widths: [720, 1347], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
-  spotlight: { src: spotlightShot, widths: [480, 904], sizes: "(max-width: 540px) calc(100vw - 4rem), 480px" },
+  monitoring: { src: monitoringShot, widths: [720, 1440], sizes: "(max-width: 800px) calc(100vw - 4rem), 720px" },
+  spotlight: { src: spotlightShot, widths: [480, 960], sizes: "(max-width: 540px) calc(100vw - 4rem), 480px" },
   themes: { src: themesShot, widths: [560, 1120], sizes: "(max-width: 620px) calc(100vw - 4rem), 560px" },
 };
 ---
