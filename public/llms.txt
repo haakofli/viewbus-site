@@ -89,7 +89,7 @@ While the app is running it serves a small HTTP API on `127.0.0.1`, meant for la
 
 ## Support
 
-No support email. Bugs and feature requests go to GitHub issues (https://github.com/haakofli/viewbus-site/issues); the app also has a built-in feedback dialog under Settings → Send feedback, which is the route for anything private or security-related. See https://viewbus.app/support
+No support email. Bugs and feature requests go to GitHub issues (https://github.com/haakofli/viewbus-site/issues); the app also has a built-in feedback dialog under Settings → About → Send feedback, which is the route for anything private or security-related. See https://viewbus.app/support
 
 ## Pages
 
