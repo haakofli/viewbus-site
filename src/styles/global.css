@@ -1184,9 +1184,23 @@ html.js-reveal .cmp.is-visible .cmp-check path {
   pointer-events: none;
 }
 @keyframes beam-orbit { to { --beam-angle: 360deg; } }
+/* Hovering the hero lifts the bottom fade in a circle under the pointer.
+   --lens is 0 until hover, which leaves the mask exactly as it is without
+   it. --mx / --my come from the pointer script in Base.astro. */
+@property --lens { syntax: "<number>"; inherits: true; initial-value: 0; }
+.hero-fade { --lens: 0; transition: --lens 0.35s ease; }
+@media (hover: hover) {
+  .hero-fade:hover { --lens: 1; }
+}
 html:not(.light) .hero-fade {
-  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 98%);
-  mask-image: linear-gradient(to bottom, #000 62%, transparent 98%);
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 62%, transparent 98%),
+    radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(0 0 0 / var(--lens)) 45%, transparent);
+  mask-image:
+    linear-gradient(to bottom, #000 62%, transparent 98%),
+    radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(0 0 0 / var(--lens)) 45%, transparent);
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
 }
 .hero-glow {
   position: absolute;
